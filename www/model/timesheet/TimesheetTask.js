@@ -17,6 +17,7 @@
 
 Ext.define('PO.model.timesheet.TimesheetTask', {
     extend: 'Ext.data.Model',
+    xtype: 'timesheetTask',
     fields: [
 
 	// Identity
