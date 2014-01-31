@@ -48,6 +48,18 @@ Ext.define('PO.model.Project', {
 
                     return result;
                 }
+            },
+	    {   name: 'start_date_date',		// A &nbsp; sequence representing the project indentation
+                convert: function(value, record) {
+                    var start_date = record.get('start_date');
+		    return new Date(start_date);
+                }
+            },
+	    {   name: 'end_date_date',		// A &nbsp; sequence representing the project indentation
+                convert: function(value, record) {
+                    var end_date = record.get('end_date');
+		    return new Date(end_date);
+                }
             }
 	],
 	proxy: {
