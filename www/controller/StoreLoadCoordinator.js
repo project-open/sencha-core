@@ -35,7 +35,7 @@ Ext.define('PO.controller.StoreLoadCoordinator', {
 	isLoadingComplete: function() {
 		for (var i=0; i<this.stores.length; i++) {
 			var key = this.stores[i];
-			if (this.storeLoadStates[key]==false) {
+			if (this.storeLoadStates[key] == false) {
 				return false;
 			}
 		}
@@ -44,9 +44,9 @@ Ext.define('PO.controller.StoreLoadCoordinator', {
 
 	onStoreLoad: function(store, records, successful, eOpts, storeName) {
 		this.storeLoadStates[store.storeId] = true;
-		if (this.isLoadingComplete()==true) {
-			this.fireEvent('load');
-			// this.resetStoreLoadStates();
+		if (this.isLoadingComplete() == true) {
+		    this.fireEvent('load');
+		    // this.resetStoreLoadStates();
 		}
 	},	
 

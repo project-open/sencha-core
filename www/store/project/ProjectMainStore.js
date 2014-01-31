@@ -8,7 +8,8 @@
 
 Ext.define('PO.store.project.ProjectMainStore', {
     extend:         'Ext.data.Store',
-    model: 	    'PO.model.Project',
+    requires:	    ['PO.model.project.Project'],
+    model: 	    'PO.model.project.Project',
     storeId:	    'projectMainStore',
     autoLoad:	    true,
     remoteFilter:   true,
@@ -20,7 +21,6 @@ Ext.define('PO.store.project.ProjectMainStore', {
 	timeout:    300000,
 	extraParams: {
 	    format:	'json',
-	    deref_p:	'1',
 	    project_status_id:	'76',
 	    query:	'parent_id is NULL'
 	},
@@ -28,9 +28,6 @@ Ext.define('PO.store.project.ProjectMainStore', {
 		type:		'json',		// Tell the Proxy Reader to parse JSON
 		root:		'data',		// Where do the data start in the JSON file?
 		totalProperty:  'total'		// Total number of tickets for pagination
-	},
-	writer: {
-		type:		'json'		// Allow Sencha to write ticket changes
 	}
     }
 });
