@@ -1,33 +1,46 @@
-/* /sencha-core/www/store/project/ProjectMainStore.js
+/* 
+ * /sencha-core/www/store/project/ProjectMainStore.js
  *
  * Copyright (C) 2014 ]project-open[
- *
  * All rights reserved. Please see
- * http://www.project-open.com/license/ for details.
+ * http://www.project-open.com/license/sencha/ for details.
+ *
+ * <ul>
+ * <li>A store with the list of all active main projects in the system.
+ * <li>The store needs explicit sync() in order to store changes.
+ * <li>The store does not explicitely exclude tasks and tickets
+ *     with parent_id=NULL, which may occur accidentally in ]po[.
+ * </ul>
  */
 
 Ext.define('PO.store.project.ProjectMainStore', {
-    extend:         'Ext.data.Store',
-    requires:	    ['PO.model.project.Project'],
-    model: 	    'PO.model.project.Project',
-    storeId:	    'projectMainStore',
-    autoLoad:	    true,
-    remoteFilter:   true,
-    pageSize:	    100000,
+    storeId:		'projectMainStore',
+    extend:		'Ext.data.Store',
+    requires:		['PO.model.project.Project'],
+    model: 		'PO.model.project.Project',	// Uses standard Project as model
+    autoLoad:		true,
+    remoteFilter:	true,				// Do not filter on the Sencha side
+    pageSize:		100000,				// Load all projects, no matter what size(?)
     proxy: {
-	type:       'rest',
-	url:        '/intranet-rest/im_project',
-	appendId:   true,
-	timeout:    300000,
+	type:		'rest',				// Standard ]po[ REST interface for loading
+	url:		'/intranet-rest/im_project',
+	appendId:	true,
+	timeout:	300000,
 	extraParams: {
-	    format:	'json',
-	    project_status_id:	'76',
-	    query:	'parent_id is NULL'
+	    format:		'json',
+	    project_status_id:	'76',			// Only projects in status "active" (no substates)
+	    query:		'parent_id is NULL'	// Select only top-level projects
+	    // deref_p:		'1'			// We don't need company_name etc.
+	    // This can be overwrittten during load.
 	},
 	reader: {
-		type:		'json',		// Tell the Proxy Reader to parse JSON
-		root:		'data',		// Where do the data start in the JSON file?
-		totalProperty:  'total'		// Total number of tickets for pagination
+	    type:		'json',			// Tell the Proxy Reader to parse JSON
+	    root:		'data',			// Where do the data start in the JSON file?
+	    totalProperty:  'total'			// Total number of tickets for pagination
+	},
+	writer: {
+	    type:		'json'			// Allow Sencha to write ticket changes
 	}
     }
 });
+
