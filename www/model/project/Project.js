@@ -32,7 +32,7 @@ Ext.define('PO.model.project.Project', {
 	'project_status_id',			// 76=open, 81=closed, ...
 	'project_type_id',			// 100=Task, 101=Ticket, 2501=Consulting Project, ...
 	
-	'start_date',				// '2001-01-01'
+	'start_date',				// '2001-01-01 00:00:00+01'
 	'end_date',
 	'project_lead_id',			// Project manager
 	'percent_completed',			// 0 - 100: Defines what has already been done.
