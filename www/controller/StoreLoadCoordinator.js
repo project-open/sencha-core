@@ -28,44 +28,44 @@ Ext.define('PO.controller.StoreLoadCoordinator', {
     debug: 1,
 
     mixins: {
-	observable: 'Ext.util.Observable'
+        observable: 'Ext.util.Observable'
     },
 
     resetStoreLoadStates: function() {
-	this.storeLoadStates = {};			  
-	Ext.each(this.stores, function(storeId) {
-	    this.storeLoadStates[storeId] = false;
-	}, this);	   
-    },	
+        this.storeLoadStates = {};  
+        Ext.each(this.stores, function(storeId) {
+            this.storeLoadStates[storeId] = false;
+        }, this);   
+    },
 
     isLoadingComplete: function() {
-	for (var i=0; i<this.stores.length; i++) {
-	    var key = this.stores[i];
-	    if (this.storeLoadStates[key] == false) {
-		if (this.debug) { console.log('PO.controller.StoreLoadCoordinator.isLoadingComplete: store='+key+' not loaded yet.'); }
-		return false;
-	    }
-	}
-	return true;		
-    },	
+        for (var i=0; i<this.stores.length; i++) {
+            var key = this.stores[i];
+            if (this.storeLoadStates[key] == false) {
+                if (this.debug) { console.log('PO.controller.StoreLoadCoordinator.isLoadingComplete: store='+key+' not loaded yet.'); }
+                return false;
+            }
+        }
+        return true;
+    },
 
     onStoreLoad: function(store, records, successful, eOpts, storeName) {
-	if (this.debug) { console.log('PO.controller.StoreLoadCoordinator.onStoreLoad: store='+store.storeId); }
-	this.storeLoadStates[store.storeId] = true;
-	if (this.isLoadingComplete() == true) {
-	    if (this.debug) { console.log('PO.controller.StoreLoadCoordinator.onStoreLoad: all stores loaded - starting application'); }
-	    this.fireEvent('load');
-	}
-    },	
+        if (this.debug) { console.log('PO.controller.StoreLoadCoordinator.onStoreLoad: store='+store.storeId); }
+        this.storeLoadStates[store.storeId] = true;
+        if (this.isLoadingComplete() == true) {
+            if (this.debug) { console.log('PO.controller.StoreLoadCoordinator.onStoreLoad: all stores loaded - starting application'); }
+            this.fireEvent('load');
+        }
+    },
 
     constructor: function (config) {
-	this.mixins.observable.constructor.call(this, config);
-	this.resetStoreLoadStates();
-	Ext.each(this.stores, function(storeId) {
-	    var store = Ext.StoreManager.lookup(storeId);
-	    store.on('load', Ext.bind(this.onStoreLoad, this, [storeId], true));
-	}, this);
-	this.addEvents('load');
+        this.mixins.observable.constructor.call(this, config);
+        this.resetStoreLoadStates();
+        Ext.each(this.stores, function(storeId) {
+            var store = Ext.StoreManager.lookup(storeId);
+            store.on('load', Ext.bind(this.onStoreLoad, this, [storeId], true));
+        }, this);
+        this.addEvents('load');
     }
 });
 

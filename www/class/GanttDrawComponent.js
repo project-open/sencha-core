@@ -146,6 +146,7 @@ Ext.define('PO.class.GanttDrawComponent', {
             width: w,
             height: 15,
             radius: 3,
+	    fill: 'blue',
             stroke: 'blue',
             'stroke-width': 1
         }).show(true);
