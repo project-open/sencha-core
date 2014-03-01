@@ -102,6 +102,9 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	'uom_id_deref',				// Unit of measure (should alsways be "Hour")
 	'on_track_status_id_deref',		// Is the task on-track? "Green", "Yellow" or "Red"
 
+	'successors',				// List of tasks that depend on the current tasks
+	'predecessory',				// List of tasks on which this task depends
+
 	{   name: 'indent',			// A &nbsp; sequence representing the project indentation
             convert: function(value, record) {
                 var level = record.get('level');
