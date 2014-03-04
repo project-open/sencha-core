@@ -105,6 +105,8 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	'successors',				// List of tasks that depend on the current tasks
 	'predecessory',				// List of tasks on which this task depends
 
+	'expanded',                             // true or false (without quotes), default state for tree
+
 	{   name: 'indent',			// A &nbsp; sequence representing the project indentation
             convert: function(value, record) {
                 var level = record.get('level');

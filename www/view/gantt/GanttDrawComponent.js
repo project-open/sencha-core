@@ -23,6 +23,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         'Ext.layout.component.Draw'
     ],
 
+    // surface                                  // Inherited from draw.Component
+
     ganttTreePanel: null,			// Needs to be set during init
 
     // Size of the Gantt diagram
@@ -72,9 +74,10 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	me.barEndHash = {};                                     // Hash array from object_ids -> Start/end point
 	me.taskModelHash = {};
 
+	// Attract events from the TreePanel showing the task names etc.
         me.ganttTreePanel.on({
-            'itemexpand': me.redraw,
-            'itemcollapse': me.redraw,
+            'itemexpand': me.onItemExpand,
+            'itemcollapse': me.onItemCollapse,
             'itemmove': me.redraw,
             'itemremove': me.redraw,
             'iteminsert': me.redraw,
@@ -84,6 +87,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             'scope': this
         });;
 
+	// Drag & Drop on the "surface"
         me.on({
             'mousedown': me.onMouseDown,
             'mouseup': me.onMouseUp,
@@ -101,6 +105,34 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	    me.taskModelHash[id] = model;
         });
 
+    },
+
+    onItemCollapse: function(taskModel) {
+	var me = this;
+	console.log('PO.class.GanttDrawComponent.onItemCollapse: ');
+
+	// Remember the new state
+	var task_id = taskModel.get('task_id');
+	Ext.Ajax.request({
+	    url: '/intranet/biz-object-tree-open-close.tcl',
+	    params: { 'object_id': task_id, 'open_p': 'c' }
+	});
+
+	me.redraw();
+    },
+
+    onItemExpand: function(taskModel) {
+	var me = this;
+	console.log('PO.class.GanttDrawComponent.onItemExpand: ');
+
+	// Remember the new state
+	var task_id = taskModel.get('task_id');
+	Ext.Ajax.request({
+	    url: '/intranet/biz-object-tree-open-close.tcl',
+	    params: { 'object_id': task_id, 'open_p': 'o' }
+	});
+
+	me.redraw();
     },
 
     /**
@@ -230,7 +262,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	var startPoint = me.barEndHash[from];
 	var endPoint = me.barStartHash[to];
 
-	console.log('Dependency: '+from+' -> '+to+': '+startPoint+' -> '+endPoint);
+	// console.log('Dependency: '+from+' -> '+to+': '+startPoint+' -> '+endPoint);
 
 	if (startPoint && endPoint) {
 	    var line = me.surface.add({
