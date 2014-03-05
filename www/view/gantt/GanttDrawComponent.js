@@ -185,7 +185,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
 	if (me.dndBase != null) {                  // Only if we are dragging
 	    var point = e.getXY();
-	    console.log('PO.class.GanttDrawComponent.onMouseMove: '+point);
+	    // console.log('PO.class.GanttDrawComponent.onMouseMove: '+point);
 	    
 	    me.translate(point[0] - me.dndBase[0]);
 	}
@@ -436,24 +436,51 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	var x = me.date2x(startTime);
 	var y = projectY - panelY;
         var w = Math.floor( me.ganttWidth * (endTime - startTime) / (me.axisEndTime - me.axisStartTime));
+	var h = 15;                                                 // Height of the bars
+	var d = Math.floor(h / 2.0) + 1;                            // Size of the indent of the super-project bar
 
-        var spriteBar = surface.add({
-            type: 'rect',
-            x: x,
-            y: y,
-            width: w,
-            height: 15,
-            radius: 3,
-	    fill: 'blue',
-            stroke: 'blue',
-            'stroke-width': 1
-        }).show(true);
-        spriteGroup.add(spriteBar);
+	if (!project.hasChildNodes()) {
+            var spriteBar = surface.add({
+		type: 'rect',
+		x: x,
+		y: y,
+		width: w,
+		height: h,
+		radius: 3,
+		fill: 'url(#gradientId)',
+		stroke: 'blue',
+		'stroke-width': 0.3,
+		listeners: {
+		    mouseover: function() { this.animate({duration: 500, to: {'stroke-width': 2.0}}); },
+		    mouseout: function()  { this.animate({duration: 500, to: {'stroke-width': 0.3}}); }
+		}
+            }).show(true);
+            spriteGroup.add(spriteBar);
+	} else {
+	    var spriteBar = surface.add({
+		type: 'path',
+		stroke: 'blue',
+		'stroke-width': 0.3,
+		fill: 'url(#gradientId)',
+		path: 'M '+x+','+y
+		    + 'L '+ (x+width) + ',' + (y)
+		    + 'L '+ (x+width) + ',' + (y+h)
+		    + 'L '+ (x+width-d) + ',' + (y+h-d)
+		    + 'L '+ (x+d) + ',' + (y+h-d)
+		    + 'L '+ (x) + ',' + (y+h)
+		    + 'L '+ (x) + ',' + (y),
+		listeners: {
+		    mouseover: function() { this.animate({duration: 500, to: {'stroke-width': 2.0}}); },
+		    mouseout: function()  { this.animate({duration: 500, to: {'stroke-width': 0.3}}); }
+		}
+	    }).show(true);
+            spriteGroup.add(spriteBar);
+	}
 
 	// Store the start and end points of the bar
         var id = project.get('id');
 	me.barStartHash[id] = [x,y];
-	me.barEndHash[id] = [x+w, y+15];
+	me.barEndHash[id] = [x+w, y+h];
 
         if (me.debug) { console.log('PO.class.GanttDrawComponent.drawBar: Finished'); }
     },
