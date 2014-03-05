@@ -96,7 +96,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	    'scope': this
 	});
 
-
         // Iterate through all children of the root node and check if they are visible
 	var ganttTreeStore = me.ganttTreePanel.store;
         var rootNode = ganttTreeStore.getRootNode();
@@ -104,14 +103,15 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	    var id = model.get('id');
 	    me.taskModelHash[id] = model;
         });
-
     },
 
+    /**
+     * The user has collapsed a super-task in the GanttTreePanel.
+     * We now save the 'c'=closed status using a ]po[ URL.
+     * These values will appear in the TaskTreeStore.
+     */
     onItemCollapse: function(taskModel) {
 	var me = this;
-	console.log('PO.class.GanttDrawComponent.onItemCollapse: ');
-
-	// Remember the new state
 	var task_id = taskModel.get('task_id');
 	Ext.Ajax.request({
 	    url: '/intranet/biz-object-tree-open-close.tcl',
@@ -121,6 +121,10 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	me.redraw();
     },
 
+   /**
+     * The user has expanded a super-task in the GanttTreePanel.
+     * Please see onItemCollapse for further documentation.
+     */
     onItemExpand: function(taskModel) {
 	var me = this;
 	console.log('PO.class.GanttDrawComponent.onItemExpand: ');
@@ -156,12 +160,17 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	me.dndTranslate = null;
     },
 
+    /**
+     * The end of a drag operation.
+     
+     */
     onMouseUp: function(e) {
 	var me = this;
 	if (me.dndBase == null) { return; }
 	var point = e.getXY();
 	console.log('PO.class.GanttDrawComponent.onMouseUp: '+point);
 
+	// Reset the offset when just clicking
 	if (me.dndStartRawCoordinates != null) {
 	    console.log('oldX='+me.dndStartRawCoordinates[0]+', newX='+point[0]);
 	    if (me.dndStartRawCoordinates[0] == point[0] && me.dndStartRawCoordinates[1] == point[1]) {
@@ -173,7 +182,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 	    }
 	}
 
-	// Remember by how much we have been translated
+	// Clear the DnD operation by setting dndBase to null
+	// and remember the offset for the next operation
 	if (me.dndBase != null) {
 	    me.dndTranslate = [point[0]-me.dndBase[0], point[1]-me.dndBase[1]];
 	}
@@ -450,7 +460,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 		fill: 'url(#gradientId)',
 		stroke: 'blue',
 		'stroke-width': 0.3,
-		listeners: {
+		listeners: {                                      // Highlight the sprite on mouse-over
 		    mouseover: function() { this.animate({duration: 500, to: {'stroke-width': 2.0}}); },
 		    mouseout: function()  { this.animate({duration: 500, to: {'stroke-width': 0.3}}); }
 		}
@@ -469,7 +479,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 		    + 'L '+ (x+d) + ',' + (y+h-d)
 		    + 'L '+ (x) + ',' + (y+h)
 		    + 'L '+ (x) + ',' + (y),
-		listeners: {
+		listeners: {                                      // Highlight the sprite on mouse-over
 		    mouseover: function() { this.animate({duration: 500, to: {'stroke-width': 2.0}}); },
 		    mouseout: function()  { this.animate({duration: 500, to: {'stroke-width': 0.3}}); }
 		}
