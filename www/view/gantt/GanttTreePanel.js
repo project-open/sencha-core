@@ -112,10 +112,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             if (1 == records.length) {
                 // Exactly one record enabled
                 var record = records[0];
-                tree.down('#removeTask').setDisabled(!record.isLeaf());
+                this.down('#removeTask').setDisabled(!record.isLeaf());
             } else {
                 // Zero or two or more records enabled
-                tree.down('#removeTask').setDisabled(true);
+                this.down('#removeTask').setDisabled(true);
             }
         }
     },

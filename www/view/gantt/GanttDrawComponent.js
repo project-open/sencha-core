@@ -56,9 +56,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var me = this;
         this.callParent(arguments);
 
-        me.axisStartTime = new Date('2014-01-01').getTime() - 10000000;
-        me.axisEndTime = new Date('2015-01-01').getTime();
-        
         me.axisStartX = 10;
         me.axisEndX = 490;
         me.ganttWidth = 500;
@@ -99,13 +96,27 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             'scope': this
         });
 
+
+        me.axisEndTime = new Date('2000-01-01').getTime();
+        me.axisStartTime = new Date('2099-12-31').getTime();
+
         // Iterate through all children of the root node and check if they are visible
         var ganttTreeStore = me.ganttTreePanel.store;
         var rootNode = ganttTreeStore.getRootNode();
         rootNode.cascadeBy(function(model) {
             var id = model.get('id');
             me.taskModelHash[id] = model;
+
+	    var startTime = new Date(model.get('start_date')).getTime();
+	    var endTime = new Date(model.get('end_date')).getTime();
+	    if (startTime < me.axisStartTime) { me.axisStartTime = startTime; }
+	    if (endTime > me.axisEndTime) { me.axisEndTime = endTime; }
         });
+
+	me.axisStartDate = me.prevMonth(new Date(me.axisStartTime));
+	me.axisEndDate = me.nextMonth(new Date(me.axisEndTime));
+
+
     },
 
     /**
@@ -115,10 +126,10 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      */
     onItemCollapse: function(taskModel) {
         var me = this;
-        var task_id = taskModel.get('task_id');
+        var object_id = taskModel.get('id');
         Ext.Ajax.request({
             url: '/intranet/biz-object-tree-open-close.tcl',
-            params: { 'object_id': task_id, 'open_p': 'c' }
+            params: { 'object_id': object_id, 'open_p': 'c' }
         });
 
         me.redraw();
@@ -133,10 +144,10 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         console.log('PO.class.GanttDrawComponent.onItemExpand: ');
 
         // Remember the new state
-        var task_id = taskModel.get('task_id');
+        var object_id = taskModel.get('id');
         Ext.Ajax.request({
             url: '/intranet/biz-object-tree-open-close.tcl',
-            params: { 'object_id': task_id, 'open_p': 'o' }
+            params: { 'object_id': object_id, 'open_p': 'o' }
         });
 
         me.redraw();
@@ -472,7 +483,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 y: y + 6,
                 font: '12px tahoma'
             }).show(true);
-            
 
             // Advance to the next month
             axisStartMonth = me.nextMonth(axisStartMonth);
@@ -486,8 +496,11 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      */
     drawAxisWeek: function(y) {
         var me = this;
-        var x = me.axisStartX;
         var count = 0;
+
+        // Advance to first day of the next month
+        var axisStartMonth = me.nextMonth(new Date(me.axisStartTime));
+        var x = me.date2x(axisStartMonth);
         while (x < me.axisEndX && count < 200) {
             var line = me.surface.add({
                 type: 'path',
@@ -496,8 +509,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 path: 'M '+x+' '+y+' v '+ me.axisHeight,
             }).show(true);
             
-            time = time + weekTime;
-            x = me.date2x(time);
+            axisStartMonth = me.nextMonth(axisStartMonth);
+            x = me.date2x(axisStartMonth);
             count++;
         }
     },
@@ -618,6 +631,19 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             result = new Date(date.getFullYear() + 1, 0, 1);
         } else {
             result = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+        }
+        return result;
+    },
+
+    /**
+     * Advance a date to the 1st of the prev month
+     */
+    prevMonth: function(date) {
+        var result;
+        if (date.getMonth() == 1) {
+            result = new Date(date.getFullYear() - 1, 12, 1);
+        } else {
+            result = new Date(date.getFullYear(), date.getMonth() - 1, 1);
         }
         return result;
     },
