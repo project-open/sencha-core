@@ -96,6 +96,12 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             'scope': this
         });
 
+	// Drag & Drop on the TreePanel - moving tasks
+	var ganttTreeView = me.ganttTreePanel.getView();
+        ganttTreeView.on({
+            'drop': me.onTreeViewDrop,
+            'scope': this
+        });;
 
         me.axisEndTime = new Date('2000-01-01').getTime();
         me.axisStartTime = new Date('2099-12-31').getTime();
@@ -115,9 +121,98 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
 	me.axisStartDate = me.prevMonth(new Date(me.axisStartTime));
 	me.axisEndDate = me.nextMonth(new Date(me.axisEndTime));
-
-
     },
+
+    /**
+     * The user has performed a drag-and-drop operation on the
+     * TreePanel, changing the order to tasks in the project.
+     * So we need to update the sort_order field of all tasks
+     * between source and target of the DnD and write this
+     * information back to the server.
+     *
+     * Special Cases:
+     * <li>DnD of multiple records - The user can select several tasks
+     * <li>Dropping "before" or "after" the overModel.
+     * <li>Dropping at a different parent - in this case we not only
+     *     have to update the sort order, but also modify the task's parents
+     *
+     * The "sort_order" is an integer value that is set when importing
+     * tasks from MS-Project. Drawing tasks in sort_order will automatically
+     * result in a correct tree if we indent the tasks according to their
+     * tree-level.
+     */
+    onTreeViewDrop: function(node, data, overModel, dropPosition, eOpts) {
+        var me = this;
+        console.log('GanttDrawComponent: onTreeViewDrop');
+
+        var ganttTreeStore = me.ganttTreePanel.store;
+        var rootNode = ganttTreeStore.getRootNode();
+        var sort_order = 1000;
+        rootNode.cascadeBy(function(model) {
+            // console.log('GanttDrawComponent: onTreeViewDrop: '+sort_order+': '+model.get('project_name'));
+            if (0 != sort_order) {
+		var oldSortOrder = +model.get('sort_order');
+		if (sort_order != oldSortOrder) { model.set('sort_order', ""+sort_order); }
+                var parentNode = model.parentNode;
+                if (null != parentNode) {
+                    var parentId = +parentNode.get('id')
+		    var oldParentId = +model.get('parent_id');
+                    if (parentId != oldParentId) { model.set('parent_id', ""+parentId); }
+                }
+            }
+            sort_order++;
+        });
+    },
+
+    // This variant tries to manually fix the sort_order.
+    onTreeViewDrop_bad_outdated: function(node, data, overModel, dropPosition, eOpts) {
+        var me = this;
+        console.log('GanttDrawComponent: onTreeViewDrop');
+
+        var ganttTreeStore = me.ganttTreePanel.store;
+        var taskArray = ganttTreeStore.getSortOrderArray();             // List of tasks indexed by sort_order
+        var overModelSortOrder = +overModel.get('sort_order');           // The sort order of the DnD target
+
+        // "After" is equivalent with "before" the next item
+        if ("after" == dropPosition) { 
+            overModelSortOrder++;                                       // sort_order is without "holes", so ++ is enough
+            overModel = taskArray[overModelSortOrder];
+        }
+        
+        var insertRecords = data.records;                               // The list of models to insert
+        var insertRecordsLength = insertRecords.length;
+        var insertRecordsStartSortOrder = +insertRecords[0].get('sort_order');
+        var insertRecordsEndSortOrder = insertRecordsStartSortOrder + (insertRecordsLength-1);
+
+        // Move all tasks between source and target by the number of moved records
+        if (insertRecordsStartSortOrder > overModelSortOrder) {
+            for (var so = overModelSortOrder; so < insertRecordsStartSortOrder; so++) {
+                var taskModel = taskArray[so];
+                var sort_order = +taskModel.get('sort_order');
+                sort_order = sort_order + insertRecordsLength;
+                taskModel.set('sort_order', sort_order);
+            }
+            // Insert the dragged records
+            for (var i = 0; i < insertRecordsLength; i++) {
+                var insertRecord = insertRecords[i];
+                insertRecord.set('sort_order', "" + (overModelSortOrder + i));
+            }
+        } else {
+            for (var so = insertRecordsStartSortOrder; so < overModelSortOrder; so++) {
+                var taskModel = taskArray[so];
+                var sort_order = +taskModel.get('sort_order');
+                sort_order = sort_order - insertRecordsLength;
+                taskModel.set('sort_order', sort_order);
+            }
+            // Insert the dragged records
+            for (var i = 0; i < insertRecordsLength; i++) {
+                var insertRecord = insertRecords[i];
+                insertRecord.set('sort_order', "" + (overModelSortOrder - insertRecordsLength + i));
+            }
+        }
+    },
+
+
 
     /**
      * The user has collapsed a super-task in the GanttTreePanel.
@@ -161,9 +256,9 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     onMouseDown: function(e) {
         var me = this;
         var point = e.getXY();                                          // Coordinates relative to browser window
-	var offsetPoint = [e.browserEvent.offsetX, e.browserEvent.offsetY];   // Coordinates relative to surface (why?)
+        var offsetPoint = [e.browserEvent.offsetX, e.browserEvent.offsetY];   // Coordinates relative to surface (why?)
 
-	// Now using offsetX/offsetY instead of getXY()
+        // Now using offsetX/offsetY instead of getXY()
         var sprite = me.getSpriteForPoint(offsetPoint);
         console.log('PO.class.GanttDrawComponent.onMouseDown: '+point+' -> ' + sprite);
         console.log(sprite);
@@ -229,8 +324,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             x = point[0],
             y = point[1];
 
-	if (y <= me.axisHeight) { return 'axis1'; }
-	if (y > me.axisHeight && y <= 2*me.axisHeight) { return 'axis2'; }
+        if (y <= me.axisHeight) { return 'axis1'; }
+        if (y > me.axisHeight && y <= 2*me.axisHeight) { return 'axis2'; }
 
         var items = me.surface.items.items;
         for (var i = 0, ln = items.length; i < ln; i++) {
@@ -327,58 +422,58 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var me = this;
         var from = predecessor.get('id');
         var to = successor.get('id');
-	var s = me.arrowheadSize;
+        var s = me.arrowheadSize;
 
         var startPoint = me.barEndHash[from];             // We start drawing with the end of the first bar...
         var endPoint = me.barStartHash[to];               // .. and draw towards the start of the 2nd bar.
         if (!startPoint || !endPoint) { return; }
         // console.log('Dependency: '+from+' -> '+to+': '+startPoint+' -> '+endPoint);
 
-	// Point arithmetics
-	var startX = startPoint[0];
-	var startY = startPoint[1];
-	var endX = endPoint[0];
-	var endY = endPoint[1];
-	startY = startY - (me.barHeight/2);   // Start off in the middle of the first bar
-	if (endY < startY) {                  // Drawing from a lower bar to a bar further up
-	    endY = endY + me.barHeight;       // Draw to the bottom of the bar
-	}
+        // Point arithmetics
+        var startX = startPoint[0];
+        var startY = startPoint[1];
+        var endX = endPoint[0];
+        var endY = endPoint[1];
+        startY = startY - (me.barHeight/2);   // Start off in the middle of the first bar
+        if (endY < startY) {                  // Drawing from a lower bar to a bar further up
+            endY = endY + me.barHeight;       // Draw to the bottom of the bar
+        }
 
-	// Draw the main connection line between start and end.
+        // Draw the main connection line between start and end.
         var line = me.surface.add({
             type: 'path',
             stroke: '#444',
             'stroke-width': 1,
             path: 'M '+ (startX) + ',' + (startY)
-		+ 'L '+ (endX+s)   + ',' + (startY)
-		+ 'L '+ (endX+s)   + ',' + (endY)
+                + 'L '+ (endX+s)   + ',' + (startY)
+                + 'L '+ (endX+s)   + ',' + (endY)
         }).show(true);
 
-	if (endY > startY) {
-	    // Draw "normal" arrowhead pointing downwards
+        if (endY > startY) {
+            // Draw "normal" arrowhead pointing downwards
             var arrowHead = me.surface.add({
-		type: 'path',
-		stroke: '#444',
-		fill: '#444',
-		'stroke-width': 1,
-		path: 'M '+ (endX+s)   + ',' + (endY)
-		    + 'L '+ (endX-s+s) + ',' + (endY-s)
-		    + 'L '+ (endX+2*s) + ',' + (endY-s)
-		    + 'L '+ (endX+s)   + ',' + (endY)
+                type: 'path',
+                stroke: '#444',
+                fill: '#444',
+                'stroke-width': 1,
+                path: 'M '+ (endX+s)   + ',' + (endY)
+                    + 'L '+ (endX-s+s) + ',' + (endY-s)
+                    + 'L '+ (endX+2*s) + ',' + (endY-s)
+                    + 'L '+ (endX+s)   + ',' + (endY)
             }).show(true);
-	} else {
-	    // Draw arrowhead pointing upward
+        } else {
+            // Draw arrowhead pointing upward
             var arrowHead = me.surface.add({
-		type: 'path',
-		stroke: '#444',
-		fill: '#444',
-		'stroke-width': 1,
-		path: 'M '+ (endX+s)   + ',' + (endY)
-		    + 'L '+ (endX-s+s) + ',' + (endY+s)     // +s here on the Y coordinate, so that the arrow...
-		    + 'L '+ (endX+2*s) + ',' + (endY+s)     // .. points from bottom up.
-		    + 'L '+ (endX+s)   + ',' + (endY)
+                type: 'path',
+                stroke: '#444',
+                fill: '#444',
+                'stroke-width': 1,
+                path: 'M '+ (endX+s)   + ',' + (endY)
+                    + 'L '+ (endX-s+s) + ',' + (endY+s)     // +s here on the Y coordinate, so that the arrow...
+                    + 'L '+ (endX+2*s) + ',' + (endY+s)     // .. points from bottom up.
+                    + 'L '+ (endX+s)   + ',' + (endY)
             }).show(true);
-	}
+        }
     },
 
     /**
@@ -582,7 +677,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 }
             }).show(true);
         }
-	spriteBar.model = project;                                      // Store the task information for the sprite
+        spriteBar.model = project;                                      // Store the task information for the sprite
         spriteGroup.add(spriteBar);
 
         // Store the start and end points of the bar

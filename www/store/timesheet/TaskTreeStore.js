@@ -37,6 +37,26 @@ Ext.define('PO.store.timesheet.TaskTreeStore', {
             type:		'json', 
             rootProperty:	'data' 
         }
+    },
+
+    /**
+     * Return an array with the tree items ordered by sort_order.
+     * The resulting array should not have "holes".
+     */
+    getSortOrderArray: function() {
+	var me = this;
+	var result = new Array();
+        var rootNode = me.getRootNode();
+
+        // Iterate through all children of the root node
+        rootNode.cascadeBy(function(model) {
+	    var sort_order = +model.get('sort_order');
+	    if (0 != sort_order) {
+		result[sort_order] = model;
+	    }
+        });
+
+	return result;
     }
 });
 

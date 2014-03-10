@@ -41,14 +41,27 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     // the 'columns' property is now 'headers'
     columns: [{
+	text:                       'Id',
+	flex:                       1,
+	dataIndex:                  'id'
+    }, {
         xtype:				'treecolumn',			// This will show the tree
         text:				'Task',
         flex:				2,
         sortable:			true,
         dataIndex:			'project_name',
         editor: {
-            allowBlank:			false
+	    allowBlank:			false
         }
+    },{
+        text:				'Parent',
+        flex:				1,
+        dataIndex:			'parent_id'
+    },{
+        text:				'SortOrder',
+        flex:				1,
+        dataIndex:			'sort_order'
+/*
     },{
         text:				'Assigned To',
         flex:				1,
@@ -95,6 +108,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             displayField:		'category',
             valueField:			'category_id',
         }
+
+*/
     }, {
         xtype:				'checkcolumn',
         header:				'Done',
