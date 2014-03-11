@@ -14,6 +14,7 @@
  */
 Ext.define('PO.view.gantt.GanttTreePanel', {
     extend:				'Ext.tree.Panel',
+    id:                                 'ganttTreePanel',
     alias:				'ganttTreePanel',
     title:				'Projects',
     width:				500,
@@ -41,9 +42,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     // the 'columns' property is now 'headers'
     columns: [{
-	text:                       'Id',
-	flex:                       1,
-	dataIndex:                  'id'
+        text:				'Id',
+        flex:				1,
+        dataIndex:			'id',
+        hidden:				true,
+        editor: {
+            allowBlank:			false
+        }
     }, {
         xtype:				'treecolumn',			// This will show the tree
         text:				'Task',
@@ -51,20 +56,29 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         sortable:			true,
         dataIndex:			'project_name',
         editor: {
-	    allowBlank:			false
+            allowBlank:			false
         }
     },{
         text:				'Parent',
         flex:				1,
-        dataIndex:			'parent_id'
+        hidden:				true,
+        dataIndex:			'parent_id',
+        editor: {
+            allowBlank:			false
+        }
     },{
         text:				'SortOrder',
         flex:				1,
-        dataIndex:			'sort_order'
-/*
+        hidden:				true,
+        dataIndex:			'sort_order',
+        hidden:				true,
+        editor: {
+            allowBlank:			false
+        }
     },{
         text:				'Assigned To',
         flex:				1,
+        hidden:				true,
         dataIndex:			'user',
         sortable:			true,
         editor: {
@@ -76,6 +90,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         format:				'Y-m-d',
         // format:			'Y-m-d H:i:s',				// 2000-01-01 00:00:00+01
         flex:				1,
+        hidden:				true,
         dataIndex:			'start_date',
         sortable:			true,
         editor: {
@@ -86,6 +101,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         xtype:				'datecolumn',
         format:				'Y-m-d',
         flex:				1,
+        hidden:				true,
         dataIndex:			'end_date_date',
         sortable:			true,
         editor:	{
@@ -94,6 +110,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     },{
         text:				'Status',
         flex:				1,
+        hidden:				true,
         dataIndex:			'project_status_id',
         sortable:			true,
         renderer: function(value){
@@ -108,11 +125,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             displayField:		'category',
             valueField:			'category_id',
         }
-
-*/
     }, {
         xtype:				'checkcolumn',
         header:				'Done',
+        hidden:				true,
         dataIndex:			'done',
         width:				40,
         stopSelection:			false,
@@ -142,7 +158,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         handler : function() {
             rowEditing.cancelEdit();
 
-            // Create a model instance !!!
+            // Create a model instance 
             var r = Ext.create('PO.model.timesheet.TimesheetTask', {
                 project_name: "New Task",
                 project_nr: "task_0018",
@@ -196,6 +212,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
         },
         disabled:			true
-    }]
+    }],
+
+    onButtonAdd: function() {
+	console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
+    }
 });
 
