@@ -90,7 +90,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         format:				'Y-m-d',
         // format:			'Y-m-d H:i:s',				// 2000-01-01 00:00:00+01
         flex:				1,
-        hidden:				true,
+        hidden:				false,
         dataIndex:			'start_date',
         sortable:			true,
         editor: {
@@ -101,7 +101,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         xtype:				'datecolumn',
         format:				'Y-m-d',
         flex:				1,
-        hidden:				true,
+        hidden:				false,
         dataIndex:			'end_date_date',
         sortable:			true,
         editor:	{
@@ -216,6 +216,44 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     onButtonAdd: function() {
 	console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
+	var me = this;
+	var rowEditing = me.plugins[0];
+	var taskTreeStore = me.getStore();
+
+        rowEditing.cancelEdit();
+
+        // Create a model instance 
+        var r = Ext.create('PO.model.timesheet.TimesheetTask', {
+            project_name: "New Task",
+            project_nr: "task_0018",
+            parent_id: "709261",
+            company_id: "500633",
+            start_date: "2013-09-19 12:00:00+02",
+            end_date: "2013-09-20 12:00:00+02",
+            percent_completed: "0",
+            project_status_id: "76",
+            project_type_id: "100",
+	    iconCls: 'task!!!'
+        });
+
+        taskTreeStore.sync();
+        var selectionModel = me.getSelectionModel();
+        var lastSelected = selectionModel.getLastSelected();
+	var lastSelectedParent = lastSelected.parentNode;
+
+        // ToDo: Appending the new task at the lastSelected does't work for some reasons.
+        // Also, the newly added task should be a "task" and not a folder.
+        var root = taskTreeStore.getRootNode();
+	var rNode = root.createNode(r);
+	lastSelectedParent.insertBefore(rNode, lastSelected);
+
+	selectionModel.deselectAll();
+	selectionModel.select([rNode]);
+
+	rowEditing.startEdit(rNode, 0);
+
+        // root.appendChild(r);
+        // lastSelected.appendChild(r);
     }
 });
 

@@ -25,7 +25,12 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
 	this.control({
             '#buttonLoad': { click: this.onButtonLoad },
             '#buttonSave': { click: this.onButton },
-            '#buttonAdd': { click: panel.onButtonAdd },
+            '#buttonAdd': { 
+		click: { 
+		    fn: panel.onButtonAdd,
+		    scope: panel
+		}
+	    },
             '#buttonDelete': { click: this.onButton },
             '#buttonReduceIndent': { click: this.onButton },
             '#buttonIncreaseIndent': { click: this.onButton },
@@ -34,7 +39,8 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
             '#buttonBreakDependency': { click: this.onButton },
             '#buttonZoomIn': { click: this.onButton },
             '#buttonZoomOut': { click: this.onButton },
-            '#buttonSettings': { click: this.onButton }
+            '#buttonSettings': { click: this.onButton },
+	    scope: panel
         });
 
 	return this;
