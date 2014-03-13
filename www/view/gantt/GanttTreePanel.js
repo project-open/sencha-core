@@ -16,13 +16,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     extend:				'Ext.tree.Panel',
     id:                                 'ganttTreePanel',
     alias:				'ganttTreePanel',
-    title:				'Projects',
+    title:				false,
     width:				500,
     height:				300,
     region:				'west',
     shrinkWrap:				true,
     animate:				false,		// Animation messes up bars on the right side
-    collapsible:			true,
+    collapsible:			false,
     useArrows:				true,
     rootVisible:			false,
     store:				'taskTreeStore',
@@ -138,122 +138,171 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }
     }],
 
-    listeners: {
-        'selectionchange': function(view, records) {
-            if (1 == records.length) {
-                // Exactly one record enabled
-                var record = records[0];
-                this.down('#removeTask').setDisabled(!record.isLeaf());
-            } else {
-                // Zero or two or more records enabled
-                this.down('#removeTask').setDisabled(true);
-            }
-        }
-    },
-
-    // Toolbar for adding and deleting tasks
-    tbar: [{
-        text:				'Add Task',
-        iconCls:			'task-add',
-        handler : function() {
-            rowEditing.cancelEdit();
-
-            // Create a model instance 
-            var r = Ext.create('PO.model.timesheet.TimesheetTask', {
-                project_name: "New Task",
-                project_nr: "task_0018",
-                parent_id: "709261",
-                company_id: "500633",
-                start_date: "2013-09-19 12:00:00+02",
-                end_date: "2013-09-20 12:00:00+02",
-                percent_completed: "0",
-                project_status_id: "76",
-                project_type_id: "100"
-            });
-
-            taskTreeStore.sync();
-            var selectionModel = tree.getSelectionModel();
-            var lastSelected = selectionModel.getLastSelected();
-
-            // ToDo: Appending the new task at the lastSelected does't work for some reasons.
-            // Also, the newly added task should be a "task" and not a folder.
-            var root = taskTreeStore.getRootNode();
-            // root.appendChild(r);
-            lastSelected.appendChild(r);
-        }
-    }, {
-        itemId:				'removeTask',
-        text:				'Remove Task',
-        iconCls:			'task-remove',
-        handler: function() {
-            rowEditing.cancelEdit();
-            var selectionModel = tree.getSelectionModel();
-            var lastSelected = selectionModel.getLastSelected();
-            var parent = lastSelected.parentNode;
-            var lastSelectedIndex = parent.indexOf(lastSelected);
-
-            // Remove the selected element
-            lastSelected.remove();
-
-            var newNode = parent.getChildAt(lastSelectedIndex);
-            if (typeof(newNode) == "undefined") {
-                lastSelectedIndex = lastSelectedIndex -1;
-                if (lastSelectedIndex < 0) { lastSelectedIndex = 0; }
-                newNode = parent.getChildAt(lastSelectedIndex);
-            }
-
-            if (typeof(newNode) == "undefined") {
-                // lastSelected was the last child of it's parent, so select the parent.
-                selectionModel.select(parent);
-            } else {
-                newNode = parent.getChildAt(lastSelectedIndex);
-                selectionModel.select(newNode);
-            }
-
-        },
-        disabled:			true
-    }],
-
+    /**
+     * "Add" (+) button pressed.
+     * Insert a new task in the position of the last selection.
+     */
     onButtonAdd: function() {
-	console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
-	var me = this;
-	var rowEditing = me.plugins[0];
-	var taskTreeStore = me.getStore();
+        console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
+        var me = this;
+        var rowEditing = me.plugins[0];
+        var taskTreeStore = me.getStore();
+        var root = taskTreeStore.getRootNode();
 
         rowEditing.cancelEdit();
-
-        // Create a model instance 
-        var r = Ext.create('PO.model.timesheet.TimesheetTask', {
-            project_name: "New Task",
-            project_nr: "task_0018",
-            parent_id: "709261",
-            company_id: "500633",
-            start_date: "2013-09-19 12:00:00+02",
-            end_date: "2013-09-20 12:00:00+02",
-            percent_completed: "0",
-            project_status_id: "76",
-            project_type_id: "100",
-	    iconCls: 'task!!!'
-        });
-
         taskTreeStore.sync();
         var selectionModel = me.getSelectionModel();
         var lastSelected = selectionModel.getLastSelected();
-	var lastSelectedParent = lastSelected.parentNode;
+        var lastSelectedParent = null;
 
-        // ToDo: Appending the new task at the lastSelected does't work for some reasons.
-        // Also, the newly added task should be a "task" and not a folder.
-        var root = taskTreeStore.getRootNode();
-	var rNode = root.createNode(r);
-	lastSelectedParent.insertBefore(rNode, lastSelected);
+        if (null == lastSelected) {
+            lastSelected = root;	 			// Use the root as the last selected node
+            lastSelectedParent = root;
+        } else {
+            lastSelectedParent = lastSelected.parentNode;
+        }
 
-	selectionModel.deselectAll();
-	selectionModel.select([rNode]);
+	// Create a model instance and decorate with NodeInterface
+        var r = Ext.create('PO.model.timesheet.TimesheetTask', {
+            project_name: "New Task",
+            project_nr: "task_0018",
+            parent_id: lastSelected.get('parent_id'),
+            company_id: lastSelected.get('company_id'),
+            start_date: new Date().toISOString().substring(0,10),
+            end_date: new Date().toISOString().substring(0,10),
+            percent_completed: '0',
+            project_status_id: '76',
+            project_type_id: '100'
+        });
+        var rNode = root.createNode(r);
+        rNode.set('leaf', true);					// Leafs show a different icon than folders
 
-	rowEditing.startEdit(rNode, 0);
+        var appendP = false;
+        if (!selectionModel.hasSelection()) { appendP = true; }
+        if (root == lastSelected) { appendP = true; }
+        if (lastSelected.getDepth() <= 1) { appendP = true; }			// Don't allow to add New Task before the root.
+        if (appendP) {
+            root.appendChild(rNode);	 				// Add the task at the end of the root
+        } else {
+            lastSelectedParent.insertBefore(rNode, lastSelected);	    // Insert into tree
+        }
 
-        // root.appendChild(r);
-        // lastSelected.appendChild(r);
+        // Start the column editor
+        selectionModel.deselectAll();
+        selectionModel.select([rNode]);
+        rowEditing.startEdit(rNode, 0);
+    },
+
+    /**
+     * "Delete" (-) button pressed.
+     * Delete the currently selected task from the tree.
+     */
+    onButtonDelete: function() {
+        console.log('PO.view.gantt.GanttTreePanel.onButtonDelete: ');
+        var me = this;
+        var rowEditing = me.plugins[0];
+        var taskTreeStore = me.getStore();
+        var selectionModel = me.getSelectionModel();
+        var lastSelected = selectionModel.getLastSelected();
+        var lastSelectedParent = lastSelected.parentNode;
+        var lastSelectedIndex = lastSelectedParent.indexOf(lastSelected);
+
+        rowEditing.cancelEdit();
+
+        // Remove the selected element
+        lastSelected.remove();
+
+        // Select the next node
+        var newNode = lastSelectedParent.getChildAt(lastSelectedIndex);
+        if (typeof(newNode) == "undefined") {
+            lastSelectedIndex = lastSelectedIndex -1;
+            if (lastSelectedIndex < 0) { lastSelectedIndex = 0; }
+            newNode = lastSelectedParent.getChildAt(lastSelectedIndex);
+        }
+
+        if (typeof(newNode) == "undefined") {
+            // lastSelected was the last child of it's parent, so select the parent.
+            selectionModel.select(lastSelectedParent);
+        } else {
+            newNode = lastSelectedParent.getChildAt(lastSelectedIndex);
+            selectionModel.select(newNode);
+        }
+        
+    },
+
+    /**
+     * The user has clicked below the last task.
+     * We will interpret this as the request to create a new task at the end.
+     */
+    onContainerClick: function() {
+        console.log('PO.view.gantt.GanttTreePanel.onContainerClick: ');
+        var me = this;
+
+        // Clear the selection in order to force adding the task at the bottom
+        var selectionModel = me.getSelectionModel();
+        selectionModel.deselectAll();
+
+        me.onButtonAdd();
+    },
+
+    /**
+     * Move the task more to the right if possible.
+     *
+     * Take the node just above the selected one and 
+     * make this node a child of it.
+     */
+    onButtonIncreaseIndent: function() {
+        console.log('GanttTreePanel.onButtonIncreaseIndent');
+        var selectionModel = this.getSelectionModel();
+        var lastSelected = selectionModel.getLastSelected();
+        var lastSelectedParent = lastSelected.parentNode;
+        if (null == lastSelectedParent) { return; }					// We can't indent the root element
+
+        var lastSelectedIndex = lastSelectedParent.indexOf(lastSelected);
+        var prevNodeIndex = lastSelectedIndex -1;
+        if (prevNodeIndex < 0) { return; }						// We can't indent the root element
+
+        var prevNode = lastSelectedParent.getChildAt(prevNodeIndex);
+
+        // Remove the item from the tree
+        prevNode.set('leaf', false);
+        prevNode.appendChild(lastSelected);			// Add to the previous node as a child
+        prevNode.expand();
+
+        // Focus back on the task, so that it will accept the next keyboard commands
+        this.getView().focusNode(lastSelected);
+
+        // ToDo: It seems the TreePanel looses focus here
+        // selectionModel.select(lastSelected);
+        // selectionModel.setLastFocused(lastSelected);
+    },
+
+    /**
+     * Move the task more to the left if possible.
+     */
+    onButtonReduceIndent: function() {
+        console.log('GanttTreePanel.onButtonReduceIndent');
+
+        var selectionModel = this.getSelectionModel();
+        var lastSelected = selectionModel.getLastSelected();
+        var lastSelectedParent = lastSelected.parentNode;
+        if (null == lastSelectedParent) { return; }					// We can't indent the root element
+
+        var lastSelectedParentParent = lastSelectedParent.parentNode;
+        if (null == lastSelectedParentParent) { return; }					// We can't indent the root element
+
+        var lastSelectedParentIndex = lastSelectedParentParent.indexOf(lastSelectedParent);
+        lastSelectedParentParent.insertChild(lastSelectedParentIndex+1, lastSelected);
+
+        // Check if the parent has now become a leaf
+        var parentNumChildren = lastSelectedParent.childNodes.length;
+        if (0 == parentNumChildren) {
+            lastSelectedParent.set('leaf', true);
+        }
+
+        // Focus back on the task, so that it will accept the next keyboard commands
+        this.getView().focusNode(lastSelected);
     }
+
 });
 
