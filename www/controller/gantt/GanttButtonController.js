@@ -27,34 +27,34 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
     ],
     
     init: function() {
-        if (this.debug) { console.log('PO.controller.gantt.GanttButtonController: init'); }
+	var me = this;
+        if (me.debug) { console.log('PO.controller.gantt.GanttButtonController: init'); }
 
-        var panel = this.getGanttTreePanel();
         this.control({
             '#buttonLoad': { click: this.onButtonLoad },
             '#buttonSave': { click: this.onButton },
-            '#buttonAdd': { click: { fn: panel.onButtonAdd, scope: panel }},
-            '#buttonDelete': { click: { fn: panel.onButtonDelete, scope: panel }},
-            '#buttonReduceIndent': { click: { fn: panel.onButtonReduceIndent, scope: panel }},
-            '#buttonIncreaseIndent': { click: { fn: panel.onButtonIncreaseIndent, scope: panel }},
+            '#buttonAdd': { click: { fn: me.ganttTreePanel.onButtonAdd, scope: me.ganttTreePanel }},
+            '#buttonDelete': { click: { fn: me.ganttTreePanel.onButtonDelete, scope: me.ganttTreePanel }},
+            '#buttonReduceIndent': { click: { fn: me.ganttTreePanel.onButtonReduceIndent, scope: me.ganttTreePanel }},
+            '#buttonIncreaseIndent': { click: { fn: me.ganttTreePanel.onButtonIncreaseIndent, scope: me.ganttTreePanel }},
             '#buttonDependencies': { click: this.onButton },
             '#buttonAddDependency': { click: this.onButton },
             '#buttonBreakDependency': { click: this.onButton },
-            '#buttonZoomIn': { click: this.onButton },
-            '#buttonZoomOut': { click: this.onButton },
+            '#buttonZoomIn': { click: { fn: me.ganttDrawComponent.onZoomIn, scope: me.ganttDrawComponent }},
+            '#buttonZoomOut': { click: { fn: me.ganttDrawComponent.onZoomOut, scope: me.ganttDrawComponent }},
             '#buttonSettings': { click: this.onButton },
-            scope: panel
+            scope: me.ganttTreePanel
         });
 
         // Listen to changes in the selction model in order to enable/disable the "delete" button.
-        panel.on('selectionchange', this.onTreePanelSelectionChange, this);
+        me.ganttTreePanel.on('selectionchange', this.onTreePanelSelectionChange, this);
 
         // Listen to a click into the empty space below the tree in order to add a new task
-        panel.on('containerclick', panel.onContainerClick, panel);
+        me.ganttTreePanel.on('containerclick', me.ganttTreePanel.onContainerClick, me.ganttTreePanel);
 
         // Listen to special keys
-        panel.on('cellkeydown', this.onCellKeyDown, panel);
-        panel.on('beforecellkeydown', this.onBeforeCellKeyDown, panel);
+        me.ganttTreePanel.on('cellkeydown', this.onCellKeyDown, me.ganttTreePanel);
+        me.ganttTreePanel.on('beforecellkeydown', this.onBeforeCellKeyDown, me.ganttTreePanel);
         return this;
     },
 

@@ -276,7 +276,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
     /**
      * The end of a drag operation.
-     
      */
     onMouseUp: function(e) {
         var me = this;
@@ -304,6 +303,9 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         me.dndBase = null;					// Stop dragging
     },
 
+    /**
+     * "Translate" the entire diagram when dragging around.
+     */
     onMouseMove: function(e) {
         var me = this;
 
@@ -313,6 +315,22 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             
             me.translate(point[0] - me.dndBase[0]);
         }
+    },
+
+
+    /**
+     * pressed the (+) (zoom in) button
+     */
+    onZoomIn: function() {
+	console.log('GanttDrawComponent.onZoomIn');
+    },
+
+
+    /**
+     * pressed the (-) (zoom out) button
+     */
+    onZoomOut: function() {
+	console.log('GanttDrawComponent.onZoomOut');
     },
 
 
@@ -443,11 +461,13 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var line = me.surface.add({
             type: 'path',
             stroke: '#444',
-            'stroke-width': 1,
+	    'shape-rendering': 'crispy-edges',
+            'stroke-width': 0.5,
             path: 'M '+ (startX) + ',' + (startY)
                 + 'L '+ (endX+s)   + ',' + (startY)
                 + 'L '+ (endX+s)   + ',' + (endY)
         }).show(true);
+
 
         if (endY > startY) {
             // Draw "normal" arrowhead pointing downwards
@@ -455,7 +475,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 type: 'path',
                 stroke: '#444',
                 fill: '#444',
-                'stroke-width': 1,
+                'stroke-width': 0.5,
                 path: 'M '+ (endX+s)   + ',' + (endY)
                     + 'L '+ (endX-s+s) + ',' + (endY-s)
                     + 'L '+ (endX+2*s) + ',' + (endY-s)
@@ -467,7 +487,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 type: 'path',
                 stroke: '#444',
                 fill: '#444',
-                'stroke-width': 1,
+                'stroke-width': 0.5,
                 path: 'M '+ (endX+s)   + ',' + (endY)
                     + 'L '+ (endX-s+s) + ',' + (endY+s)     // +s here on the Y coordinate, so that the arrow...
                     + 'L '+ (endX+2*s) + ',' + (endY+s)     // .. points from bottom up.
@@ -527,11 +547,14 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 type: 'path',
                 stroke: '#444',
                 fill: 'none',
-                'stroke-width': 1,
+
+		'shape-rendering': 'crispy-edges',
+		'stroke-width': 0.5,
+
                 path: 'M '+x+' '+y+' v '+ me.axisHeight
             });
 
-            line.setAttributes({'shape-rendering': 'crispEdges'}, true);
+            // line.setAttributes({'shape-rendering': 'crispEdges'}, true);
             line.show(true);
 
             var quarter = Math.floor(axisStartQuarter.getMonth() / 3) + 1;
@@ -565,7 +588,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             var line = me.surface.add({
                 type: 'path',
                 stroke: '#444',
-                'stroke-width': 1,
+		'shape-rendering': 'crispy-edges',
+		'stroke-width': 0.5,
                 path: 'M '+x+' '+y+' v '+ me.axisHeight,
             }).show(true);
             
@@ -600,7 +624,10 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             var line = me.surface.add({
                 type: 'path',
                 stroke: '#444',
-                'stroke-width': 1,
+
+		'shape-rendering': 'crispy-edges',
+		'stroke-width': 0.5,
+
                 path: 'M '+x+' '+y+' v '+ me.axisHeight,
             }).show(true);
             
