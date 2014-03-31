@@ -17,9 +17,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     id:                                 'ganttTreePanel',
     alias:				'ganttTreePanel',
     title:				false,
-    width:				500,
-    height:				300,
-    region:				'west',
     shrinkWrap:				true,
     animate:				false,		// Animation messes up bars on the right side
     collapsible:			false,

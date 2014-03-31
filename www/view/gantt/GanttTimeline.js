@@ -1,5 +1,5 @@
 /**
- * sencha-core/www/class/GanttDrawComponent.js
+ * sencha-core/www/class/GanttTimeline.js
  * A Ext.draw.Component (SVG surface) that knows how to draw
  * Gantt diagrams.
  *
@@ -13,7 +13,7 @@
  * Like a chart Series, displays a list of projects
  * using Gantt bars.
  */
-Ext.define('PO.view.gantt.GanttDrawComponent', {
+Ext.define('PO.view.gantt.GanttTimeline', {
 
     extend: 'Ext.draw.Component',
 
@@ -24,7 +24,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     ],
 
     // surface						// Inherited from draw.Component
-
     ganttTreePanel: null,				// Needs to be set during init
 
     // Size of the Gantt diagram
@@ -38,8 +37,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     axisEndX: 290,					// End of the date axis
     axisHeight: 20,     				// Height of each of the two axis levels
 
-    arrowheadSize: 4,   				// head size for dependency arrows
-
     monthNames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
 
     dndBase: null,
@@ -47,7 +44,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     dndStartRawCoordinates: null,  			// Raw mouse coordinates when starting to drag
     dndTranslate: null,
 
-    barHeight: 15,
+    barHeight: 2,
     barStartHash: {},   				// Hash array from object_ids -> Start/end point
     barEndHash: {},   					// Hash array from object_ids -> Start/end point
     taskModelHash: {},
@@ -76,8 +73,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
         // Attract events from the TreePanel showing the task names etc.
         me.ganttTreePanel.on({
-            'itemexpand': me.onItemExpand,
-            'itemcollapse': me.onItemCollapse,
             'itemmove': me.redraw,
             'itemremove': me.redraw,
             'iteminsert': me.redraw,
@@ -143,13 +138,13 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      */
     onTreeViewDrop: function(node, data, overModel, dropPosition, eOpts) {
         var me = this;
-        console.log('GanttDrawComponent: onTreeViewDrop');
+        console.log('GanttTimeline: onTreeViewDrop');
 
         var ganttTreeStore = me.ganttTreePanel.store;
         var rootNode = ganttTreeStore.getRootNode();
         var sort_order = 1000;
         rootNode.cascadeBy(function(model) {
-            // console.log('GanttDrawComponent: onTreeViewDrop: '+sort_order+': '+model.get('project_name'));
+            // console.log('GanttTimeline: onTreeViewDrop: '+sort_order+': '+model.get('project_name'));
             if (0 != sort_order) {
 		var oldSortOrder = +model.get('sort_order');
 		if (sort_order != oldSortOrder) { model.set('sort_order', ""+sort_order); }
@@ -164,90 +159,6 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         });
     },
 
-    // This variant tries to manually fix the sort_order.
-    onTreeViewDrop_bad_outdated: function(node, data, overModel, dropPosition, eOpts) {
-        var me = this;
-        console.log('GanttDrawComponent: onTreeViewDrop');
-
-        var ganttTreeStore = me.ganttTreePanel.store;
-        var taskArray = ganttTreeStore.getSortOrderArray();             // List of tasks indexed by sort_order
-        var overModelSortOrder = +overModel.get('sort_order');           // The sort order of the DnD target
-
-        // "After" is equivalent with "before" the next item
-        if ("after" == dropPosition) { 
-            overModelSortOrder++;                                       // sort_order is without "holes", so ++ is enough
-            overModel = taskArray[overModelSortOrder];
-        }
-        
-        var insertRecords = data.records;                               // The list of models to insert
-        var insertRecordsLength = insertRecords.length;
-        var insertRecordsStartSortOrder = +insertRecords[0].get('sort_order');
-        var insertRecordsEndSortOrder = insertRecordsStartSortOrder + (insertRecordsLength-1);
-
-        // Move all tasks between source and target by the number of moved records
-        if (insertRecordsStartSortOrder > overModelSortOrder) {
-            for (var so = overModelSortOrder; so < insertRecordsStartSortOrder; so++) {
-                var taskModel = taskArray[so];
-                var sort_order = +taskModel.get('sort_order');
-                sort_order = sort_order + insertRecordsLength;
-                taskModel.set('sort_order', sort_order);
-            }
-            // Insert the dragged records
-            for (var i = 0; i < insertRecordsLength; i++) {
-                var insertRecord = insertRecords[i];
-                insertRecord.set('sort_order', "" + (overModelSortOrder + i));
-            }
-        } else {
-            for (var so = insertRecordsStartSortOrder; so < overModelSortOrder; so++) {
-                var taskModel = taskArray[so];
-                var sort_order = +taskModel.get('sort_order');
-                sort_order = sort_order - insertRecordsLength;
-                taskModel.set('sort_order', sort_order);
-            }
-            // Insert the dragged records
-            for (var i = 0; i < insertRecordsLength; i++) {
-                var insertRecord = insertRecords[i];
-                insertRecord.set('sort_order', "" + (overModelSortOrder - insertRecordsLength + i));
-            }
-        }
-    },
-
-
-
-    /**
-     * The user has collapsed a super-task in the GanttTreePanel.
-     * We now save the 'c'=closed status using a ]po[ URL.
-     * These values will appear in the TaskTreeStore.
-     */
-    onItemCollapse: function(taskModel) {
-        var me = this;
-        var object_id = taskModel.get('id');
-        Ext.Ajax.request({
-            url: '/intranet/biz-object-tree-open-close.tcl',
-            params: { 'object_id': object_id, 'open_p': 'c' }
-        });
-
-        me.redraw();
-    },
-
-   /**
-     * The user has expanded a super-task in the GanttTreePanel.
-     * Please see onItemCollapse for further documentation.
-     */
-    onItemExpand: function(taskModel) {
-        var me = this;
-        console.log('PO.class.GanttDrawComponent.onItemExpand: ');
-
-        // Remember the new state
-        var object_id = taskModel.get('id');
-        Ext.Ajax.request({
-            url: '/intranet/biz-object-tree-open-close.tcl',
-            params: { 'object_id': object_id, 'open_p': 'o' }
-        });
-
-        me.redraw();
-    },
-
     /**
      * The user starts a drag operation.
      * We subtract a previous dndTranslate coordinate from this point
@@ -260,7 +171,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
         // Now using offsetX/offsetY instead of getXY()
         var sprite = me.getSpriteForPoint(offsetPoint);
-        console.log('PO.class.GanttDrawComponent.onMouseDown: '+point+' -> ' + sprite);
+        console.log('PO.class.GanttTimeline.onMouseDown: '+point+' -> ' + sprite);
         console.log(sprite);
 
         // Store the original raw values for MouseUp check
@@ -281,7 +192,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var me = this;
         if (me.dndBase == null) { return; }
         var point = e.getXY();
-        console.log('PO.class.GanttDrawComponent.onMouseUp: '+point);
+        console.log('PO.class.GanttTimeline.onMouseUp: '+point);
 
         // Reset the offset when just clicking
         if (me.dndStartRawCoordinates != null) {
@@ -311,7 +222,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
         if (me.dndBase != null) {				// Only if we are dragging
             var point = e.getXY();
-            // console.log('PO.class.GanttDrawComponent.onMouseMove: '+point);
+            // console.log('PO.class.GanttTimeline.onMouseMove: '+point);
             
             me.translate(point[0] - me.dndBase[0]);
         }
@@ -322,7 +233,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      * pressed the (+) (zoom in) button
      */
     onZoomIn: function() {
-	console.log('GanttDrawComponent.onZoomIn');
+	console.log('GanttTimeline.onZoomIn');
     },
 
 
@@ -330,7 +241,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      * pressed the (-) (zoom out) button
      */
     onZoomOut: function() {
-	console.log('GanttDrawComponent.onZoomOut');
+	console.log('GanttTimeline.onZoomOut');
     },
 
 
@@ -396,7 +307,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      * Draw all Gantt bars
      */
     redraw: function(a,b,c,d,e) {
-        console.log('PO.class.GanttDrawComponent.redraw: Starting');
+        console.log('PO.class.GanttTimeline.redraw: Starting');
         var me = this;
         var ganttTreeStore = me.ganttTreePanel.store;
         var ganttTreeView = me.ganttTreePanel.getView();
@@ -417,94 +328,9 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             me.drawBar(model, viewNode);
         });
 
-        // Iterate through all children and draw dependencies
-        rootNode.cascadeBy(function(model) {
-            var viewNode = ganttTreeView.getNode(model);
-            var dependentTasks = model.get('successors');
-            if (dependentTasks instanceof Array) {
-                for (var i = 0, len = dependentTasks.length; i < len; i++) {
-                    var depTask = dependentTasks[i];
-                    var depNode = me.taskModelHash[depTask];
-                    me.drawDependency(model, depNode);
-                }
-            }
-        });
-
-        console.log('PO.class.GanttDrawComponent.redraw: Finished');
+        console.log('PO.class.GanttTimeline.redraw: Finished');
     },
 
-    /**
-     * Draws a dependency line from one bar to the next one
-     */
-    drawDependency: function(predecessor, successor) {
-        var me = this;
-
-	if (!predecessor) { 
-	    console.log('GanttDrawComponent.drawDependency: predecessor is NULL');
-	    return; 
-	}
-	if (!successor) { 
-	    console.log('GanttDrawComponent.drawDependency: successor is NULL');
-	    return; 
-	}
-
-        var from = predecessor.get('id');
-        var to = successor.get('id');
-        var s = me.arrowheadSize;
-
-        var startPoint = me.barEndHash[from];             // We start drawing with the end of the first bar...
-        var endPoint = me.barStartHash[to];               // .. and draw towards the start of the 2nd bar.
-        if (!startPoint || !endPoint) { return; }
-        // console.log('Dependency: '+from+' -> '+to+': '+startPoint+' -> '+endPoint);
-
-        // Point arithmetics
-        var startX = startPoint[0];
-        var startY = startPoint[1];
-        var endX = endPoint[0];
-        var endY = endPoint[1];
-        startY = startY - (me.barHeight/2);   // Start off in the middle of the first bar
-        if (endY < startY) {                  // Drawing from a lower bar to a bar further up
-            endY = endY + me.barHeight;       // Draw to the bottom of the bar
-        }
-
-        // Draw the main connection line between start and end.
-        var line = me.surface.add({
-            type: 'path',
-            stroke: '#444',
-	    'shape-rendering': 'crispy-edges',
-            'stroke-width': 0.5,
-            path: 'M '+ (startX) + ',' + (startY)
-                + 'L '+ (endX+s)   + ',' + (startY)
-                + 'L '+ (endX+s)   + ',' + (endY)
-        }).show(true);
-
-
-        if (endY > startY) {
-            // Draw "normal" arrowhead pointing downwards
-            var arrowHead = me.surface.add({
-                type: 'path',
-                stroke: '#444',
-                fill: '#444',
-                'stroke-width': 0.5,
-                path: 'M '+ (endX+s)   + ',' + (endY)
-                    + 'L '+ (endX-s+s) + ',' + (endY-s)
-                    + 'L '+ (endX+2*s) + ',' + (endY-s)
-                    + 'L '+ (endX+s)   + ',' + (endY)
-            }).show(true);
-        } else {
-            // Draw arrowhead pointing upward
-            var arrowHead = me.surface.add({
-                type: 'path',
-                stroke: '#444',
-                fill: '#444',
-                'stroke-width': 0.5,
-                path: 'M '+ (endX+s)   + ',' + (endY)
-                    + 'L '+ (endX-s+s) + ',' + (endY+s)     // +s here on the Y coordinate, so that the arrow...
-                    + 'L '+ (endX+2*s) + ',' + (endY+s)     // .. points from bottom up.
-                    + 'L '+ (endX+s)   + ',' + (endY)
-            }).show(true);
-        }
-    },
 
     /**
      * Draw a horizontal axis from start until end date
@@ -653,7 +479,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      */
     drawBar: function(project, viewNode) {
         var me = this;
-        if (me.debug) { console.log('PO.class.GanttDrawComponent.drawBar: Starting'); }
+        if (me.debug) { console.log('PO.class.GanttTimeline.drawBar: Starting'); }
         var ganttTreeStore = me.ganttTreePanel.store;
         var ganttTreeView = me.ganttTreePanel.getView();
         var surface = me.surface;
@@ -722,7 +548,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         me.barStartHash[id] = [x,y];                                  // Move the start of the bar 5px to the right
         me.barEndHash[id] = [x+w, y+h];                             // End of the bar is in the middle of the bar
 
-        if (me.debug) { console.log('PO.class.GanttDrawComponent.drawBar: Finished'); }
+        if (me.debug) { console.log('PO.class.GanttTimeline.drawBar: Finished'); }
     },
 
     /**
@@ -741,10 +567,10 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             if (date instanceof Date) {
                 dateMilliJulian = date.getTime();
             } else {
-                console.error('GanttDrawComponent.date2x: Unknown object type for date argument:'+t);
+                console.error('GanttTimeline.date2x: Unknown object type for date argument:'+t);
             }
         } else {
-            console.error('GanttDrawComponent.date2x: Unknown type for date argument:'+t);
+            console.error('GanttTimeline.date2x: Unknown type for date argument:'+t);
         }
 
         var axisWidth = me.axisEndX - me.axisStartX;
