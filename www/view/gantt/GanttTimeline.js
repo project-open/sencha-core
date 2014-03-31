@@ -44,7 +44,7 @@ Ext.define('PO.view.gantt.GanttTimeline', {
     dndStartRawCoordinates: null,  			// Raw mouse coordinates when starting to drag
     dndTranslate: null,
 
-    barHeight: 2,
+    barHeight: 0,
     barStartHash: {},   				// Hash array from object_ids -> Start/end point
     barEndHash: {},   					// Hash array from object_ids -> Start/end point
     taskModelHash: {},
@@ -66,7 +66,7 @@ Ext.define('PO.view.gantt.GanttTimeline', {
         me.dndTranslate = [0,0];   			// Default translate of the surface
         me.dndStartRawCoordinates = null;
 
-	me.barHeight = 15;
+	me.barHeight = 2;
         me.barStartHash = {};     			// Hash array from object_ids -> Start/end point
         me.barEndHash = {};     			// Hash array from object_ids -> Start/end point
         me.taskModelHash = {};
@@ -169,11 +169,6 @@ Ext.define('PO.view.gantt.GanttTimeline', {
         var point = e.getXY();                                          // Coordinates relative to browser window
         var offsetPoint = [e.browserEvent.offsetX, e.browserEvent.offsetY];   // Coordinates relative to surface (why?)
 
-        // Now using offsetX/offsetY instead of getXY()
-        var sprite = me.getSpriteForPoint(offsetPoint);
-        console.log('PO.class.GanttTimeline.onMouseDown: '+point+' -> ' + sprite);
-        console.log(sprite);
-
         // Store the original raw values for MouseUp check
         me.dndStartRawCoordinates = point.slice(0);			// slice(0) creates a clone of the array
 
@@ -246,46 +241,6 @@ Ext.define('PO.view.gantt.GanttTimeline', {
 
 
     /**
-     * Returns the item for a x/y mouse coordinate
-     */
-    getSpriteForPoint: function(point) {
-        var me = this,
-            x = point[0],
-            y = point[1];
-
-        if (y <= me.axisHeight) { return 'axis1'; }
-        if (y > me.axisHeight && y <= 2*me.axisHeight) { return 'axis2'; }
-
-        var items = me.surface.items.items;
-        for (var i = 0, ln = items.length; i < ln; i++) {
-            if (items[i] && me.isSpriteInPoint(x, y, items[i], i)) {
-                return items[i];
-            }
-        }
-        return null;
-    },
-
-    /**
-     * Checks for mouse inside the BBox
-     */  
-    isSpriteInPoint: function(x, y, sprite, i) {
-        var spriteType = sprite.type;
-/*
-        if (0 != "rect".localeCompare(spriteType)) { 
-            return false;					// We are only looking for bars...
-        }
-        if (sprite.radius == 0) { 
-            return false;					// ... with round corners.
-        }
-*/
-        var bbox = sprite.getBBox();
-        return bbox.x <= x && bbox.y <= y
-            && (bbox.x + bbox.width) >= x
-            && (bbox.y + bbox.height) >= y;
-    },
-
-
-    /**
      * "Translte" (=move) all sprites in the surface
      */
     translate: function(x) {
@@ -345,11 +300,14 @@ Ext.define('PO.view.gantt.GanttTimeline', {
         // Quarterly Axis
         var quarterTime = 90.0 * 24 * 3600 * 1000;
         var axisUnits = (me.axisEndTime - me.axisStartTime) / quarterTime;
-        if (axisUnits > 3 && axisUnits < 50) {
+
             me.drawAxisQuarter(y);
             y = y + me.axisHeight;
+
+        if (axisUnits > 3 && axisUnits < 50) {
         }
 
+/*
         // Monthly Axis
         var monthTime = 30.0 * 24 * 3600 * 1000;
         var axisUnits = (me.axisEndTime - me.axisStartTime) / monthTime;
@@ -365,7 +323,7 @@ Ext.define('PO.view.gantt.GanttTimeline', {
             me.drawAxisWeek(y);
             y = y + me.axisHeight;
         }
-
+*/
     },
 
     /**
@@ -505,41 +463,19 @@ Ext.define('PO.view.gantt.GanttTimeline', {
         var h = me.barHeight; 							// Height of the bars
         var d = Math.floor(h / 2.0) + 1;    				// Size of the indent of the super-project bar
 
-        if (!project.hasChildNodes()) {
-            var spriteBar = surface.add({
-                type: 'rect',
-                x: x,
-                y: y,
-                width: w,
-                height: h,
-                radius: 3,
-                fill: 'url(#gradientId)',
-                stroke: 'blue',
-                'stroke-width': 0.3,
-                listeners: {						// Highlight the sprite on mouse-over
-                    mouseover: function() { this.animate({duration: 500, to: {'stroke-width': 2.0}}); },
-                    mouseout: function()  { this.animate({duration: 500, to: {'stroke-width': 0.3}}); }
-                }
-            }).show(true);
-        } else {
-            var spriteBar = surface.add({
-                type: 'path',
-                stroke: 'blue',
-                'stroke-width': 0.3,
-                fill: 'url(#gradientId)',
-                path: 'M '+ x + ',' + y
-                    + 'L '+ (x+width) + ',' + (y)
-                    + 'L '+ (x+width) + ',' + (y+h)
-                    + 'L '+ (x+width-d) + ',' + (y+h-d)
-                    + 'L '+ (x+d) + ',' + (y+h-d)
-                    + 'L '+ (x) + ',' + (y+h)
-                    + 'L '+ (x) + ',' + (y),
-                listeners: {						// Highlight the sprite on mouse-over
-                    mouseover: function() { this.animate({duration: 500, to: {'stroke-width': 2.0}}); },
-                    mouseout: function()  { this.animate({duration: 500, to: {'stroke-width': 0.3}}); }
-                }
-            }).show(true);
-        }
+	y = y / 6.0;  // smaller bars in preview
+
+        var spriteBar = surface.add({
+            type: 'rect',
+            x: x,
+            y: y,
+            width: w,
+            height: h,
+            radius: 3,
+            fill: 'url(#gradientId)',
+            stroke: 'blue',
+            'stroke-width': 0.3
+        }).show(true);
         spriteBar.model = project;                                      // Store the task information for the sprite
         spriteGroup.add(spriteBar);
 
