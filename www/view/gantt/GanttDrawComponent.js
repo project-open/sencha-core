@@ -47,7 +47,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     dndStartRawCoordinates: null,  			// Raw mouse coordinates when starting to drag
     dndTranslate: null,
 
-    barHeight: 15,
+    barHeight: 0,
     barStartHash: {},   				// Hash array from object_ids -> Start/end point
     barEndHash: {},   					// Hash array from object_ids -> Start/end point
     taskModelHash: {},
@@ -65,11 +65,11 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         me.axisHeight = 20;
         
         me.dndBase = null;				// Drag-and-drop starting point
-	me.dndBaseObject = null;
+        me.dndBaseObject = null;
         me.dndTranslate = [0,0];   			// Default translate of the surface
         me.dndStartRawCoordinates = null;
 
-	me.barHeight = 15;
+        me.barHeight = 15;
         me.barStartHash = {};     			// Hash array from object_ids -> Start/end point
         me.barEndHash = {};     			// Hash array from object_ids -> Start/end point
         me.taskModelHash = {};
@@ -87,7 +87,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             'scope': this
         });;
 
-	// Drag & Drop on the "surface"
+        // Drag & Drop on the "surface"
         me.on({
             'mousedown': me.onMouseDown,
             'mouseup': me.onMouseUp,
@@ -96,7 +96,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             'scope': this
         });
 
-	// Drag & Drop on the TreePanel - moving tasks
+        // Drag & Drop on the TreePanel - moving tasks
 	var ganttTreeView = me.ganttTreePanel.getView();
         ganttTreeView.on({
             'drop': me.onTreeViewDrop,
@@ -121,6 +121,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
 	me.axisStartDate = me.prevMonth(new Date(me.axisStartTime));
 	me.axisEndDate = me.nextMonth(new Date(me.axisEndTime));
+
+	this.addEvents('move');
     },
 
     /**
@@ -311,9 +313,14 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
         if (me.dndBase != null) {				// Only if we are dragging
             var point = e.getXY();
+	    var translateDist = point[0] - me.dndBase[0]
             // console.log('PO.class.GanttDrawComponent.onMouseMove: '+point);
             
-            me.translate(point[0] - me.dndBase[0]);
+	    // Move the entire surface around
+            me.translate(translateDist);
+
+	    // Fire event in order to notify listerns about the move
+	    this.fireEvent('move', translateDist);
         }
     },
 
@@ -516,6 +523,14 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var count = 0;
         var y = 0;
 
+        // Yearly Axis
+        var yearTime = 365.0 * 24 * 3600 * 1000;
+        var axisUnits = (me.axisEndTime - me.axisStartTime) / yearTime;
+        if (axisUnits > 3 && axisUnits < 50) {
+            me.drawAxisYear(y);
+            y = y + me.axisHeight;
+        }
+
         // Quarterly Axis
         var quarterTime = 90.0 * 24 * 3600 * 1000;
         var axisUnits = (me.axisEndTime - me.axisStartTime) / quarterTime;
@@ -543,6 +558,40 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     },
 
     /**
+     * Draw a horizontal axis from start until end date
+     */
+    drawAxisYear: function(y) {
+        var me = this;
+        var count = 0;
+
+        // Advance to first day of the next year
+        var axisStartYear = me.nextYear(new Date(me.axisStartTime));
+        var x = me.date2x(axisStartYear);
+        while (x < me.axisEndX && count < 200) {
+            var line = me.surface.add({
+                type: 'path',
+                stroke: '#444',
+		'shape-rendering': 'crispy-edges',
+		'stroke-width': 0.5,
+                path: 'M '+x+' '+y+' v '+ me.axisHeight,
+            }).show(true);
+
+            var text = axisStartYear.getFullYear();
+            var textSprite = me.surface.add({
+                type: 'text',
+                text: '' + text,
+                x: x+2,
+                y: y + 6,
+                font: '12px tahoma'
+            }).show(true);
+            
+            axisStartYear = me.nextYear(axisStartYear);
+            x = me.date2x(axisStartYear);
+            count++;
+        }
+    },
+
+    /**
      * Draw a horizontal monthly axis
      */
     drawAxisQuarter: function(y) {
@@ -557,10 +606,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 type: 'path',
                 stroke: '#444',
                 fill: 'none',
-
 		'shape-rendering': 'crispy-edges',
 		'stroke-width': 0.5,
-
                 path: 'M '+x+' '+y+' v '+ me.axisHeight
             });
 
@@ -568,7 +615,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             line.show(true);
 
             var quarter = Math.floor(axisStartQuarter.getMonth() / 3) + 1;
-            var text = ('' + axisStartQuarter.getYear()).substring(1,4) + 'Q' + quarter;
+            var text = ('' + axisStartQuarter.getFullYear()).substring(2,4) + 'Q' + quarter;
             var textSprite = me.surface.add({
                 type: 'text',
                 text: text,
@@ -791,7 +838,17 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             result = new Date(date.getFullYear(), date.getMonth() + 3, 1);
         }
         return result;
+    },
+
+    /**
+     * Advance a date to the 1st of january of the next year
+     */
+    nextYear: function(date) {
+        var result;
+        result = new Date(date.getFullYear() + 1, 0, 1);
+        return result;
     }
+
 
 
 

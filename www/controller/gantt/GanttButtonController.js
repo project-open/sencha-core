@@ -20,7 +20,7 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
     'ganttButtonController': null,
     'ganttTreePanel': null,
     'ganttDrawComponent': null,
-    
+    'ganttTimeline': null,                                        // x3 time axis
 
     refs: [
         { ref: 'ganttTreePanel', selector: '#ganttTreePanel' }
@@ -55,6 +55,11 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
         // Listen to special keys
         me.ganttTreePanel.on('cellkeydown', this.onCellKeyDown, me.ganttTreePanel);
         me.ganttTreePanel.on('beforecellkeydown', this.onBeforeCellKeyDown, me.ganttTreePanel);
+
+	// Deal with mouse move events from both surfaces
+	me.ganttTimeline.on('move', this.onTimelineMove, me);
+	me.ganttDrawComponent.on('move', this.onDrawComponentMove, me);
+
         return this;
     },
 
@@ -64,6 +69,30 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
 
     onButtonSave: function() {
         console.log('ButtonSave');
+    },
+
+    /**
+     * The user is drag-and-dropping the Timeline around.
+     * Now update the main DrawComponent accordingly.
+     */
+    onTimelineMove: function(dist) {
+        // console.log('GanttButtonController.onTimelineMove: dist='+dist);
+        this.ganttDrawComponent.translate(dist * 3);	// Move the DrawComponent multiplied
+
+	// ToDo: There are still some break when switching between the surfaces
+	// this.ganttDrawComponent.dndBase[0] = -dist;
+    },
+
+    /**
+     * The user is drag-and-dropping the main DrawComponent around.
+     * Now move the Timeline accordingly.
+     */
+    onDrawComponentMove: function(dist) {
+        console.log('GanttButtonController.onDrawComponentMove: dist='+dist);
+        this.ganttTimeline.translate(dist / 3.0);	// Move the Timeline by a fraction
+
+	// ToDo: There are still some break when switching between the surfaces
+	// this.ganttTimeline.dndBase[0] = -dist;
     },
 
     /**
