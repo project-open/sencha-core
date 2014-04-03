@@ -54,10 +54,6 @@ Ext.define('PO.view.gantt.GanttButtonPanel', {
 	}, {
 	    xtype: 'tbseparator'
 	}, {
-	    icon: '/intranet/images/navbar_default/link.png',
-	    tooltip: 'Dependencies',
-	    id: 'buttonDependencies'
-	}, {
 	    icon: '/intranet/images/navbar_default/link_add.png',
 	    tooltip: 'Add dependency',
 	    id: 'buttonAddDependency'

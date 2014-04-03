@@ -37,11 +37,10 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
             '#buttonDelete': { click: { fn: me.ganttTreePanel.onButtonDelete, scope: me.ganttTreePanel }},
             '#buttonReduceIndent': { click: { fn: me.ganttTreePanel.onButtonReduceIndent, scope: me.ganttTreePanel }},
             '#buttonIncreaseIndent': { click: { fn: me.ganttTreePanel.onButtonIncreaseIndent, scope: me.ganttTreePanel }},
-            '#buttonDependencies': { click: this.onButton },
             '#buttonAddDependency': { click: this.onButton },
             '#buttonBreakDependency': { click: this.onButton },
-            '#buttonZoomIn': { click: { fn: me.ganttDrawComponent.onZoomIn, scope: me.ganttDrawComponent }},
-            '#buttonZoomOut': { click: { fn: me.ganttDrawComponent.onZoomOut, scope: me.ganttDrawComponent }},
+            '#buttonZoomIn': { click: this.onZoomIn },
+            '#buttonZoomOut': { click: this.onZoomOut },
             '#buttonSettings': { click: this.onButton },
             scope: me.ganttTreePanel
         });
@@ -64,11 +63,23 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
     },
 
     onButtonLoad: function() {
-        console.log('ButtonLoad');
+        console.log('GanttButtonController.ButtonLoad');
     },
 
     onButtonSave: function() {
-        console.log('ButtonSave');
+        console.log('GanttButtonController.ButtonSave');
+    },
+
+    onZoomIn: function() {
+        console.log('GanttButtonController.onZoomIn');
+	this.ganttDrawComponent.onZoomIn();
+	this.ganttTimeline.onZoomIn();
+    },
+
+    onZoomOut: function() {
+        console.log('GanttButtonController.onZoomOut');
+	this.ganttDrawComponent.onZoomOut();
+	this.ganttTimeline.onZoomOut();
     },
 
     /**
@@ -77,7 +88,8 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
      */
     onTimelineMove: function(dist) {
         // console.log('GanttButtonController.onTimelineMove: dist='+dist);
-        this.ganttDrawComponent.translate(dist * 3);	// Move the DrawComponent multiplied
+	var axisFactor = this.ganttTimeline.axisFactor;
+        this.ganttDrawComponent.translate(dist * axisFactor);	// Move the DrawComponent multiplied
 
 	// ToDo: There are still some break when switching between the surfaces
 	// this.ganttDrawComponent.dndBase[0] = -dist;
@@ -89,7 +101,8 @@ Ext.define('PO.controller.gantt.GanttButtonController', {
      */
     onDrawComponentMove: function(dist) {
         console.log('GanttButtonController.onDrawComponentMove: dist='+dist);
-        this.ganttTimeline.translate(dist / 3.0);	// Move the Timeline by a fraction
+	var axisFactor = this.ganttTimeline.axisFactor;
+        this.ganttTimeline.translate(dist / axisFactor);	// Move the Timeline by a fraction
 
 	// ToDo: There are still some break when switching between the surfaces
 	// this.ganttTimeline.dndBase[0] = -dist;

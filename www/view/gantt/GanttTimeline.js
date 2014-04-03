@@ -70,14 +70,21 @@ Ext.define('PO.view.gantt.GanttTimeline', {
         // Draw the top axis
         me.drawAxis();
 
-        // Iterate through all children of the root node and check if they are visible
-        rootNode.cascadeBy(function(model) {
-            var viewNode = ganttTreeView.getNode(model);
+	var panelY = me.ganttTreePanel.getY();
 
-            // hidden nodes/models don't have a viewNode, so we don't need to draw a bar.
-            if (viewNode == null) { return; }
-            if (!model.isVisible()) { return; }
-            me.drawBar(model, viewNode);
+
+        // Iterate through all children of the root node and check if they are visible
+	var maxDepth = 2;
+	var y = 0;
+        rootNode.cascadeBy(function(model) {
+	    if (model.getDepth() > maxDepth) { return; }
+	    if (!model.isVisible()) { return; }
+
+            var viewNode = ganttTreeView.getNode(model);
+	    if (viewNode == null) { return; }	                        // hidden nodes/models don't have a viewNode, so we don't need to draw a bar.
+
+	    me.drawBar(model, viewNode, {'y': y});
+	    y = y + me.barHeight + 2;
         });
 
         console.log('PO.class.GanttTimeline.redraw: Finished');
@@ -101,8 +108,9 @@ Ext.define('PO.view.gantt.GanttTimeline', {
     /**
      * Draw a single bar for a project or task
      */
-    drawBar: function(project, viewNode) {
+    drawBar: function(project, viewNode, overrideParams) {
         var me = this;
+	var params = overrideParams || {};
         if (me.debug) { console.log('PO.class.GanttTimeline.drawBar: Starting'); }
         var ganttTreeStore = me.ganttTreePanel.store;
         var ganttTreeView = me.ganttTreePanel.getView();
@@ -124,12 +132,13 @@ Ext.define('PO.view.gantt.GanttTimeline', {
 
         var projectY = ganttTreeView.getNode(project).getBoundingClientRect().top;
         var x = me.date2x(startTime);
-        var y = projectY - panelY;
+        var y = (projectY - panelY) / 6.0;   // smaller bars in preview
         var w = Math.floor( me.ganttWidth * (endTime - startTime) / (me.axisEndTime - me.axisStartTime));
         var h = me.barHeight; 							// Height of the bars
         var d = Math.floor(h / 2.0) + 1;    				// Size of the indent of the super-project bar
 
-	y = y / 6.0;  // smaller bars in preview
+	var overrideY = params.y;
+	if (overrideY != undefined) { y = params.y; }
 
         var spriteBar = surface.add({
             type: 'rect',

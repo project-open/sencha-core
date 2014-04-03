@@ -37,10 +37,14 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     axisEndTime: 0,
     axisEndX: 290,					// End of the date axis
     axisHeight: 20,     				// Height of each of the two axis levels
+    axisScale: 'month',     				// Default scale for the time axis
 
     arrowheadSize: 4,   				// head size for dependency arrows
 
     monthNames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+    
+    // different scales for the time axis
+    axisScales: ["year", "quarter", "month", "week"],
 
     dndBase: null,
     dndBaseObject: null,
@@ -97,7 +101,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         });
 
         // Drag & Drop on the TreePanel - moving tasks
-	var ganttTreeView = me.ganttTreePanel.getView();
+        var ganttTreeView = me.ganttTreePanel.getView();
         ganttTreeView.on({
             'drop': me.onTreeViewDrop,
             'scope': this
@@ -113,16 +117,16 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             var id = model.get('id');
             me.taskModelHash[id] = model;
 
-	    var startTime = new Date(model.get('start_date')).getTime();
-	    var endTime = new Date(model.get('end_date')).getTime();
-	    if (startTime < me.axisStartTime) { me.axisStartTime = startTime; }
-	    if (endTime > me.axisEndTime) { me.axisEndTime = endTime; }
+            var startTime = new Date(model.get('start_date')).getTime();
+            var endTime = new Date(model.get('end_date')).getTime();
+            if (startTime < me.axisStartTime) { me.axisStartTime = startTime; }
+            if (endTime > me.axisEndTime) { me.axisEndTime = endTime; }
         });
 
-	me.axisStartDate = me.prevMonth(new Date(me.axisStartTime));
-	me.axisEndDate = me.nextMonth(new Date(me.axisEndTime));
+        me.axisStartDate = me.prevMonth(new Date(me.axisStartTime));
+        me.axisEndDate = me.nextMonth(new Date(me.axisEndTime));
 
-	this.addEvents('move');
+        this.addEvents('move');
     },
 
     /**
@@ -153,12 +157,12 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         rootNode.cascadeBy(function(model) {
             // console.log('GanttDrawComponent: onTreeViewDrop: '+sort_order+': '+model.get('project_name'));
             if (0 != sort_order) {
-		var oldSortOrder = +model.get('sort_order');
-		if (sort_order != oldSortOrder) { model.set('sort_order', ""+sort_order); }
+                  var oldSortOrder = +model.get('sort_order');
+                  if (sort_order != oldSortOrder) { model.set('sort_order', ""+sort_order); }
                 var parentNode = model.parentNode;
                 if (null != parentNode) {
                     var parentId = +parentNode.get('id')
-		    var oldParentId = +model.get('parent_id');
+                      var oldParentId = +model.get('parent_id');
                     if (parentId != oldParentId) { model.set('parent_id', ""+parentId); }
                 }
             }
@@ -313,14 +317,14 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
 
         if (me.dndBase != null) {				// Only if we are dragging
             var point = e.getXY();
-	    var translateDist = point[0] - me.dndBase[0]
+            var translateDist = point[0] - me.dndBase[0]
             // console.log('PO.class.GanttDrawComponent.onMouseMove: '+point);
             
-	    // Move the entire surface around
+            // Move the entire surface around
             me.translate(translateDist);
 
-	    // Fire event in order to notify listerns about the move
-	    this.fireEvent('move', translateDist);
+            // Fire event in order to notify listerns about the move
+            this.fireEvent('move', translateDist);
         }
     },
 
@@ -329,7 +333,17 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      * pressed the (+) (zoom in) button
      */
     onZoomIn: function() {
-	console.log('GanttDrawComponent.onZoomIn');
+        console.log('GanttDrawComponent.onZoomIn');
+
+        var index = this.axisScales.indexOf(this.axisScale);
+        var newScale;
+        if (index < (this.axisScales.length - 1)) {
+            newScale = this.axisScales[index+1];
+        } else {
+            newScale = this.axisScales[index];
+        }
+        this.axisScale = newScale;
+        this.redraw();
     },
 
 
@@ -337,7 +351,18 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
      * pressed the (-) (zoom out) button
      */
     onZoomOut: function() {
-	console.log('GanttDrawComponent.onZoomOut');
+        console.log('GanttDrawComponent.onZoomOut');
+
+        var index = this.axisScales.indexOf(this.axisScale);
+        var newScale;
+        if (index > 0) {
+            newScale = this.axisScales[index-1];
+        } else {
+            newScale = this.axisScales[index];
+        }
+
+        this.axisScale = newScale;
+        this.redraw();
     },
 
 
@@ -446,14 +471,14 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     drawDependency: function(predecessor, successor) {
         var me = this;
 
-	if (!predecessor) { 
-	    console.log('GanttDrawComponent.drawDependency: predecessor is NULL');
-	    return; 
-	}
-	if (!successor) { 
-	    console.log('GanttDrawComponent.drawDependency: successor is NULL');
-	    return; 
-	}
+        if (!predecessor) { 
+            console.log('GanttDrawComponent.drawDependency: predecessor is NULL');
+            return; 
+        }
+        if (!successor) { 
+            console.log('GanttDrawComponent.drawDependency: successor is NULL');
+            return; 
+        }
 
         var from = predecessor.get('id');
         var to = successor.get('id');
@@ -478,7 +503,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var line = me.surface.add({
             type: 'path',
             stroke: '#444',
-	    'shape-rendering': 'crispy-edges',
+            'shape-rendering': 'crispy-edges',
             'stroke-width': 0.5,
             path: 'M '+ (startX) + ',' + (startY)
                 + 'L '+ (endX+s)   + ',' + (startY)
@@ -523,38 +548,19 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var count = 0;
         var y = 0;
 
-        // Yearly Axis
-        var yearTime = 365.0 * 24 * 3600 * 1000;
-        var axisUnits = (me.axisEndTime - me.axisStartTime) / yearTime;
-        if (axisUnits > 3 && axisUnits < 50) {
-            me.drawAxisYear(y);
-            y = y + me.axisHeight;
+        switch (me.axisScale) {
+            case 'year': me.drawAxisYear(y);
+            break;
+            case 'quarter': me.drawAxisQuarter(y);
+            break;
+            case 'month': me.drawAxisMonth(y);
+            break;
+            case 'week': me.drawAxisWeek(y);
+            break;
+            case 'day': me.drawAxisDay(y);
+            break;
+            default: console.log('GanttDrawComponent.drawAxis: unknown axisScale="'+axisScale+'"');
         }
-
-        // Quarterly Axis
-        var quarterTime = 90.0 * 24 * 3600 * 1000;
-        var axisUnits = (me.axisEndTime - me.axisStartTime) / quarterTime;
-        if (axisUnits > 3 && axisUnits < 50) {
-            me.drawAxisQuarter(y);
-            y = y + me.axisHeight;
-        }
-
-        // Monthly Axis
-        var monthTime = 30.0 * 24 * 3600 * 1000;
-        var axisUnits = (me.axisEndTime - me.axisStartTime) / monthTime;
-        if (axisUnits > 3 && axisUnits < 50) {
-            me.drawAxisMonth(y);
-            y = y + me.axisHeight;
-        }
-
-        // Weekly Axis
-        var weekTime = 7.0 * 24 * 3600 * 1000;
-        var axisUnits = (me.axisEndTime - me.axisStartTime) / weekTime;
-        if (axisUnits > 3 && axisUnits < 50) {
-            me.drawAxisWeek(y);
-            y = y + me.axisHeight;
-        }
-
     },
 
     /**
@@ -571,8 +577,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             var line = me.surface.add({
                 type: 'path',
                 stroke: '#444',
-		'shape-rendering': 'crispy-edges',
-		'stroke-width': 0.5,
+                  'shape-rendering': 'crispy-edges',
+                  'stroke-width': 0.5,
                 path: 'M '+x+' '+y+' v '+ me.axisHeight,
             }).show(true);
 
@@ -606,8 +612,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
                 type: 'path',
                 stroke: '#444',
                 fill: 'none',
-		'shape-rendering': 'crispy-edges',
-		'stroke-width': 0.5,
+                  'shape-rendering': 'crispy-edges',
+                  'stroke-width': 0.5,
                 path: 'M '+x+' '+y+' v '+ me.axisHeight
             });
 
@@ -645,8 +651,8 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
             var line = me.surface.add({
                 type: 'path',
                 stroke: '#444',
-		'shape-rendering': 'crispy-edges',
-		'stroke-width': 0.5,
+                  'shape-rendering': 'crispy-edges',
+                  'stroke-width': 0.5,
                 path: 'M '+x+' '+y+' v '+ me.axisHeight,
             }).show(true);
             
@@ -674,22 +680,29 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         var me = this;
         var count = 0;
 
-        // Advance to first day of the next month
-        var axisStartMonth = me.nextMonth(new Date(me.axisStartTime));
-        var x = me.date2x(axisStartMonth);
+        // Advance to first day of the next week
+        var axisStartWeek = me.nextWeek(new Date(me.axisStartTime));
+        var x = me.date2x(axisStartWeek);
         while (x < me.axisEndX && count < 200) {
             var line = me.surface.add({
                 type: 'path',
                 stroke: '#444',
-
-		'shape-rendering': 'crispy-edges',
-		'stroke-width': 0.5,
-
+                  'shape-rendering': 'crispy-edges',
+                  'stroke-width': 0.5,
                 path: 'M '+x+' '+y+' v '+ me.axisHeight,
             }).show(true);
+
+            var week = Ext.Date.getWeekOfYear(axisStartWeek);
+            var textSprite = me.surface.add({
+                type: 'text',
+                text: ''+week,
+                x: x+2,
+                y: y + 6,
+                font: '12px tahoma'
+            }).show(true);
             
-            axisStartMonth = me.nextMonth(axisStartMonth);
-            x = me.date2x(axisStartMonth);
+            axisStartWeek = me.nextWeek(axisStartWeek);
+            x = me.date2x(axisStartWeek);
             count++;
         }
     },
@@ -698,7 +711,7 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
     /**
      * Draw a single bar for a project or task
      */
-    drawBar: function(project, viewNode) {
+    drawBar: function(project, viewNode, overrideParams) {
         var me = this;
         if (me.debug) { console.log('PO.class.GanttDrawComponent.drawBar: Starting'); }
         var ganttTreeStore = me.ganttTreePanel.store;
@@ -827,6 +840,78 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         return result;
     },
 
+
+    /**
+     * Advance a date to the 1st of the next week
+     */
+    nextWeek: function(date) {
+        var result;
+        var oneDayTime = 24.0 * 3600 * 1000;                            // milliseconds in one day
+        var today = date;
+        var week = Ext.Date.getWeekOfYear(date);
+
+        // Check if this is the first day of the week
+        var tomorrow = new Date(today.getTime() + oneDayTime);
+        var weekTomorrow = Ext.Date.getWeekOfYear(tomorrow);
+
+        if (week == weekTomorrow) {
+            
+            // Same week. So we are not on the last day of the week
+            // Determine the last day of the week.
+            // This is the day who's tomorrow is in a different week.
+            while (week == weekTomorrow) {
+                  today = tomorrow;
+                  tomorrow = new Date(today.getTime() + oneDayTime);
+                  result = tomorrow;
+                  weekTomorrow = Ext.Date.getWeekOfYear(tomorrow);
+            }
+
+        } else {
+
+            // We are already on the last day of the week.
+            // So we need to go forward an entire week
+            result = new Date(date.getTime() + 7.0 * oneDayTime);
+        }
+        return result;
+    },
+
+    /**
+     * Advance a date to the 1st of the prev week
+     */
+    prevWeek: function(date) {
+        var result;
+        var oneDayTime = 24.0 * 3600 * 1000;                            // milliseconds in one day
+        var today = date;
+        var week = Ext.Date.getWeekOfYear(date);
+
+        // Check if this is the first day of the week
+        var yesterday = new Date(today.getTime() - oneDayTime);
+        var weekYesterday = Ext.Date.getWeekOfYear(yesterday);
+
+        if (week == weekYesterday) {
+            
+            // Same week. So we are not on the first day of the week
+            // Determine the first day of the week.
+            // This is the day who's yesterday is in a different week.
+            while (week == weekYesterday) {
+                today = yesterday;
+                yesterday = new Date(today.getTime() - oneDayTime);
+                result = today;
+                weekYesterday = Ext.Date.getWeekOfYear(yesterday);
+            }
+
+        } else {
+
+            // We are already on the first day of the week.
+            // So we need to go back an entire week
+            result = new Date(date.getTime() - 7.0 * oneDayTime);
+        }
+        return result;
+    },
+
+
+
+
     /**
      * Advance a date to the 1st of the next quarter
      */
@@ -848,9 +933,5 @@ Ext.define('PO.view.gantt.GanttDrawComponent', {
         result = new Date(date.getFullYear() + 1, 0, 1);
         return result;
     }
-
-
-
-
 });
 
