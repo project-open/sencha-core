@@ -105,10 +105,12 @@ Ext.define('Ext.ux.TreeCombo', {
 
     setValue: function(valueInit) {
 	if (typeof valueInit == 'undefined') return;
-	var me = this,
-	tree = this.tree,
-	values = (valueInit == '') ? [] : valueInit.split(','),
-	valueFin = [];	
+	// fraber 2014-06-30: avoid error by split() further below
+	if (typeof valueInt != 'string') valueInit = ''+valueInit;
+	var me = this;
+	var tree = this.tree;
+	var values = (valueInit == '') ? [] : valueInit.split(',');
+	var valueFin = [];
 	inputEl = me.inputEl;
 	if (tree.store.isLoading()) {
 	    me.afterLoadSetValue = valueInit;
