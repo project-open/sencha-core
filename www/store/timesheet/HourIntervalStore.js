@@ -10,6 +10,7 @@ Ext.define('PO.store.timesheet.HourIntervalStore', {
     model: 	    'PO.model.timesheet.HourInterval',
     storeId:	    'hourIntervalStore',
     autoLoad:	    false,
+    autoSync:	    true,
     remoteFilter:   true,
     pageSize:	    1000,
     proxy: {
