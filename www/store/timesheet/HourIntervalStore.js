@@ -9,10 +9,15 @@ Ext.define('PO.store.timesheet.HourIntervalStore', {
     extend:         'Ext.data.Store',
     model: 	    'PO.model.timesheet.HourInterval',
     storeId:	    'hourIntervalStore',
+    autoDestroy:    true,
     autoLoad:	    false,
-    autoSync:	    true,
+    autoSync:	    false,
     remoteFilter:   true,
     pageSize:	    1000,
+    sorters: [{
+        property: 'interval_start',
+        direction: 'DESC'
+    }],
     proxy: {
 	type:       'rest',
 	url:        '/intranet-rest/im_hour_interval',
@@ -23,6 +28,7 @@ Ext.define('PO.store.timesheet.HourIntervalStore', {
 	    project_id: 0		// Needs to be overwritten by controller
 	},
 	reader: { type: 'json', root: 'data' }
+	// listeners: { exception: function(store, response, op) { window.alert('Exception: '+response); } }
     }
 });
 
