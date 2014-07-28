@@ -28,7 +28,6 @@ Ext.define('PO.store.timesheet.HourIntervalStore', {
 	    project_id: 0		// Needs to be overwritten by controller
 	},
 	reader: { type: 'json', root: 'data' }
-	// listeners: { exception: function(store, response, op) { window.alert('Exception: '+response); } }
     }
 });
 
