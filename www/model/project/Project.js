@@ -40,6 +40,51 @@ Ext.define('PO.model.project.Project', {
 	'description',		
 	'note',
 
+	'project_budget',			// Budget
+	'project_budget_currency',
+	'project_budget_hours',
+
+	'program_id',				// Is this project part of a program or portfolio?
+	'percent_completed',			// Percentage of work done
+	'on_track_status_id',			// Green, yellow or red
+
+	'template_p',				// Use this project as a template?
+	'release_item_p',			// Use this project as something to be released?
+	'milestone_p',				// Show this project in the milestone view?
+
+	'company_contact_id',			// Customer contact
+	'sort_order',				// Used for portfolio views
+	'company_project_nr',			// The order ID of the customer
+	'project_cost_center_id',		// Assign this project to some cost/profit center?
+	'project_priority_id',			// Priority for portfolio management
+
+	'presales_probability',			// Presales tracking
+	'presales_value',
+	'presales_value_currency',
+	'presales_priority_id',
+	'presales_sales_stage_id',
+	'presales_campaign_id',
+	'presales_close_probability',
+
+/*
+	// Financial cache
+	'cost_quotes_cache',
+	'cost_invoices_cache',
+	'cost_timesheet_planned_cache',
+	'cost_purchase_orders_cache',
+	'cost_bills_cache',
+	'cost_timesheet_logged_cache',
+	'reported_hours_cache',
+	'cost_expense_planned_cache',
+	'cost_expense_logged_cache',
+	'cost_delivery_notes_cache',
+	'cost_cache_dirty',
+	'reported_days_cache',
+	'cost_bills_planned',
+	'cost_expenses_planned',
+*/
+
+
 	'level',				// 0 for a main project, 1 for a sub-project etc.
 
 	// ------------				// Denormalized fields from suitable queries
