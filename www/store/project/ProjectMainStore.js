@@ -28,15 +28,14 @@ Ext.define('PO.store.project.ProjectMainStore', {
 	timeout:	300000,
 	extraParams: {
 	    format:		'json',
-	    project_status_id:	'76',			// Only projects in status "active" (no substates)
 	    query:		'parent_id is NULL'	// Select only top-level projects
 	    // deref_p:		'1'			// We don't need company_name etc.
-	    // This can be overwrittten during load.
+	    // This should be overwrittten during load.
 	},
 	reader: {
 	    type:		'json',			// Tell the Proxy Reader to parse JSON
 	    root:		'data',			// Where do the data start in the JSON file?
-	    totalProperty:  'total'			// Total number of tickets for pagination
+	    totalProperty:	'total'			// Total number of tickets for pagination
 	},
 	writer: {
 	    type:		'json'			// Allow Sencha to write ticket changes
