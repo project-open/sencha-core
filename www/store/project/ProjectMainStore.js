@@ -18,7 +18,7 @@ Ext.define('PO.store.project.ProjectMainStore', {
     extend:		'Ext.data.Store',
     requires:		['PO.model.project.Project'],
     model: 		'PO.model.project.Project',	// Uses standard Project as model
-    autoLoad:		false,
+    autoLoad:		false,				// Allow the application to set extraParams
     remoteFilter:	true,				// Do not filter on the Sencha side
     pageSize:		100000,				// Load all projects, no matter what size(?)
     proxy: {
