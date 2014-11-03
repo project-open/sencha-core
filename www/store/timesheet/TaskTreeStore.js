@@ -19,15 +19,15 @@ Ext.define('PO.store.timesheet.TaskTreeStore', {
     folderSort:			false,		// Needs to be false in order to preserve the MS-Project import order
     proxy: {
         type:			'ajax',
-        url:			'/sencha-task-editor/treegrid.json',
+        url:			'/intranet-rest/data-source/project-task-tree.json',
         extraParams: {
             project_id:		0		// Will be set by app before loading
         },
         api: {
-            create:		'/sencha-task-editor/treegrid.json?create=1',
-            read:		'/sencha-task-editor/treegrid.json?read=1',
-            update:		'/sencha-task-editor/treegrid-update',
-            destroy:		'/sencha-task-editor/treegrid.json?destroy=1',
+            create:		'/intranet-rest/data-source/project-task-tree.json?create=1',
+            read:		'/intranet-rest/data-source/project-task-tree.json?read=1',
+            update:		'/intranet-rest/data-source/project-task-tree-update',
+            destroy:		'/intranet-rest/data-source/project-task-tree.json?destroy=1',
         },
         reader: {
             type:		'json', 
