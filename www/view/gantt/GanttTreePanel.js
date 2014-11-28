@@ -88,7 +88,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         // format:			'Y-m-d H:i:s',				// 2000-01-01 00:00:00+01
         flex:				1,
         hidden:				false,
-        dataIndex:			'start_date',
+        dataIndex:			'start_date_date',
         sortable:			true,
         editor: {
             allowBlank:			false
