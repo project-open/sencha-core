@@ -46,11 +46,12 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      * an already existing preference or creating a new one.
      * The preference is written to the server REST back-end.
      */
-    setPreference: function(preferenceKey, preferenceValue) {
+    setPreference: function(preferenceUrl, preferenceKey, preferenceValue) {
 	var prefModel = this.findRecord('preference_key',preferenceKey);
 	if (null == prefModel) {
 	    // We need to create a new preference
             prefModel = Ext.create('PO.model.user.SenchaPreference', {
+		preference_url: preferenceUrl,                 // URL = "section" of parameters
 		preference_key: preferenceKey,                 // Use the element's ID as key for the true/false preference
 		preference_value: ''+preferenceValue           // The REST Back-end only works with strings
             });

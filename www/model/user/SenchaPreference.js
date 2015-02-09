@@ -6,6 +6,7 @@ Ext.define('PO.model.user.SenchaPreference', {
 	'preference_status_id',
 	'preference_type_id',
 	'preference_object_id',
+	'preference_url',
 	'preference_key',
 	'preference_value'
     ],
@@ -18,7 +19,7 @@ Ext.define('PO.model.user.SenchaPreference', {
 	extraParams: {
 	    format:		'json',		// Tell the ]po[ REST to return JSON data.
 	    deref_p:	'1',
-	    columns:	'preference_object_id,preference_key,preference_value'
+	    columns:	'preference_object_id,preference_url,preference_key,preference_value'
 	},
 	reader: {
 	    type:		'json',		// Tell the Proxy Reader to parse JSON

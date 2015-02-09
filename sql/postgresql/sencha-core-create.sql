@@ -43,7 +43,7 @@ where object_type = 'im_sencha_preference';
 -- acs_objects...) that contain information about an im_sencha_preference object.
 -- This way, developers can add "extension tables" to an object to
 -- hold additional DynFields, without changing the program code.
-insert into acs_object_type_tables (object_type,table_name,id_column)
+insert into acs_object_type_tables (object_type, table_name, id_column)
 values ('im_sencha_preference', 'im_sencha_preferences', 'preference_id');
 
 
@@ -93,6 +93,10 @@ create table im_sencha_preferences (
 				constraint im_sencha_preference_user_fk
 				references acs_objects,
 				-- Key of the preference - can not be NULL
+	preference_url		text
+				constraint im_sencha_preference_url_nn
+				not null,
+				-- Key of the preference - can not be NULL
 	preference_key		text
 				constraint im_sencha_preference_key_nn
 				not null,
@@ -103,7 +107,8 @@ create table im_sencha_preferences (
 create index im_sencha_preferences_object_idx on im_sencha_preferences(preference_object_id);
 
 -- Avoid duplicate entries.
-create unique index im_sencha_preferences_object_preference_idx on im_sencha_preferences(preference_type_id, preference_object_id, preference_key);
+create unique index im_sencha_preferences_object_preference_idx 
+on im_sencha_preferences(preference_object_id, preference_key);
 
 
 create or replace function im_sencha_preference__name(integer)
@@ -112,7 +117,9 @@ DECLARE
 	p_preference_id		alias for $1;
 	v_name			varchar;
 BEGIN
-	select	acs_object__name(preference_object_id) || ': ' || preference_key || '=' || coalesce(preference_value, 'NULL')
+	select	acs_object__name(preference_object_id) || ': ' || 
+		preference_url || '.' || preference_key || '=' || 
+		coalesce(preference_value, 'NULL')
 	into	v_name
 	from	im_sencha_preferences
 	where	preference_id = p_preference_id;
@@ -125,7 +132,7 @@ create or replace function im_sencha_preference__new (
 	integer, varchar, timestamptz,
 	integer, varchar, integer,
 	integer, integer, integer,
-	varchar, varchar
+	varchar, varchar, varchar
 ) returns integer as $body$
 DECLARE
 	p_preference_id		alias for $1;			-- preference_id  default null
@@ -138,8 +145,9 @@ DECLARE
 	p_preference_type_id	alias for $7;			-- type (email, http, text comment, ...)
 	p_preference_status_id	alias for $8;			-- status ("active" or "deleted").
 	p_preference_object_id	alias for $9;			-- associated object (project, user, ...)
-	p_preference_key	alias for $10;			-- associated object (project, user, ...)
-	p_preference_value	alias for $11;			-- associated object (project, user, ...)
+	p_preference_url	alias for $10;			-- associated object (project, user, ...)
+	p_preference_key	alias for $11;			-- associated object (project, user, ...)
+	p_preference_value	alias for $12;			-- associated object (project, user, ...)
 
 	v_preference_id	integer;
 BEGIN
@@ -156,15 +164,16 @@ BEGIN
 	insert into im_sencha_preferences (
 		preference_id, preference_object_id,
 		preference_type_id, preference_status_id,
-		preference_key, preference_value
+		preference_url, preference_key, preference_value
 	) values (
 		v_preference_id, p_preference_object_id,
 		p_preference_type_id, p_preference_status_id,
-		p_preference_key, p_preference_value
+		p_preference_url, p_preference_key, p_preference_value
 	);
 
 	return v_preference_id;
 END;$body$ language 'plpgsql';
+
 
 create or replace function im_sencha_preference__delete(integer)
 returns integer as $body$
