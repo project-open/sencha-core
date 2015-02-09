@@ -94,7 +94,15 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
 	if (null == prefValue) { return defaultValue; }
 	var prefResult = prefValue == 'true' ? true : false;
 	return prefResult;
-    }
+    },
+
+    /**
+     * Check if a key exists
+     */
+    existsPreference: function(preferenceKey) {
+	var prefModel = this.findRecord('preference_key',preferenceKey);
+	return (null != prefModel);
+    },
 
 });
 
