@@ -16,7 +16,9 @@
 -- - The sort_order of a grid column
 -- - ...
 -- All preferences return an empty string if they have not been defined previously.
---
+-- Please Note: A user or admin may delete the contents of the preferences
+-- table at any moment if necessary. You need to define the default behavior 
+-- in the TCL/Sencha code if there are no preferences in the table. 
 
 SELECT acs_object_type__create_type (
 	'im_sencha_preference',				-- object_type - only lower case letters and "_"
@@ -57,10 +59,6 @@ insert into im_biz_object_urls (object_type, url_type, url) values (
 'im_sencha_preference','edit','/sencha-core/preferences/new?display_mode=edit&preference_id=');
 
 
-
--- This table stores one object per row. Links to super-type "acs_object" 
--- using the "preference_id" field, which contains the same object_id as 
--- acs_objects.object_id.
 create table im_sencha_preferences (
 				-- The object_id: references acs_objects.object_id.
 				-- So we can lookup object metadata such as creation_date,
@@ -92,7 +90,8 @@ create table im_sencha_preferences (
 				not null
 				constraint im_sencha_preference_user_fk
 				references acs_objects,
-				-- Key of the preference - can not be NULL
+				-- For Sencha page: URL of the page
+				-- For Portlets: label of the portlet
 	preference_url		text
 				constraint im_sencha_preference_url_nn
 				not null,
