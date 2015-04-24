@@ -28,7 +28,7 @@ Ext.define('PO.store.user.SenchaColumnConfigStore', {
 	timeout:	300000,
 	extraParams: { 
 	    format: 'json',
-	    column_config_object_id: '<%= [ad_get_user_id] %>',
+	    column_config_object_id: 0,
 	    column_config_url: 'undefined'
 	},
 	reader: {
@@ -80,7 +80,9 @@ Ext.define('PO.store.user.SenchaColumnConfigStore', {
 
 		// Initialize sortOrder
 		for (var i = 0, len = columns.length; i < len; i++) {
-		    columns[i].sortOrder = 0;
+		    if (!sortOrder in columns[i]) {
+			columns[i].sortOrder = 0;
+		    }
 		}
 
 		// Set parameters according to database values
@@ -89,7 +91,6 @@ Ext.define('PO.store.user.SenchaColumnConfigStore', {
 		    var sortOrderString = record.get('column_config_sort_order');
 		    if (undefined == sortOrder || "" == sortOrder) { sortOrder = "0"; }
 		    var sortOrder = parseInt(sortOrderString);
-
 		    var filteredColumns = columns.filter(function(col) {return col.dataIndex == record.get('column_config_name'); });
 		    if (filteredColumns.length != 1) { continue; }
 		    var column = filteredColumns[0];
@@ -111,11 +112,13 @@ Ext.define('PO.store.user.SenchaColumnConfigStore', {
 	    },
 	    scope: this
 	});
+	return this;
     },
 
     /**
-     * Receive information about changed columns
-     * in order to save the changes to DB
+     * Triggered onColumnsChanged when a user enabled/disabled
+     * columns, changes order or resizes.
+     * Store this configuration into the DB.
      */
     saveColumns: function(headerContainer) {
 	console.log('PO.store.user.SenchaColumnConfigStore: onGridColumnsChanged: '); console.log(headerContainer);
@@ -134,7 +137,25 @@ Ext.define('PO.store.user.SenchaColumnConfigStore', {
 		column_config_hidden: hidden,
 		column_config_width: column.width
 	    });
-	    colModel.save();
+	    colModel.save({
+		success: function(colConfigModel, operation) {
+                    console.log('PO.store.user.SenchaColumnConfigStore: onGridColumnsChanged: colModel.save(): success');
+
+		    // Pull out the new ID of the object from the reply message and store into the model.
+		    // We will need this ID for DELETE operation on the preference.
+		    var object_id = operation.request.proxy.reader.jsonData.data[0].rest_oid;
+		    colConfigModel.set('column_config_id', object_id);
+		    colConfigModel.set('id', object_id);
+
+		    // Add this columnConfig model to the current store
+		    this.add(colConfigModel);
+                },
+                failure: function(colConfigModel, operation) {
+		    var message = operation.request.scope.reader.jsonData.message;
+                    Ext.Msg.alert('Error saving column configuration', message);
+                },
+		scope: this
+	    });
 	};
     },
 
