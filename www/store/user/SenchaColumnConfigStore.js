@@ -152,7 +152,7 @@ Ext.define('PO.store.user.SenchaColumnConfigStore', {
                 },
                 failure: function(colConfigModel, operation) {
 		    var message = operation.request.scope.reader.jsonData.message;
-                    Ext.Msg.alert('Error saving column configuration', message);
+                    Ext.Msg.alert('Error saving column configuration', "<pre>"+message+"</pre>");
                 },
 		scope: this
 	    });
