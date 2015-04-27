@@ -8,10 +8,6 @@
 -- @author frank.bergmann@project-open.com
 
 
-
-
-
-
 -----------------------------------------------------------
 -- Sencha Preferences
 --

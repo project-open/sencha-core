@@ -14,16 +14,16 @@ Ext.define('PO.model.timesheet.TimesheetTaskDependency', {
     xtype: 'timesheetTaskDependency',
     fields: [
 	// Identity
-	'id',					// 
+	'id',						// 
 
 	// Main object fields
-	'dependency_id',			// 
-	'dependency_status_id',			// 
-	'dependency_type_id',			// 
-	'task_id_one',				// 
-	'task_id_two',				// 
-	'hardness_type_id',			// 
-	'difference',				// 
+	'dependency_id',				// 
+	'dependency_status_id',				// 
+	'dependency_type_id',				// 
+	'task_id_one',					// 
+	'task_id_two',					// 
+	'hardness_type_id',				// 
+	'difference',					// 
 
 	// Optional fields used by Resource Leveling Editor
 	// in order to store the start- and end dates of tasks
@@ -32,7 +32,13 @@ Ext.define('PO.model.timesheet.TimesheetTaskDependency', {
 	'task_one_start_date',				// 
 	'task_one_end_date',				// 
 	'task_two_start_date',				// 
-	'task_two_end_date'				// 
+	'task_two_end_date',				// 
+
+	// Optional field with dereferenced task and project names
+	'main_project_name_one',			// 
+	'main_project_name_two',			// 
+	'task_one_name',				// 
+	'task_two_name'					// 
     ],
     proxy: {
 	type:			'rest',
