@@ -1,44 +1,40 @@
 /*
-Tree combo
-Use with 'Ext.data.TreeStore'
-
-
-If store root note has 'checked' property tree combo becomes multiselect combo (tree store must have records with 'checked' property)
-
-
-Has event 'itemclick' that can be used to capture click
-
-
-Options:
-selectChildren - if set true and if store isn't multiselect, clicking on an non-leaf node selects all it's children
-canSelectFolders - if set true and store isn't multiselect clicking on a folder selects that folder also as a value
-
-
-Use:
-
-
-single leaf node selector:
-selectChildren: false
-canSelectFolders: false
-- this will select only leaf nodes and will not allow selecting non-leaf nodes
-
-
-single node selector (can select leaf and non-leaf nodes)
-selectChildren: false
-canSelectFolders: true
-- this will select single value either leaf or non-leaf
-
-
-children selector:
-selectChildren: true
-canSelectFolders: true
-- clicking on a node will select it's children and node, clicking on a leaf node will select only that node
-
-
-This config:
-selectChildren: true
-canSelectFolders: false
-- is invalid, you cannot select children without node
+ * Tree combo
+ * Use with 'Ext.data.TreeStore'
+ * 
+ * If store root note has 'checked' property tree combo 
+ * becomes multiselect combo (tree store must have 
+ * records with 'checked' property)
+ * Has event 'itemclick' that can be used to capture click
+ * 
+ * Options:
+ * selectChildren - if set true and if store isn't multiselect, 
+ * clicking on an non-leaf node selects all it's children
+ * canSelectFolders - if set true and store isn't multiselect 
+ * clicking on a folder selects that folder also as a value
+ * 
+ * Use:
+ * single leaf node selector:
+ * selectChildren: false
+ * canSelectFolders: false
+ * - this will select only leaf nodes and will not allow 
+ *   selecting non-leaf nodes
+ * 
+ * single node selector (can select leaf and non-leaf nodes)
+ * selectChildren: false
+ * canSelectFolders: true
+ * - this will select single value either leaf or non-leaf
+ * 
+ * children selector:
+ * selectChildren: true
+ * canSelectFolders: true
+ * - clicking on a node will select it's children and node, 
+ *   clicking on a leaf node will select only that node
+ * 
+ * This config:
+ * selectChildren: true
+ * canSelectFolders: false
+ * - is invalid, you cannot select children without node
 */
 
 Ext.define('Ext.ux.TreeCombo', {
@@ -185,6 +181,7 @@ Ext.define('Ext.ux.TreeCombo', {
 	    hideHeaders: true,
 	    columns: [{
 		xtype: 'treecolumn',
+		flex: 1,
 		dataIndex: me.displayField
 	    }],
 	    listeners: {
