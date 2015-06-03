@@ -66,24 +66,25 @@ Ext.define('PO.model.project.Project', {
 	'presales_campaign_id',
 	'presales_close_probability',
 
-/*
-	// Financial cache
-	'cost_quotes_cache',
-	'cost_invoices_cache',
-	'cost_timesheet_planned_cache',
-	'cost_purchase_orders_cache',
-	'cost_bills_cache',
-	'cost_timesheet_logged_cache',
-	'reported_hours_cache',
-	'cost_expense_planned_cache',
-	'cost_expense_logged_cache',
-	'cost_delivery_notes_cache',
-	'cost_cache_dirty',
-	'reported_days_cache',
-	'cost_bills_planned',
-	'cost_expenses_planned',
-*/
 
+	// Financial cache
+	'cost_cache_dirty',			// Set to NULL (empty) if dirty.
+	'cost_bills_cache',			// 
+	'cost_bills_planned',			// 
+	'cost_expense_logged_cache',		// 
+	'cost_expense_planned_cache',		// 
+	'cost_expenses_planned',		// 
+	'cost_delivery_notes_cache',		// 
+	'cost_invoices_cache',			// 
+	'cost_purchase_orders_cache',		// 
+	'cost_quotes_cache',			// 
+	'cost_timesheet_logged_cache',		// 
+	'cost_timesheet_planned_cache',		// 
+	'reported_hours_cache',			// 
+	'reported_days_cache',			// 
+
+	'project_budget',			// 
+	'project_budget_hours',			// 
 
 	'level',				// 0 for a main project, 1 for a sub-project etc.
 
@@ -92,6 +93,18 @@ Ext.define('PO.model.project.Project', {
 	'project_type',				// denormalized project_type_id (English), may not be set depending on query
 	'company_name',				// denormalized company_id
 	'project_lead_name',			// Project manager
+
+	'project_priority_name',		// 
+	'project_priority_num',			// 
+
+	// ------------				// Denormalized fields used by Portfolio Planner
+        'start_j',				// Julian start date of the project
+        'end_j',				// Julian end date of the project
+	'on_track_status_name',			// Denormalized on_track_status_id (English)
+        'assigned_days',			// Array with J -> % assignments per day, starting with start_date
+        'max_assigned_days',			// Maximum of assignment for a single unit (day or week)
+        'projectGridSelected',			// Did the user check the project in the ProjectGrid?
+	'assigned_resources_planned',		// 
 
 	// ------------				// Special fields only used by certain quieres. ToDo: Different model?
 	'hours_total',				// may not be set depending on query
