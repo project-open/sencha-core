@@ -17,12 +17,14 @@
 
 Ext.define('PO.model.finance.CostCenter', {
     extend: 'Ext.data.Model',
+
     fields: [
-	'id',
+        'id',
 	'cost_center_id',					// The primary key or object_id of the cost center
 	'cost_center_name',					// The name of the cost center
 	'cost_center_label',					// The short name of the cost center.
 	'cost_center_code',					// The short name of the cost center.
+
 	'cost_center_status_id',				// 76=open, 81=closed, ...
 	'cost_center_type_id',					// 100=Task, 101=Ticket, 2501=Gantt CostCenter, ...
 	'parent_id',						// Parent cost center or NULL for a top.
@@ -31,19 +33,25 @@ Ext.define('PO.model.finance.CostCenter', {
 	'max_child_sortkey',					// auxilary field for hierarchical tree index
 	'description',						// Description
 	'note',							// Note
-	'department_planner_days_per_year'			// sum of available employee time per dept
+	'department_planner_days_per_year',			// sum of available employee time per dept
 
 	// ------------						// Denormalized fields from suitable queries
-	'cost_center_status',					// denormalized cost_center_status_id (English), may not be set depending on query
-	'cost_center_type',					// denormalized cost_center_type_id (English), may not be set depending on query
-	'manager_name'						// denormalized manager
+	'cost_center_status',					// status (English), may not be set depending on query
+	'cost_center_type',					// type (English), may not be set depending on query
+	'manager_name',						// denormalized manager name
+
+	// ------------						// Fields for portfolio planner. ToDo: Move to subclass?
+	'assigned_resources',					// Number of full-time resources being a member of this CC
+        'available_days',					// Array with J -> available days, starting with start_date
+        'assigned_days',					// Array with J -> assigned days, starting with start_date
 
 	{ name: 'level',					// 0 for the top-level company", 1 for a sub-cost center etc.
 	  convert: function(value, record) {
 	      var sortKey = record.get('tree_sortkey');
-	      return sortKey.length() / 8 - 5;
+	      return sortKey.length / 8 - 5;
 	  }
 	},
+
 	{ name: 'indent',					// A &nbsp; sequence representing the cost center indentation
 	  convert: function(value, record) {
 	      var level = record.get('level');
@@ -62,7 +70,6 @@ Ext.define('PO.model.finance.CostCenter', {
 	url:			'/intranet-rest/im_cost_center',// Standard URL for cost centers
 	appendId:		true,				// Append the object_id: ../im_ticket/<object_id>
 	timeout:		300000,
-	
 	extraParams: {
 	    format:		'json',				// Tell the ]po[ REST to return JSON data.
 	    deref_p:		'1'				// By default also load denormalized fields 
@@ -77,4 +84,14 @@ Ext.define('PO.model.finance.CostCenter', {
 	    type:		'json'				// Allow Sencha to write ticket changes
 	}
     }
+
+/*
+
+    fields: [
+
+
+    ]
+
+
+    */
 });
