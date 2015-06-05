@@ -514,6 +514,15 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     /**
      * Advance a date to the 1st of the next month
      */
+    currentMonth: function(date) {
+        var result;
+        result = new Date(date.getFullYear(), date.getMonth(), 1);
+        return result;
+    },
+
+    /**
+     * Advance a date to the 1st of the next month
+     */
     nextMonth: function(date) {
         var result;
         if (date.getMonth() == 11) {
