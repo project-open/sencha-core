@@ -33,6 +33,14 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	var ticketStore = Ext.create('PO.store.helpdesk.TicketStore');
 	var serverUrl = "http://www.project-open.net";
 
+	var item = Ext.create('Ext.menu.Item', {
+	    text: "Create a new ticket",
+	    href: serverUrl+"/intranet-helpdesk/new?ticket_sla_id="+sla_id,
+	    hrefTarget: '_blank'
+	});
+	me.add(item);
+	
+
 	// Use the REST server-side "proxy" to get data from www.project-open.net
 	ticketStore.getProxy().url = "/intranet-rest/data-source/domain-proxy";
 

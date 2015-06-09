@@ -54,6 +54,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     axisHeight: 11,					// Height of each of the two axis levels
     axisScale: 'month',					// Default scale for the time axis
 
+    monthThreeChar: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    weekThreeChar: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    weekOneChar: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+
     /**
      * Starts the main editor panel as the right-hand side
      * of a project grid, cost center grid or project tree.
@@ -369,24 +373,34 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     drawAxis: function() {
         var me = this;
         if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting'); }
-        me.drawAxisYear();
-        me.drawAxisMonth();
+	var h = 0;
+	
+	var timespanDays = (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (1000 * 3600 * 24);
+	if (timespanDays > 365) {
+            me.drawAxisYear(h); h = h + me.axisHeight;
+	}
+	if (timespanDays > 30) {
+            me.drawAxisMonth(h); h = h + me.axisHeight;
+	}
+	if (timespanDays > 7 && h < 2 * me.axisHeight) {
+            me.drawAxisWeek(h); h = h + me.axisHeight;
+	}
+	if (timespanDays > 1 && h < 2 * me.axisHeight) {
+            me.drawAxisDay(h);
+	}
         if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Finished'); }
     },
 
     /**
      * Draw a date axis on the top of the diagram
      */
-    drawAxisYear: function() {
+    drawAxisYear: function(h) {
         var me = this;
         if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisYear: Starting'); }
 
         // Draw Yearly blocks
         var startYear = me.axisStartDate.getFullYear();
         var endYear = me.axisEndDate.getFullYear();
-        var y = 0;
-        var h = me.axisHeight;					// Height of the bars
-
         for (var year = startYear; year <= endYear; year++) {
             var x = me.date2x(new Date(year+"-01-01"));
             var xEnd = me.date2x(new Date((year+1)+"-01-01"));
@@ -395,9 +409,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var axisBar = me.surface.add({
                 type: 'rect',
                 x: x,
-                y: y,
+                y: h,
                 width: w,
-                height: h,
+                height: me.axisHeight,
                 fill: '#cdf',						// '#ace'
                 stroke: 'grey'
             }).show(true);
@@ -406,7 +420,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                 type: 'text',
                 text: ""+year,
                 x: x + 2,
-                y: y + (me.axisHeight / 2),
+                y: h + (me.axisHeight / 2),
                 fill: '#000',
                 font: "10px Arial"
             }).show(true);
@@ -417,7 +431,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     /**
      * Draw a date axis on the top of the diagram
      */
-    drawAxisMonth: function() {
+    drawAxisMonth: function(h) {
         var me = this;
         if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Starting'); }
 
@@ -429,9 +443,6 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var yea = startYear;
         var mon = startMonth;
 
-        var y = me.axisHeight;
-        var h = me.axisHeight;						// Height of the bars
-
         while (yea * 100 + mon <= endYear * 100 + endMonth) {
 
             var xEndMon = mon+1;
@@ -441,24 +452,12 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var xEnd = me.date2x(new Date(xEndYea+"-"+  ("0"+(xEndMon+1)).slice(-2)  +"-01"));
             var w = xEnd - x;
 
-            var axisBar = me.surface.add({
-                type: 'rect',
-                x: x,
-                y: y,
-                width: w,
-                height: h,
-                fill: '#cdf',						// '#ace'
-                stroke: 'grey'
-            }).show(true);
-
-            var axisText = me.surface.add({
-                type: 'text',
-                text: ""+(mon+1),
-                x: x + 2,
-                y: y + (me.axisHeight / 2),
-                fill: '#000',
-                font: "9px Arial"
-            }).show(true);
+	    // var text = ""+(mon+1);
+	    var text = me.monthThreeChar[mon];
+            var axisBar = me.surface.add(
+		{type: 'rect', x: x, y: h, width: w, height: me.axisHeight, fill: '#cdf', stroke: 'grey'}).show(true);
+            var axisText = me.surface.add(
+		{type: 'text', text: text, x:x+2, y:h+(me.axisHeight/2), fill: '#000', font: "9px Arial"}).show(true);
 
             mon = mon + 1;
             if (mon > 11) {
@@ -469,6 +468,64 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 
         if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Finished'); }
     },
+
+    /**
+     * Get the week of the year of the data argument.
+     */
+    getWeek: function(date) {
+	var d = new Date(date);
+	d.setHours(0,0,0);
+	d.setDate(d.getDate()+4-(d.getDay()||7));
+	return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
+    },
+
+    /**
+     * Draw a date axis on the top of the diagram
+     */
+    drawAxisWeek: function(h) {
+        var me = this;
+        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Starting'); }
+
+	// Start with a Sunday
+	var now = new Date(me.axisStartDate.getTime());
+	while (0 != now.getDay()) { 
+	    now = new Date(now.getTime() + 1000 * 3600 * 24);
+	}
+	
+	while (now.getTime() < me.axisEndDate.getTime()) {
+	    var startX = me.date2x(now);
+	    var week = me.getWeek(now);
+	    now = new Date(now.getTime() + 1000 * 3600 * 24 * 7);
+	    var endX = me.date2x(now);
+	    var w = endX - startX;
+
+            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
+            var axisText = me.surface.add({type: 'text', text:""+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
+	}
+        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished'); }
+    },
+
+
+    /**
+     * Draw a date axis on the top of the diagram
+     */
+    drawAxisDay: function(h) {
+        var me = this;
+        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Starting'); }
+	var now = new Date(me.axisStartDate.getTime());
+	while (now.getTime() < me.axisEndDate.getTime()) {
+	    var startX = me.date2x(now);
+	    var day = now.getDate(now);
+	    now = new Date(now.getTime() + 1000 * 3600 * 24);
+	    var endX = me.date2x(now);
+	    var w = endX - startX;
+
+            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
+            var axisText = me.surface.add({type: 'text', text:""+day, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
+	}
+        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Finished'); }
+    },
+
 
     /**
      * Convert a date object into the corresponding X coordinate.
