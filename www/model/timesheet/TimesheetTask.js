@@ -105,7 +105,8 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	'on_track_status_id_deref',		// Is the task on-track? "Green", "Yellow" or "Red"
 
 	'successors',				// List of tasks that depend on the current tasks
-	'predecessory',				// List of tasks on which this task depends
+	'predecessors',				// List of tasks on which this task depends
+	'assignees',				// List of users assigned to the task with {id,percent,name,email,initials}
 
 	'expanded',                             // true or false (without quotes), default state for tree
 

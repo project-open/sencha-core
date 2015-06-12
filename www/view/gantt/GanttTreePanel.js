@@ -22,7 +22,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     collapsible:			false,
     useArrows:				true,
     rootVisible:			false,
-    store:				'taskTreeStore',
     multiSelect:			true,
     singleExpand:			false,
 
@@ -149,6 +148,25 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             cls:			'x-grid-checkheader-editor'
         }
     }],
+
+    initComponent: function() {
+        var me = this;
+        console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
+        this.callParent(arguments);
+
+        me.store.on({
+            'datachanged': me.onDataChanged,
+            'scope': this
+        });
+
+        console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
+    },
+
+    onDataChanged: function(store, options, c,d,e,f) {
+        var me = this;
+        console.log('PO.view.gantt.GantTreePanel.onDataChange: Starting');
+        console.log('PO.view.gantt.GantTreePanel.onDataChange: Finished');
+    },
 
     /**
      * "Add" (+) button pressed.
