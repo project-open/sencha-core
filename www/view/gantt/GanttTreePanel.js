@@ -4,7 +4,7 @@
  * Copyright (c) 2011 - 2014 ]project-open[ Business Solutions, S.L.
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 or alternatively unter the terms of the ]po[
- * FL or CL license as specified in www.project-open.org/en/license.
+ * FL or CL license as specified in www.project-open.com/en/license.
  */
 
 /**
@@ -55,6 +55,21 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         editor: {
             allowBlank:			false
         }
+    }, {
+        xtype: 'actioncolumn',
+	text: 'Link',
+        dataIndex: 'project_url',
+        width: 30,
+        items: [{
+            icon: '/intranet/images/external.png',
+            tooltip: 'Link',
+            handler: function(grid, rowIndex, colIndex) {
+		console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
+                var rec = grid.getStore().getAt(rowIndex);
+                var url = '/intranet/projects/view?project_id='+rec.get('id');
+                window.open(url);                       // Open project in new browser tab
+            }
+        }]
     },{
         text:				'Parent',
         flex:				1,
@@ -268,6 +283,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
         // Focus back on the task, so that it will accept the next keyboard commands
         this.getView().focusNode(lastSelected);
+
+	// ToDo: Remove !!!
+	prevNode.set('start_date', '2015-10-01');
+
 
         // ToDo: It seems the TreePanel looses focus here
         // selectionModel.select(lastSelected);
