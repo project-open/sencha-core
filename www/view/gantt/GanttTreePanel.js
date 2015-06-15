@@ -15,13 +15,13 @@
 Ext.define('PO.view.gantt.GanttTreePanel', {
     extend:				'Ext.tree.Panel',
     requires: [
-        'PO.view.field.PODateField'
+        'PO.view.field.PODateField'				// Custom ]po[ data field for PostgreSQL timestamptz data
     ],
     id:                                 'ganttTreePanel',
     alias:				'ganttTreePanel',
     title:				false,
     shrinkWrap:				true,
-    animate:				false,		// Animation messes up bars on the right side
+    animate:				false,			// Animation messes up bars on the right side
     collapsible:			false,
     useArrows:				true,
     rootVisible:			false,
@@ -41,7 +41,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     // the 'columns' property is now 'headers'
     columns: [
-//	{text: 'Id', flex: 1, dataIndex: 'id', hidden: false}, 
+	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
 	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: {allowBlank: false}}, 
 /*	{text: 'Link', xtype: 'actioncolumn', dataIndex: 'project_url', width: 30, items: [{
 	    icon: '/intranet/images/external.png',
@@ -52,57 +52,37 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		window.open(url); // Open project in new browser tab
 	    }
 	}]},
-	{text: 'Parent', flex: 1, hidden: false, dataIndex: 'parent_id', editor: {allowBlank: false}},
-	{text: 'SortOrder', flex: 1, hidden: false, dataIndex: 'sort_order', hidden: false, editor: {allowBlank: true}},
 	{text: 'Assigned To', flex: 1, hidden: false, dataIndex: 'user', sortable: true, editor: {allowBlank: true}},
 */
-	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', renderer: function(assignees, columnDisplay, model, a,b,c,d,e){
-            var result = "";
-	    if (null != assignees && "" != assignees) {
-		assignees.forEach(function(assignee) {
-		    if ("" != result) { result = result + ", "; }
-		    result = result + assignee.initials;
-		    if (100 != assignee.percent) {
-			result = result + '['+assignee.percent+'%]';
-		    }
-		});
+	{
+	    text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', 
+	    renderer: function(assignees, columnDisplay, model, a,b,c,d,e){
+		var result = "";
+		if (null != assignees && "" != assignees) {
+		    assignees.forEach(function(assignee) {
+			if ("" != result) { result = result + ", "; }
+			result = result + assignee.initials;
+			if (100 != assignee.percent) {
+			    result = result + '['+assignee.percent+'%]';
+			}
+		    });
+		}
+		return result;
+            },
+	    editor: { 
+		xtype: 'pocombogrid',
+		store: 'taskStatusStore',
+		queryMode: 'local',
+		displayField: 'category',
+		valueField: 'category_id',
+		renderTo: Ext.getBody()
 	    }
-            return result;
-        }},
+	},
 
-
-//	{text: 'Start', xtype: 'datecolumn', format: 'Y-m-d', flex: 1, hidden: false, dataIndex: 'start_date_date', sortable: true, editor: {allowBlank: false}},
-	{text: 'Start', flex: 1, hidden: false, dataIndex: 'start_date', 
-	 renderer: function(value) { return value.substring(0,10); },
-	 editor: {
-	     xtype: 'podatefield', //'po_datefield', 'textfield'
-	     format: 'Y-m-d',
-	     displayField: 'end_date',
-	     valueField: 'end_date',
-	     editable: true
-	 }},
-
-/*
-	 field: {
-	    xtype: 'po_datefield',
-	    format: 'Y-m-d'
-	 }},
- */
-
-	{text: 'End', flex: 1, hidden: false, dataIndex: 'end_date', 
-	 renderer: function(value) { return value.substring(0,10); },
-	 editor: {
-	    xtype: 'textfield',
-	    displayField: 'end_date_date',
-	    valueField: 'end_date',
-	    editable: true
-	}},
-
+	{text: 'Start', flex: 1, hidden: false, dataIndex: 'start_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
+	{text: 'End', flex: 1, hidden: false, dataIndex: 'end_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
 	{text: 'Description', flex: 1, hidden: false, dataIndex: 'description', editor: {allowBlank: true}},
 
-
-//	{text: 'End', xtype: 'datecolumn', format: 'Y-m-d', flex: 1, hidden: false, dataIndex: 'end_date_date', sortable: true, editor: {allowBlank: false}},
-/*
 	{text: 'Status', flex: 1, hidden: false, dataIndex: 'project_status_id', sortable: true, renderer: 
 	 function(value){
              var statusStore = Ext.StoreManager.get('taskStatusStore');
@@ -114,7 +94,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
          editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}
 	}, 
 	{xtype: 'checkcolumn', header: 'Done', hidden: false, dataIndex: 'done', width: 40, stopSelection: false, editor: {xtype: 'checkbox', cls: 'x-grid-checkheader-editor'}}
-	*/
     ],
 
     initComponent: function() {
