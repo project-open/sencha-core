@@ -71,14 +71,19 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             },
 	    editor: { 
 		xtype: 'pocombogrid',
-		store: 'taskStatusStore',
+		store: Ext.data.StoreManager.lookup('taskStatusStore'),
 		queryMode: 'local',
 		displayField: 'category',
 		valueField: 'category_id',
-		renderTo: Ext.getBody()
+		listConfig: {
+		    columns: [
+			{header: 'ID', dataIndex: 'category_id'},
+			{header: 'Category', dataIndex: 'category'}
+		    ]
+		}
 	    }
 	},
-
+    
 	{text: 'Start', flex: 1, hidden: false, dataIndex: 'start_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
 	{text: 'End', flex: 1, hidden: false, dataIndex: 'end_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
 	{text: 'Description', flex: 1, hidden: false, dataIndex: 'description', editor: {allowBlank: true}},

@@ -13,7 +13,7 @@ Ext.define('PO.view.field.POComboGrid', {
     alias: 'widget.pocombogrid',
 
     // copied from ComboBox 
-    ccreatePicker: function() {
+    createPicker: function() {
         var me = this,
         picker,
         menuCls = Ext.baseCSSPrefix + 'menu',
@@ -22,7 +22,6 @@ Ext.define('PO.view.field.POComboGrid', {
                 mode: me.multiSelect ? 'SIMPLE' : 'SINGLE'
             },
             floating: true,
-            hidden: true,
             ownerCt: me.ownerCt,
             cls: me.el.up('.' + menuCls) ? menuCls : '',
             store: me.store,
