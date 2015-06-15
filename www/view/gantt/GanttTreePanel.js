@@ -14,6 +14,9 @@
  */
 Ext.define('PO.view.gantt.GanttTreePanel', {
     extend:				'Ext.tree.Panel',
+    requires: [
+        'PO.view.field.PODateField'
+    ],
     id:                                 'ganttTreePanel',
     alias:				'ganttTreePanel',
     title:				false,
@@ -37,117 +40,82 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     },
 
     // the 'columns' property is now 'headers'
-    columns: [{
-        text:				'Id',
-        flex:				1,
-        dataIndex:			'id',
-        hidden:				true,
-        editor: {
-            allowBlank:			false
-        }
-    }, {
-        xtype:				'treecolumn',			// This will show the tree
-        text:				'Task',
-        flex:				2,
-        sortable:			true,
-        dataIndex:			'project_name',
-        editor: {
-            allowBlank:			false
-        }
-    }, {
-        xtype: 'actioncolumn',
-	text: 'Link',
-        dataIndex: 'project_url',
-        width: 30,
-        items: [{
-            icon: '/intranet/images/external.png',
-            tooltip: 'Link',
-            handler: function(grid, rowIndex, colIndex) {
+    columns: [
+//	{text: 'Id', flex: 1, dataIndex: 'id', hidden: false}, 
+	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: {allowBlank: false}}, 
+/*	{text: 'Link', xtype: 'actioncolumn', dataIndex: 'project_url', width: 30, items: [{
+	    icon: '/intranet/images/external.png',
+	    tooltip: 'Link',handler: function(grid, rowIndex, colIndex) {
 		console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
-                var rec = grid.getStore().getAt(rowIndex);
-                var url = '/intranet/projects/view?project_id='+rec.get('id');
-                window.open(url);                       // Open project in new browser tab
-            }
-        }]
-    },{
-        text:				'Parent',
-        flex:				1,
-        hidden:				true,
-        dataIndex:			'parent_id',
-        editor: {
-            allowBlank:			false
-        }
-    },{
-        text:				'SortOrder',
-        flex:				1,
-        hidden:				true,
-        dataIndex:			'sort_order',
-        hidden:				true,
-        editor: {
-            allowBlank:			false
-        }
-    },{
-        text:				'Assigned To',
-        flex:				1,
-        hidden:				true,
-        dataIndex:			'user',
-        sortable:			true,
-        editor: {
-            allowBlank:			true
-        }
-    },{
-        text:				'Start',
-        xtype:				'datecolumn',
-        format:				'Y-m-d',
-        // format:			'Y-m-d H:i:s',				// 2000-01-01 00:00:00+01
-        flex:				1,
-        hidden:				false,
-        dataIndex:			'start_date_date',
-        sortable:			true,
-        editor: {
-            allowBlank:			false
-        }
-    },{
-        text:				'End',
-        xtype:				'datecolumn',
-        format:				'Y-m-d',
-        flex:				1,
-        hidden:				false,
-        dataIndex:			'end_date_date',
-        sortable:			true,
-        editor:	{
-            allowBlank:			false
-        }
-    },{
-        text:				'Status',
-        flex:				1,
-        hidden:				true,
-        dataIndex:			'project_status_id',
-        sortable:			true,
-        renderer: function(value){
-            var statusStore = Ext.StoreManager.get('projectStatusStore');
-            var model = statusStore.getById(value);
-            var result = model.get('category');
+		var rec = grid.getStore().getAt(rowIndex);
+		var url = '/intranet/projects/view?project_id='+rec.get('id');
+		window.open(url); // Open project in new browser tab
+	    }
+	}]},
+	{text: 'Parent', flex: 1, hidden: false, dataIndex: 'parent_id', editor: {allowBlank: false}},
+	{text: 'SortOrder', flex: 1, hidden: false, dataIndex: 'sort_order', hidden: false, editor: {allowBlank: true}},
+	{text: 'Assigned To', flex: 1, hidden: false, dataIndex: 'user', sortable: true, editor: {allowBlank: true}},
+*/
+	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', renderer: function(assignees, columnDisplay, model, a,b,c,d,e){
+            var result = "";
+	    if (null != assignees && "" != assignees) {
+		assignees.forEach(function(assignee) {
+		    if ("" != result) { result = result + ", "; }
+		    result = result + assignee.initials;
+		    if (100 != assignee.percent) {
+			result = result + '['+assignee.percent+'%]';
+		    }
+		});
+	    }
             return result;
-        },
-        editor: {
-            xtype:			'combo',
-            store:			'projectStatusStore',
-            displayField:		'category',
-            valueField:			'category_id',
-        }
-    }, {
-        xtype:				'checkcolumn',
-        header:				'Done',
-        hidden:				true,
-        dataIndex:			'done',
-        width:				40,
-        stopSelection:			false,
-        editor: {
-            xtype:			'checkbox',
-            cls:			'x-grid-checkheader-editor'
-        }
-    }],
+        }},
+
+
+//	{text: 'Start', xtype: 'datecolumn', format: 'Y-m-d', flex: 1, hidden: false, dataIndex: 'start_date_date', sortable: true, editor: {allowBlank: false}},
+	{text: 'Start', flex: 1, hidden: false, dataIndex: 'start_date', 
+	 renderer: function(value) { return value.substring(0,10); },
+	 editor: {
+	     xtype: 'podatefield', //'po_datefield', 'textfield'
+	     format: 'Y-m-d',
+	     displayField: 'end_date',
+	     valueField: 'end_date',
+	     editable: true
+	 }},
+
+/*
+	 field: {
+	    xtype: 'po_datefield',
+	    format: 'Y-m-d'
+	 }},
+ */
+
+	{text: 'End', flex: 1, hidden: false, dataIndex: 'end_date', 
+	 renderer: function(value) { return value.substring(0,10); },
+	 editor: {
+	    xtype: 'textfield',
+	    displayField: 'end_date_date',
+	    valueField: 'end_date',
+	    editable: true
+	}},
+
+	{text: 'Description', flex: 1, hidden: false, dataIndex: 'description', editor: {allowBlank: true}},
+
+
+//	{text: 'End', xtype: 'datecolumn', format: 'Y-m-d', flex: 1, hidden: false, dataIndex: 'end_date_date', sortable: true, editor: {allowBlank: false}},
+/*
+	{text: 'Status', flex: 1, hidden: false, dataIndex: 'project_status_id', sortable: true, renderer: 
+	 function(value){
+             var statusStore = Ext.StoreManager.get('taskStatusStore');
+	     if (undefined === statusStore) { alert('GanttTreePanel.project_status_id.render: undefined taskStatusStore'); }
+             var model = statusStore.getById(value);
+             var result = model.get('category');
+             return result;
+         },
+         editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}
+	}, 
+	{xtype: 'checkcolumn', header: 'Done', hidden: false, dataIndex: 'done', width: 40, stopSelection: false, editor: {xtype: 'checkbox', cls: 'x-grid-checkheader-editor'}}
+	*/
+    ],
 
     initComponent: function() {
         var me = this;
