@@ -444,13 +444,16 @@ Ext.define('PO.view.field.POTaskAssignment', {
 
 	// The picker consists of a grid.Panel
 	var picker = me.picker = Ext.create('Ext.grid.Panel', {
-	    title: 'Task Assignments',
+	    title: 'Task Assignments Picker',
             store: assignmentStore,
+	    floating: true,
+	    width: 400,
 	    cls: me.el.up('.' + menuCls) ? menuCls : '',
-//          ownerCt: me.ownerCt,
+            ownerCt: me.ownerCt,
+	    renderto: document.body,
 //	    selType: 'cellmodel',
 	    columns: [
-		{ text: 'Initials', width: 30, dataIndex: 'initials' },
+		{ text: 'In.', width: 30, dataIndex: 'initials' },
 		{ text: 'Name', dataIndex: 'name' },
 		{ text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: true },
 		{ text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
@@ -470,21 +473,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
 	    picker.getView().getNode(arguments);
 	};
 
-	var pickerPanel = Ext.create('Ext.panel.Panel', {
-            floating: true,
-            items: [
-		picker
-            ],
-	    dockedItems: [{
-		xtype: 'toolbar',
-		dock: 'top',
-		items: [
-		    { xtype: 'button', text: 'Button 1' }
-		]
-	    }],
-	});
-        return pickerPanel;
-
+        return picker;
 
 /*
         me.mon(picker, {
