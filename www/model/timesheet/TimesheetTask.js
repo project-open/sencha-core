@@ -34,12 +34,6 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	// Main properties of a task
 	'start_date',				// Start of task as ISO timestamp ('2001-01-01 00:00:00+01')
 	'end_date',				// End of task as ISO timestamp ('2099-12-31 00:00:00+01')
-	{name: 'start_date_date', 		// Start date in ISO date format ('2001-01-01')
-		convert: function(value, record) { return record.get('start_date').substring(0,10); }
-	},
-	{name: 'end_date_date',			// End date in ISO date format ('2001-01-01')
-		convert: function(value, record) { return record.get('end_date').substring(0,10); }
-	},
 	'percent_completed',			// 0 - 100: Defines what has already been done.
 	'description',				// Description of the task activity
 	'note',					// Notes about the task activity

@@ -121,12 +121,6 @@ Ext.define('PO.model.project.Project', {
 	      }
 	      return result;
 	  }
-	},
-	{ name: 'end_date_date',				// end_date as Date, required by Chart
-	  convert: function(value, record) {
-	      var end_date = record.get('end_date');
-	      return new Date(end_date);
-	  }
 	}
     ],
 

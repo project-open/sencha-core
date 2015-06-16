@@ -70,17 +70,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		return result;
             },
 	    editor: { 
-		xtype: 'pocombogrid',
-		store: Ext.data.StoreManager.lookup('taskStatusStore'),
-		queryMode: 'local',
-		displayField: 'category',
-		valueField: 'category_id',
-		listConfig: {
-		    columns: [
-			{header: 'ID', dataIndex: 'category_id'},
-			{header: 'Category', dataIndex: 'category'}
-		    ]
-		}
+		xtype: 'potaskassignment',
+		matchFieldWidth: false                   // Allow the picker to be larger than the field width
 	    }
 	},
     

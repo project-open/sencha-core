@@ -7,6 +7,26 @@
  * FL or CL license as specified in www.project-open.com/en/license.
  */
 
+/**
+ * A ComboBox that takes a grid definition for the picker.
+ * Here is a configuration example using the POComboGrid
+ * as an Editor:
+ *
+ * editor: {
+ *     xtype: 'pocombogrid',
+ *     store: Ext.data.StoreManager.lookup('taskStatusStore'),
+ *     queryMode: 'local',
+ *     matchFieldWidth: false,                   // Allow the picker to be larger than the field width
+ *     displayField: 'category',
+ *     valueField: 'category_id',
+ *     listConfig: {
+ *         columns: [
+ *             {header: 'ID', dataIndex: 'category_id'},
+ *             {header: 'Category', dataIndex: 'category'}
+ *                     ]
+ *     }
+ * }
+ */
 Ext.define('PO.view.field.POComboGrid', {
     extend: 'Ext.form.field.ComboBox',
     requires: ['Ext.grid.Panel'],
