@@ -117,7 +117,7 @@ Ext.define('MyCellEditing', {
         var me = this,
             ed;
 
-	me.view.componentLayoutCounter = 1;  // Hack: Simulate LayoutManager: Otherwise no editor will be shown
+        me.view.componentLayoutCounter = 1;  // Hack: Simulate LayoutManager: Otherwise no editor will be shown
 
         if (!context) {
             me.preventBeforeCheck = true;
@@ -422,85 +422,158 @@ Ext.define('PO.view.field.POTaskAssignment', {
     requires: ['Ext.grid.Panel'],
     alias: 'widget.potaskassignment',
 
-    // copied from ComboBox 
-    createPicker: function() {
-	console.log('PO.view.field.POTaskAssignmentField.createPicker');
-        var me = this;
-        var menuCls = Ext.baseCSSPrefix + 'menu';
-
-	// New store for keeping assignment data
-	var assignmentStore = Ext.create('Ext.data.Store', { 
-	    id: 'taskAssignmentStore',
-	    fields: ['id', 'percent', 'name', 'email', 'initials'], 
-	    data: [
-		{id:8864, percent: 100.0, name: 'Ben Bigboss', email:'bbigboss@tigerpond.com', initials:'BB'}, 
-		{id:8898, percent: 50.0, name:'Bobby Bizconsult', email:'bbizconsult@tigerpond.com', initials:'BB'}, 
-		{id:8892, percent: 50.0, name:'Carlos Codificador', email:'ccodificador@tigerpond.com', initials:'CC'}, 
-		{id:8823, percent: 100.0, name:'David Developer', email:'ddeveloper@tigerpond.com', initials:'DD'}, 
-		{id:27484, percent: 12.3, name:'Harry Helpdesk', email:'hhelpdesk@tigerpond.com', initials:'HH'}, 
-		{id:624, percent: 33.3, name:'System Administrator', email:'sysadmin@tigerpond.com', initials:'SA'}
-            ]
-	});
-
-	// The picker consists of a grid.Panel
-	var picker = me.picker = Ext.create('Ext.grid.Panel', {
-	    title: 'Task Assignments',
-            store: assignmentStore,
-	    floating: true,
-	    width: 200,
-	    cls: me.el.up('.' + menuCls) ? menuCls : '',
-            ownerCt: me.ownerCt,
-	    renderto: document.body,
-//	    selType: 'cellmodel',
-	    columns: [
-		{ text: 'In.', width: 30, dataIndex: 'initials' },
-		{ text: 'Name', dataIndex: 'name', flex: 1 },
-		{ text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: true },
-		{ text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
-	    ],
-	    dockedItems: [{
-		xtype: 'toolbar',
-		dock: 'bottom',
-		items: [
-		    { xtype: 'button', text: 'Button 1' }
-		]
-	    }],
-	    plugins: [Ext.create('MyCellEditing', {    // Hack the issue that this is a floating panel without Window around
-		clicksToEdit: 1,
-		listeners: {
-                    beforeedit: function(obj) {
-			return true;
-                    }   
-		}
-	    })]
-	});
-
-	// hack: pass getNode() to the view
-	picker.getNode = function() {
-	    picker.getView().getNode(arguments);
-	};
-
-        return picker;
-
-/*
-        me.mon(picker, {
-            itemclick: me.onItemClick,
-            refresh: me.onListRefresh,
-            scope: me
-        });
-
-        me.mon(picker.getSelectionModel(), {
-            selectionChange: me.onListSelectionChange,
-            scope: me
-        });
-*/
+    initValue: function() {
+        var me = this,
+        value = me.value;
+        if (Ext.isString(value)) {
+            me.value = me.rawToValue(value);        // If a String value was supplied, try to convert it to a proper Date
+        }
+        me.callParent();
     },
 
-    valueToRaw: function(assignees) {
+    getErrors: function(value) {
+        var me = this;
+        return [];              // Empty list of errors at the moment
+    },
+
+    rawToValue: function(rawValue) {
+        // console.log('POTaskAssignment.rawToValue: rawValue='+rawValue);
+        return this.parseAssignments(rawValue) || rawValue || null;
+    },
+
+    valueToRaw: function(value) {
+        // console.log('POTaskAssignment.valueToRaw: value='+value);
+        return this.formatAssignments(value);
+    },
+
+
+     /**
+      * Attempts to parse a given string value into an assignment store.
+      * @param {String} value The value to attempt to parse
+      * @param {String} format A valid date format (see {@link Ext.Date#parse})
+      * @return {Date} The parsed Date object, or null if the value could not be successfully parsed.
+      */
+    safeParse : function(value, format) {
+        var me = this;
+        var result = null;
+
+        return result;
+    },
+
+    getSubmitValue: function() {
+        var value = this.getValue();
+        console.log('POTaskAssignment.getSubmitValue: ToDo');
+        return value;
+    },
+
+    /**
+     * Covert a comma separated list of initials into an 
+     * array of user assignments
+     */
+    parseAssignments: function(value) {
+        // console.log('POTaskAssignment.parseAssignments: value='+value);
+        if (!Ext.isString(value)) {return value; }
+
+        var result = [];
+        var names = value.split(";");
+        for(var i = 0; i < names.length; i++) {
+            var name = names[i];               // BB[20%]
+            var assigObject = this.parseAssignment(name);
+            // console.log('POTaskAssignment.parseAssignments: i='+i+', name='+name+' -> '+assigObject);
+            if (!Ext.isString(assigObject) && null != assigObject) {
+                result.push(assigObject);
+            }
+        }
+        return result;
+    },
+
+    /**
+     * Returns an assignment object if it can successfully parse a value like "BB[80%]".
+     * Returns a string with an error message if it can't parse the value.
+     */
+    parseAssignment: function(value) {
+        if (!Ext.isString(value)) { 
+            return "Value='"+value+"' is not a string but a "+typeof value; 
+        }
+
+        value = value.replace(/ /,"");            // Eliminate white spaces, better than trim()
+        if (value.length < 2) {
+            return "Value='"+value+"' should contain of at least two characters"; 
+        }
+        var initials = "";
+        var percentString = value;
+
+        // Split the value into the "initials" part possibly including
+        // numbers and the remaining part hopefully containing "[80%]"
+        while (/^[a-zA-Z0-9]/.test(percentString.substr(0,1))) {
+            initials = initials + value.substr(0,1);
+            percentString = percentString.substring(1,value.length);
+        }
+        var percent = this.parseAssignmentPercent(percentString.trim());   // Number indicating percent or an error
+	// console.log("POTaskAssignment.parseAssignmentPercent: '"+percentString+"' -> '"+percent+"'");
+        if (Ext.isString(percent)) { return percent; }                     // Return an error string
+
+        // ToDo: Sort the user store alphabetically in order to create
+        // deterministic results
+        var result = null;
+        var userStore = Ext.StoreManager.get('userStore');
+        var letters = value.toUpperCase().split("");
+        userStore.each(function(user) {
+            if (null != result) { return; }
+            var firstNames = user.get('first_names');
+            var lastName = user.get('last_name');
+            var firstNamesInitial = firstNames.toUpperCase().substr(0,1);
+            var lastNameInitial = lastName.toUpperCase().substr(0,1);
+            var found = false;
+            if (letters[0] == firstNamesInitial && letters[1] == lastNameInitial) { found = true; }
+            
+            if (found) {
+                // {id:8864, percent:   0.0, name:'Ben Bigboss', email:'bbigboss@tigerpond.com', initials:'BB'}
+		var user_id = parseInt(user.get('user_id'));
+		var name = firstNames + " " + lastName;
+		var email = user.get('email');
+		var initials = firstNamesInitial+lastNameInitial;
+                result = {id: user_id, percent: percent, name: name, email: email, initials: initials};
+            }
+        });
+
+	return result;
+    },
+
+    /**
+     * Parse a string like "[80%]" into the number 80.
+     * Returns 100 for an empty or invalid string.
+     */
+    parseAssignmentPercent: function(percentString) {
+        if (!Ext.isString(percentString) || 0 == percentString.length) { return 100.0; }
+
+        var str = percentString;
+        if (!/^\[.+\]$/.test(str)) {
+            return "Percent specification '"+str+"' does not consist of a brackets enclosing a number.";
+        }
+        var str = str.substr(1,str.length - 2);
+        if (!/^[0-9\.]+%$/.test(str)) {
+            return "Percent specification '"+str+"' does not include in it's brackets a number followed by '%'.";
+        }
+        var str = str.substr(0,str.length - 1);
+        var number = parseFloat(str);
+
+        if (NaN == number) {
+            return "Percent specification '"+str+"' does not include a valid number between it's brackets.";
+        }
+        return number;
+    },
+
+    /**
+     * Format assignments to a String
+     */
+    formatAssignments: function(assig) {
+        if (Ext.isString(assig)) { return assig; }
+
         var result = "";
-        if (null != assignees && "" != assignees) {
-            assignees.forEach(function(assignee) {
-                if ("" != result) { result = result + ", "; }
+        if (null != assig) {
+            assig.forEach(function(assignee) {
+                if ("" != result) { result = result + ";"; }
                 result = result + assignee.initials;
                 if (100 != assignee.percent) {
                     result = result + '['+assignee.percent+'%]';
@@ -510,17 +583,112 @@ Ext.define('PO.view.field.POTaskAssignment', {
         return result;
     },
 
-    /**
-     * Set the value of the editable field
-     */
-    applyValues: function() {
-        var me = this,
-        form = me.picker,
-        vals = form.getForm().getValues();    
+    // copied from ComboBox 
+    createPicker: function() {
+        console.log('PO.view.field.POTaskAssignmentField.createPicker');
+        var me = this;
+        var menuCls = Ext.baseCSSPrefix + 'menu';
 
-        me.setValue( Ext.encode( vals ) );
-        me.fireEvent( 'blur' );
-        me.collapse();        
+        // New store for keeping assignment data
+        var assignmentStore = Ext.create('Ext.data.Store', { 
+            id: 'taskAssignmentStore',
+            fields: ['id', 'percent', 'name', 'email', 'initials'], 
+            data: [
+                {id:8864, percent: 100.0, name: 'Ben Bigboss', email:'bbigboss@tigerpond.com', initials:'BB'}, 
+                {id:8898, percent: 50.0, name:'Bobby Bizconsult', email:'bbizconsult@tigerpond.com', initials:'BB'}, 
+                {id:8892, percent: 50.0, name:'Carlos Codificador', email:'ccodificador@tigerpond.com', initials:'CC'}, 
+/*		{id:8823, percent: 100.0, name:'David Developer', email:'ddeveloper@tigerpond.com', initials:'DD'}, 
+                {id:27484, percent: 12.3, name:'Harry Helpdesk', email:'hhelpdesk@tigerpond.com', initials:'HH'}, 
+                {id:624, percent: 33.3, name:'System Administrator', email:'sysadmin@tigerpond.com', initials:'SA'}
+                */
+            ]
+        });
+
+        // The picker consists of a grid.Panel
+        var picker = me.picker = Ext.create('Ext.grid.Panel', {
+            title: 'Task Assignments',
+            store: assignmentStore,
+            floating: true,
+            width: 200,
+            cls: me.el.up('.' + menuCls) ? menuCls : '',
+            ownerCt: me.ownerCt,
+            renderto: document.body,
+            columns: [
+                { text: 'In.', width: 30, dataIndex: 'initials' },
+                { text: 'Name', dataIndex: 'name', flex: 1 },
+                { text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: true },
+                { text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
+            ],
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'bottom',
+                items: [{ xtype: 'button', text: 'Button 1' }]
+            }],
+            plugins: [Ext.create('MyCellEditing', {    // Hack the issue that this is a floating panel without Window around
+                clicksToEdit: 1
+            })],
+            setValue: function(value) {
+                console.log('POTaskAssignment.picker.setValue='+value);
+		var store = this.store;
+		store.removeAll();
+		value.forEach(function(v) {
+		    store.add(v);
+		});
+            }
+        });
+
+        // hack: pass getNode() to the view
+        picker.getNode = function() {
+            picker.getView().getNode(arguments);
+        };
+
+        return picker;
+    },
+
+    onDownArrow: function(e) {
+        this.callParent(arguments);
+        if (this.isExpanded) {
+            this.getPicker().focus();
+        }
+    },
+
+    onSelect: function(m, d) {
+        var me = this;
+        me.setValue(d);
+        me.fireEvent('select', me, d);
+        me.collapse();
+    },
+
+    /**
+     * @private
+     * Sets the Date picker's value to match the current field value when expanding.
+     */
+    onExpand: function() {
+        var value = this.getValue();
+        this.picker.setValue(value);
+    },
+
+    /**
+     * @private
+     * Focuses the field when collapsing the Date picker.
+     */
+    onCollapse: function() {
+        this.focus(false, 60);
+    },
+
+    // private
+    beforeBlur : function(){
+        var me = this,
+        v = me.parseAssignments(me.getRawValue()),
+        focusTask = me.focusTask;
+
+        if (focusTask) {
+            focusTask.cancel();
+        }
+
+        if (v) {
+            me.setValue(v);
+        }
     }
 
 });

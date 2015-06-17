@@ -28,6 +28,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     multiSelect:			true,
     singleExpand:			false,
 
+    projectMembers:    "test",
+
     // Enable in-line row editing.
     plugins:				[Ext.create('Ext.grid.plugin.RowEditing', {clicksToMoveEditor: 2})],
 
@@ -60,7 +62,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		var result = "";
 		if (null != assignees && "" != assignees) {
 		    assignees.forEach(function(assignee) {
-			if ("" != result) { result = result + ", "; }
+			if ("" != result) { result = result + ";"; }
 			result = result + assignee.initials;
 			if (100 != assignee.percent) {
 			    result = result + '['+assignee.percent+'%]';
@@ -71,6 +73,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             },
 	    editor: { 
 		xtype: 'potaskassignment',
+		projectMembers: this.projectMembers,
 		matchFieldWidth: false                   // Allow the picker to be larger than the field width
 	    }
 	},
