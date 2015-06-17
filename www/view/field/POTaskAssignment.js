@@ -444,20 +444,27 @@ Ext.define('PO.view.field.POTaskAssignment', {
 
 	// The picker consists of a grid.Panel
 	var picker = me.picker = Ext.create('Ext.grid.Panel', {
-	    title: 'Task Assignments Picker',
+	    title: 'Task Assignments',
             store: assignmentStore,
 	    floating: true,
-	    width: 400,
+	    width: 200,
 	    cls: me.el.up('.' + menuCls) ? menuCls : '',
             ownerCt: me.ownerCt,
 	    renderto: document.body,
 //	    selType: 'cellmodel',
 	    columns: [
 		{ text: 'In.', width: 30, dataIndex: 'initials' },
-		{ text: 'Name', dataIndex: 'name' },
+		{ text: 'Name', dataIndex: 'name', flex: 1 },
 		{ text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: true },
 		{ text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
 	    ],
+	    dockedItems: [{
+		xtype: 'toolbar',
+		dock: 'bottom',
+		items: [
+		    { xtype: 'button', text: 'Button 1' }
+		]
+	    }],
 	    plugins: [Ext.create('MyCellEditing', {    // Hack the issue that this is a floating panel without Window around
 		clicksToEdit: 1,
 		listeners: {
@@ -487,8 +494,34 @@ Ext.define('PO.view.field.POTaskAssignment', {
             scope: me
         });
 */
-    }
+    },
 
+    valueToRaw: function(assignees) {
+        var result = "";
+        if (null != assignees && "" != assignees) {
+            assignees.forEach(function(assignee) {
+                if ("" != result) { result = result + ", "; }
+                result = result + assignee.initials;
+                if (100 != assignee.percent) {
+                    result = result + '['+assignee.percent+'%]';
+                }
+            });
+        }
+        return result;
+    },
+
+    /**
+     * Set the value of the editable field
+     */
+    applyValues: function() {
+        var me = this,
+        form = me.picker,
+        vals = form.getForm().getValues();    
+
+        me.setValue( Ext.encode( vals ) );
+        me.fireEvent( 'blur' );
+        me.collapse();        
+    }
 
 });
 
