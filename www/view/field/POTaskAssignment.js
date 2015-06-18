@@ -593,15 +593,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
         var assignmentStore = Ext.create('Ext.data.Store', { 
             id: 'taskAssignmentStore',
             fields: ['id', 'percent', 'name', 'email', 'initials'], 
-            data: [
-                {id:8864, percent: 100.0, name: 'Ben Bigboss', email:'bbigboss@tigerpond.com', initials:'BB'}, 
-                {id:8898, percent: 50.0, name:'Bobby Bizconsult', email:'bbizconsult@tigerpond.com', initials:'BB'}, 
-                {id:8892, percent: 50.0, name:'Carlos Codificador', email:'ccodificador@tigerpond.com', initials:'CC'}, 
-/*		{id:8823, percent: 100.0, name:'David Developer', email:'ddeveloper@tigerpond.com', initials:'DD'}, 
-                {id:27484, percent: 12.3, name:'Harry Helpdesk', email:'hhelpdesk@tigerpond.com', initials:'HH'}, 
-                {id:624, percent: 33.3, name:'System Administrator', email:'sysadmin@tigerpond.com', initials:'SA'}
-                */
-            ]
+            data: []                                   // Data will come from setValue()
         });
 
         // The picker consists of a grid.Panel
@@ -614,19 +606,34 @@ Ext.define('PO.view.field.POTaskAssignment', {
             ownerCt: me.ownerCt,
             renderto: document.body,
             columns: [
-                { text: 'In.', width: 30, dataIndex: 'initials' },
-                { text: 'Name', dataIndex: 'name', flex: 1 },
+                { text: 'In.', width: 30, dataIndex: 'initials', hidden: true},
+                { text: 'Name', dataIndex: 'name', flex: 1, editor: {
+		    xtype: 'combobox',
+		    store: Ext.StoreManager.get('userStore'),
+		    displayField: 'first_names',
+		    valueField: 'user_id'
+		}},
                 { text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: true },
                 { text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
             ],
             dockedItems: [{
                 xtype: 'toolbar',
-                dock: 'bottom',
-                items: [{ xtype: 'button', text: 'Button 1' }]
+                dock: 'top',
+                items: [
+		    {icon: '/intranet/images/navbar_default/add.png', tooltip: 'Add a user', id: 'assigButtonAdd'}, 
+		    {icon: '/intranet/images/navbar_default/delete.png', tooltip: 'Delete a user', id: 'assigButtonDelete'}, 
+		    '->',
+		    {icon: '/intranet/images/navbar_default/help.png', tooltip: 'Help', id: 'assigButtonHelp'},
+		    {icon: '/intranet/images/navbar_default/accept.png', tooltip: 'Save', id: 'assigButtonAccept'}, 
+		    {icon: '/intranet/images/navbar_default/cross.png', tooltip: 'Cancel', id: 'assigButtonCancel'}
+		]
             }],
             plugins: [Ext.create('MyCellEditing', {    // Hack the issue that this is a floating panel without Window around
                 clicksToEdit: 1
             })],
+
+	    // Set the value of the picker.
+	    // Called by onExpand() below.
             setValue: function(value) {
                 console.log('POTaskAssignment.picker.setValue='+value);
 		var store = this.store;
@@ -636,6 +643,24 @@ Ext.define('PO.view.field.POTaskAssignment', {
 		});
             }
         });
+
+	console.log('POTaskAssignment.createPicker: Before controller');
+	alert('POTaskAssignment.createPicker: Before controller');
+
+	var controller = Ext.create('Ext.app.Controller', {
+            init: function() {
+		var me = this;
+		this.control({
+                    '#assigButtonAdd': { click: me.onAssigButtonAdd }
+		});
+		return this;
+            },
+
+	    onAssigButtonAdd: function(button, event) {
+		console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
+		assignmentStore.add({});
+	    }
+	}).init();
 
         // hack: pass getNode() to the view
         picker.getNode = function() {
