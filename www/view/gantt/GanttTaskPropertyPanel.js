@@ -133,7 +133,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		    layout: 'hbox',
 		    items: [{
 			xtype: 'numberfield',
-			name: 'duration_units',
+			name: 'planned_units',
 			hideLabel: true,
 			width: 70,
 			value: '1',
@@ -141,7 +141,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 			allowBlank: false
 		    }, {
 			xtype: 'combobox',
-			name: 'duration_uom',
+			name: 'uom_id',
 			displayField: 'category',
 			valueField: 'category_id',
 			queryMode: 'local',
@@ -166,7 +166,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		}, {
 		    xtype: 'numberfield',
 		    fieldLabel: '% Done',
-		    name: 'percent_complete',
+		    name: 'percent_completed',
 		    width: 140,
 		    value: '0',
 		    minValue: 0,
@@ -175,7 +175,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		}, {
 		    xtype: 'numberfield',
 		    fieldLabel: 'Priority',
-		    name: 'task_priority',
+		    name: 'priority',
 		    width: 150,
 		    value: '500',
 		    minValue: 0,
@@ -188,16 +188,16 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		defaultType: 'datefield',
 		layout: 'anchor',
 		items: [{
-		    xtype: 'datefield',
+		    xtype: 'podatefield',
 		    fieldLabel: 'Start',
 		    name: 'start_date',
 		    allowBlank: false,
 		    format: 'Y-m-d',
 		    value: new Date()
 		}, {
-		    xtype: 'datefield',
+		    xtype: 'podatefield',
 		    fieldLabel: 'End',
-		    name: 'ebd_date',
+		    name: 'end_date',
 		    allowBlank: false,
 		    format: 'Y-m-d',
 		    value: new Date()
@@ -205,7 +205,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 	    }]
 	});
 	
-	var taskPropertyTabpanel = Ext.create("Ext.tab.Panel",{
+	var taskPropertyTabpanel = Ext.create("Ext.tab.Panel", {
 	    id: 'taskPropertyTabpanel',
 	    border: false,
 	    items: [
@@ -223,8 +223,14 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		handler: this.onCancel
 	    }]    
 	});
-
 	me.add(taskPropertyTabpanel);
+
+	// store panels in the main object
+	me.taskPropertyFormGeneral = taskPropertyFormGeneral;
+	me.taskPropertyAssignments = taskPropertyAssignments;
+	me.taskPropertyFormNotes = taskPropertyFormNotes;
+	me.taskPropertyTabpanel = taskPropertyTabpanel;
+
 	console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Finished');
     },
 
@@ -235,8 +241,24 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     setValue: function(task) {
 	console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Starting');
 	var me = this;
-	var form = me.getForm();
-	form.loadRecord(task);
+
+	// Default values for task if not defined yet by ]po[
+	if ("" == task.get('planned_units')) { task.set('planned_units', '1'); }
+	if ("" == task.get('uom_i')) { task.set('uom_id', '320'); } // "Day" as UoM
+	if ("" == task.get('priority')) { task.set('priority', '500'); }
+	if ("" == task.get('start_date')) { task.set('start_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
+	if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
+	if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
+	if ("" == task.get('')) { task.set('', ''); }
+	if ("" == task.get('')) { task.set('', ''); }
+	if ("" == task.get('')) { task.set('', ''); }
+	if ("" == task.get('')) { task.set('', ''); }
+	if ("" == task.get('')) { task.set('', ''); }
+	if ("" == task.get('')) { task.set('', ''); }
+	
+	// Load the data into the various forms
+	me.taskPropertyFormGeneral.getForm().loadRecord(task);
+	me.taskPropertyFormNotes.getForm().loadRecord(task);
 	console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Finished');
     }
 }); 
