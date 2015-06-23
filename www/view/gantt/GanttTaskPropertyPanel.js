@@ -22,6 +22,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     height: 400,
 
     closable: true,
+    closeAction: 'hide',
     resizable: true,
     modal: false,
     layout: 'fit',
@@ -32,7 +33,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 	this.callParent(arguments);
 
 	// New store for keeping assignment data
-	var assignmentStore = Ext.create('Ext.data.Store', {
+	var taskAssignmentStore = Ext.create('Ext.data.Store', {
 	    id: 'taskAssignmentStore',
 	    fields: ['id', 'percent', 'name', 'email', 'initials'],
 	    data: []                                   // Data will come from setValue()
@@ -41,7 +42,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 	var taskPropertyAssignments = Ext.create('Ext.grid.Panel', {
             title: 'Assignments',
 	    id: 'taskPropertyAssignments',
-            store: assignmentStore,
+            store: taskAssignmentStore,
             width: 200,
             columns: [
 		{ text: 'In.', width: 30, dataIndex: 'initials', hidden: true},
@@ -66,7 +67,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		    {icon: '/intranet/images/navbar_default/cross.png', tooltip: 'Cancel', id: 'assigButtonCancel'}
 		]
             }],
-            plugins: [Ext.create('MyCellEditing', {    // Hack the issue that this is a floating panel without Window around
+            plugins: [Ext.create('Ext.grid.plugin.CellEditing', {    // Hack the issue that this is a floating panel without Window around
 		clicksToEdit: 1
             })],
 
@@ -92,7 +93,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             },
 	    onAssigButtonAdd: function(button, event) {
 		console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
-		assignmentStore.add({});
+		taskAssignmentStore.add({});
 	    }
 	}).init();
 
@@ -215,25 +216,75 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 	    ],
 	    buttons: [{
 		text: 'OK',
-		scope: this,
-		handler: this.onOk
+		scope: me,
+		handler: me.onButtonOK
 	    }, {
 		text: 'Cancel',
-		scope: this,
-		handler: this.onCancel
+		scope: me,
+		handler: me.onButtonCancel
 	    }]    
 	});
 	me.add(taskPropertyTabpanel);
 
 	// store panels in the main object
+	me.taskAssignmentStore = taskAssignmentStore;
 	me.taskPropertyFormGeneral = taskPropertyFormGeneral;
 	me.taskPropertyAssignments = taskPropertyAssignments;
 	me.taskPropertyFormNotes = taskPropertyFormNotes;
 	me.taskPropertyTabpanel = taskPropertyTabpanel;
 
+	// me.on('close', this.onClose, this);	// capture the close event
 	console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Finished');
     },
 
+    /**
+     * Save the modified form values into the model.
+     */
+    onButtonOK: function(button, event) {
+	console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
+	var me = this;
+
+	var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
+	me.taskModel.set(fields);
+	fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
+	me.taskModel.set(fields);
+
+	var assignees = [];
+	me.taskAssignmentStore.each(function(assig) {
+	    assignees.push(assig);
+	});
+	me.taskModel.data.assignees = assignees;
+
+	me.hide();                              // hide the TaskProperty panel
+    },
+
+    /**
+     * Simply hide the windows.
+     * This automatically discards any changes.
+     */
+    onButtonCancel: function(button, event) {
+	console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonCancel');
+	var me = this;
+	me.hide();                              // hide the TaskProperty panel
+    },
+
+    setActiveTab: function(tab) {
+	var me = this;
+	me.taskPropertyTabpanel.setActiveTab(tab);
+    },
+
+    /**
+     * Try to hide the list of tabs and the outer frame
+     */
+    hideTabs: function() {
+	console.log('PO.view.gantt.GanttTaskPropertyPanel.hideTabs: Starting');
+	var me = this;
+	var tabPanel = me.taskPropertyTabpanel;
+	var tabBar = tabPanel.tabBar;
+	tabBar.hide();
+
+    },
+    
     /**
      * Show the properties of the specified task model.
      * Write changes back to the task immediately (at the moment).
@@ -250,15 +301,19 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 	if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
 	if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
 	if ("" == task.get('')) { task.set('', ''); }
-	if ("" == task.get('')) { task.set('', ''); }
-	if ("" == task.get('')) { task.set('', ''); }
-	if ("" == task.get('')) { task.set('', ''); }
-	if ("" == task.get('')) { task.set('', ''); }
-	if ("" == task.get('')) { task.set('', ''); }
 	
 	// Load the data into the various forms
 	me.taskPropertyFormGeneral.getForm().loadRecord(task);
 	me.taskPropertyFormNotes.getForm().loadRecord(task);
+
+	// Load assignment information into the assignmentStore
+	me.taskAssignmentStore.removeAll();
+	var assignments = task.get('assignees');
+	assignments.forEach(function(v) {
+	    me.taskAssignmentStore.add(v);
+	});
+
+	me.taskModel = task;                              // Save the model for reference
 	console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Finished');
     }
 }); 

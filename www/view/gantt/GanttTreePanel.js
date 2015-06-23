@@ -31,7 +31,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     projectMembers:    "test",
 
     // Enable in-line row editing.
-    plugins:				[Ext.create('Ext.grid.plugin.RowEditing', {clicksToMoveEditor: 1})],
+    plugins:				[Ext.create('Ext.grid.plugin.CellEditing', {clicksToEdit: 2})],
 
     // Enabled drag-and-drop for the tree. Yes, that's all...
     viewConfig: {
@@ -43,46 +43,43 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     // the 'columns' property is now 'headers'
     columns: [
+	{text: 'I', xtype: 'actioncolumn', dataIndex: 'project_id', width: 30, items: [{
+            icon: '/intranet/images/navbar_default/information.png',
+            tooltip: 'Link',
+	    handler: function(grid, rowIndex, colIndex) {
+                console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
+                var rec = grid.getStore().getAt(rowIndex);
+		var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
+		taskPropertyPanel.setValue(rec);
+		taskPropertyPanel.setActiveTab('taskPropertyFormGeneral');
+		taskPropertyPanel.show();
+            }
+        }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
 	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: {allowBlank: false}}, 
-/*	{text: 'Link', xtype: 'actioncolumn', dataIndex: 'project_url', width: 30, items: [{
-	    icon: '/intranet/images/external.png',
-	    tooltip: 'Link',handler: function(grid, rowIndex, colIndex) {
-		console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
-		var rec = grid.getStore().getAt(rowIndex);
-		var url = '/intranet/projects/view?project_id='+rec.get('id');
-		window.open(url); // Open project in new browser tab
+	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', renderer: function(assignees, columnDisplay, model) {
+	    var result = "";
+	    if (null != assignees && "" != assignees) {
+		assignees.forEach(function(assignee) {
+		    if ("" != result) { result = result + ";"; }
+		    result = result + assignee.initials;
+		    if (100 != assignee.percent) {
+			result = result + '['+assignee.percent+'%]';
+		    }
+		});
 	    }
-	}]},
-	{text: 'Assigned To', flex: 1, hidden: false, dataIndex: 'user', sortable: true, editor: {allowBlank: true}},
-*/
-	{
-	    text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', 
-	    renderer: function(assignees, columnDisplay, model, a,b,c,d,e){
-		var result = "";
-		if (null != assignees && "" != assignees) {
-		    assignees.forEach(function(assignee) {
-			if ("" != result) { result = result + ";"; }
-			result = result + assignee.initials;
-			if (100 != assignee.percent) {
-			    result = result + '['+assignee.percent+'%]';
-			}
-		    });
-		}
-		return result;
-            },
-	    editor: { 
-		xtype: 'potaskassignment',
-		projectMembers: this.projectMembers,
-		matchFieldWidth: false                   // Allow the picker to be larger than the field width
-	    }
+	    return result;
+        },
+	 editor: { 
+	     xtype: 'potaskassignment',
+	     projectMembers: this.projectMembers,
+	     matchFieldWidth: false                   // Allow the picker to be larger than the field width
+	 }
 	},
-    
 	{text: 'Start', flex: 1, hidden: false, dataIndex: 'start_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
 	{text: 'End', flex: 1, hidden: false, dataIndex: 'end_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
-	{text: 'Description', flex: 1, hidden: false, dataIndex: 'description', editor: {allowBlank: true}},
-
-	{text: 'Status', flex: 1, hidden: false, dataIndex: 'project_status_id', sortable: true, renderer: 
+	{text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
+	{text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true, renderer: 
 	 function(value){
              var statusStore = Ext.StoreManager.get('taskStatusStore');
 	     if (undefined === statusStore) { alert('GanttTreePanel.project_status_id.render: undefined taskStatusStore'); }
@@ -91,8 +88,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              return result;
          },
          editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}
-	}, 
-	{xtype: 'checkcolumn', header: 'Done', hidden: false, dataIndex: 'done', width: 40, stopSelection: false, editor: {xtype: 'checkbox', cls: 'x-grid-checkheader-editor'}}
+	}
+	// {xtype: 'checkcolumn', header: 'Done', hidden: false, dataIndex: 'done', width: 40, stopSelection: false, editor: {xtype: 'checkbox', cls: 'x-grid-checkheader-editor'}}
     ],
 
     initComponent: function() {
@@ -105,9 +102,19 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             'scope': this
         });
 
+	me.on({
+	    'celldblclick': me.onCellDblClick,
+	    'scope': this
+	});
+	
         console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
     },
 
+    onCellDblClick: function(a,b,c,e) {
+        console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Starting');
+        console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Finished');
+    },
+    
     onDataChanged: function(store, options, c,d,e,f) {
         var me = this;
         console.log('PO.view.gantt.GantTreePanel.onDataChange: Starting');
