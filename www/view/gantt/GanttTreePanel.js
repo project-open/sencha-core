@@ -31,7 +31,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     projectMembers:    "test",
 
     // Enable in-line row editing.
-    plugins:				[Ext.create('Ext.grid.plugin.RowEditing', {clicksToMoveEditor: 2})],
+    plugins:				[Ext.create('Ext.grid.plugin.RowEditing', {clicksToMoveEditor: 1})],
 
     // Enabled drag-and-drop for the tree. Yes, that's all...
     viewConfig: {
