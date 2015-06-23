@@ -103,7 +103,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
             percentString = percentString.substring(1,value.length);
         }
         var percent = this.parseAssignmentPercent(percentString.trim());   // Number indicating percent or an error
-	// console.log("POTaskAssignment.parseAssignmentPercent: '"+percentString+"' -> '"+percent+"'");
+        // console.log("POTaskAssignment.parseAssignmentPercent: '"+percentString+"' -> '"+percent+"'");
         if (Ext.isString(percent)) { return percent; }                     // Return an error string
 
         // ToDo: Sort the user store alphabetically in order to create
@@ -122,15 +122,15 @@ Ext.define('PO.view.field.POTaskAssignment', {
             
             if (found) {
                 // {id:8864, percent:   0.0, name:'Ben Bigboss', email:'bbigboss@tigerpond.com', initials:'BB'}
-		var user_id = parseInt(user.get('user_id'));
-		var name = firstNames + " " + lastName;
-		var email = user.get('email');
-		var initials = firstNamesInitial+lastNameInitial;
+                var user_id = parseInt(user.get('user_id'));
+                var name = firstNames + " " + lastName;
+                var email = user.get('email');
+                var initials = firstNamesInitial+lastNameInitial;
                 result = {id: user_id, percent: percent, name: name, email: email, initials: initials};
             }
         });
 
-	return result;
+        return result;
     },
 
     /**
@@ -181,17 +181,13 @@ Ext.define('PO.view.field.POTaskAssignment', {
         console.log('PO.view.field.POTaskAssignmentField.createPicker');
         var me = this;
 
-	var treePanel = Ext.getCmp('ganttTreePanel');
-	var rec = treePanel.getSelectionModel().getLastSelected();
+	me.onExpand();                            // Reuse the function for showing the TaskPropertyPanel
 
-	var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
-	taskPropertyPanel.setValue(rec);
-	taskPropertyPanel.setActiveTab('taskPropertyAssignments');
-	// taskPropertyPanel.show();           // Show handled by picker management
-
-	return taskPropertyPanel;
+	// Return a dummy panel in order to avoid errors
+	var dummyPanel = Ext.create('Ext.container.Container');
+	return dummyPanel;
     },
-	
+        
     onDownArrow: function(e) {
         console.log('PO.view.field.POTaskAssignmentField.onDownArrow');
         this.callParent(arguments);
@@ -213,26 +209,13 @@ Ext.define('PO.view.field.POTaskAssignment', {
      * Sets the Date picker's value to match the current field value when expanding.
      */
     onExpand: function() {
-	var treePanel = Ext.getCmp('ganttTreePanel');
-        // var value = this.getValue();
-	var value = treePanel.getSelectionModel().getLastSelected();
-        this.picker.setValue(value);
+        var treePanel = Ext.getCmp('ganttTreePanel');
+        var value = treePanel.getSelectionModel().getLastSelected();
 
-	var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
-	taskPropertyPanel.setActiveTab('taskPropertyAssignments');
-
-	/*
-	var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
-	taskPropertyPanel.hideTabs();
-	taskPropertyPanel.title = '';
-	taskPropertyPanel.closable = false;
-	taskPropertyPanel.header = false;
-	taskPropertyPanel.frame = false;
-	taskPropertyPanel.frameHeader = false;
-	taskPropertyPanel.shadow = false,
-	taskPropertyPanel.border = true;
-	taskPropertyPanel.preventHeader = true;
-	*/
+        var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
+	taskPropertyPanel.setValue(value);
+        taskPropertyPanel.setActiveTab('taskPropertyAssignments');
+        taskPropertyPanel.show();           // Show handled by picker management
     },
 
     /**
@@ -243,6 +226,19 @@ Ext.define('PO.view.field.POTaskAssignment', {
         this.focus(false, 60);
     },
 
+    /**
+     * Overwrite Picker.collapse() function, 
+     * becaue here is nothing to collapse...
+     */
+    collapse: function() {
+	var me = this;
+	var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
+	taskPropertyPanel.hide();
+	me.isExpanded = false;
+	me.fireEvent('collapse', me);
+	me.onCollapse();
+    },
+    
     // private
     beforeBlur : function(){
         var me = this,
