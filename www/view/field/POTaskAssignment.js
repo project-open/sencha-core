@@ -109,9 +109,9 @@ Ext.define('PO.view.field.POTaskAssignment', {
         // ToDo: Sort the user store alphabetically in order to create
         // deterministic results
         var result = null;
-        var userStore = Ext.StoreManager.get('userStore');
+        var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
         var letters = value.toUpperCase().split("");
-        userStore.each(function(user) {
+        projectMemberStore.each(function(user) {
             if (null != result) { return; }
             var firstNames = user.get('first_names');
             var lastName = user.get('last_name');

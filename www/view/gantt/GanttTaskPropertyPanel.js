@@ -47,7 +47,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                 { text: 'In.', width: 30, dataIndex: 'initials', hidden: true},
                 { text: 'Name', dataIndex: 'id', flex: 1, editor: {
                     xtype: 'combobox',
-                    store: Ext.StoreManager.get('userStore'),
+                    store: Ext.StoreManager.get('projectMemberStore'),
                     displayField: 'full_name',
                     valueField: 'user_id',
 		    queryMode: 'local',
