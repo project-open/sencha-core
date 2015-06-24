@@ -38,7 +38,6 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             fields: ['id', 'percent', 'name', 'email', 'initials'],
             data: []                                   // Data will come from setValue()
         });
-
         var taskPropertyAssignments = Ext.create('Ext.grid.Panel', {
             title: 'Assignments',
             id: 'taskPropertyAssignments',
@@ -46,13 +45,24 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             width: 200,
             columns: [
                 { text: 'In.', width: 30, dataIndex: 'initials', hidden: true},
-                { text: 'Name', dataIndex: 'name', flex: 1, editor: {
+                { text: 'Name', dataIndex: 'id', flex: 1, editor: {
                     xtype: 'combobox',
                     store: Ext.StoreManager.get('userStore'),
                     displayField: 'full_name',
-                    valueField: 'user_id'
-                }},
-                { text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: true },
+                    valueField: 'user_id',
+		    queryMode: 'local',
+		    listeners: {
+			select: function(comboBox, userModels, idx) {
+			    var gridSel = taskPropertyAssignments.getSelectionModel().getLastSelected();
+			    var comboSel = userModels[0];                 // Single-select mode
+			    alert('select: '+gridSel+', '+comboSel);
+			}
+		    }
+                }, renderer: function(value, columnDisplay, model) {
+		    return model.get('name');
+		}
+		},
+                { text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: false },
                 { text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
             ],
             dockedItems: [{
@@ -95,7 +105,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             onAssigButtonAdd: function(button, event) {
                 console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
                 var me = this;
-                var newRecord = me.taskAssignmentStore.add({})[0];
+                var newRecord = me.taskAssignmentStore.add({percent:100})[0];
                 var editing = me.taskPropertyAssignments.editingPlugin;
                 editing.cancelEdit();
                 editing.startEdit(newRecord, 0);                       // Start editing the first row
@@ -255,6 +265,9 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
         var me = this;
 
+	// Write timestamp to make sure that data are modified and redrawn.
+	me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
+	
         var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
         me.taskModel.set(fields);
         fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
@@ -262,7 +275,9 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 
         var assignees = [];
         me.taskAssignmentStore.each(function(assig) {
-            assignees.push(assig);
+	    var user_id = assig.get('user_id');
+	    console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
+            assignees.push(assig.data);
         });
         me.taskModel.data.assignees = assignees;
 

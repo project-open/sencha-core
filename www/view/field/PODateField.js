@@ -81,8 +81,8 @@ Ext.define('PO.view.field.PODateField', {
             floating: true,
             hidden: true,
             focusOnShow: true,
-            minDate: me.minValue,
-            maxDate: me.maxValue,
+            minDate: new Date('2000-01-01'),
+            maxDate: new Date('2099-12-31'),
             disabledDatesRE: me.disabledDatesRE,
             disabledDatesText: me.disabledDatesText,
             disabledDays: me.disabledDays,
@@ -130,7 +130,7 @@ Ext.define('PO.view.field.PODateField', {
      * Sets the Date picker's value to match the current field value when expanding.
      */
     onExpand: function() {
-        var value = this.getValue();
+        var value = new Date(this.getValue());
         this.picker.setValue(Ext.isDate(value) ? value : new Date());
     },
 

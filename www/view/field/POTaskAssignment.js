@@ -11,7 +11,7 @@
  * A special editor field used to assign users to a project task.
  */
 Ext.define('PO.view.field.POTaskAssignment', {
-    extend: 'Ext.form.field.Picker',
+    extend: 'Ext.form.field.Trigger',
     requires: ['Ext.grid.Panel'],
     alias: 'widget.potaskassignment',
 
@@ -176,76 +176,21 @@ Ext.define('PO.view.field.POTaskAssignment', {
         return result;
     },
 
-    // copied from ComboBox 
-    createPicker: function(a, b, c, d) {
-        console.log('PO.view.field.POTaskAssignmentField.createPicker');
-        var me = this;
-
-	me.onExpand();                            // Reuse the function for showing the TaskPropertyPanel
-
-	// Return a dummy panel in order to avoid errors
-	var dummyPanel = Ext.create('Ext.container.Container');
-	return dummyPanel;
-    },
-        
-    onDownArrow: function(e) {
-        console.log('PO.view.field.POTaskAssignmentField.onDownArrow');
-        this.callParent(arguments);
-        if (this.isExpanded) {
-            this.getPicker().focus();
-        }
-    },
-
-    onSelect: function(m, d) {
-        console.log('PO.view.field.POTaskAssignmentField.onSelect');
-        var me = this;
-        me.setValue(d);
-        me.fireEvent('select', me, d);
-        me.collapse();
-    },
-
     /**
-     * @private
-     * Sets the Date picker's value to match the current field value when expanding.
+     * Open the TaskProperty panel with the Assignments
+     * tab open in order to edit assignments.
      */
-    onExpand: function() {
-        var treePanel = Ext.getCmp('ganttTreePanel');
+    onTriggerClick: function(a, b, c, d) {
+        console.log('PO.view.field.POTaskAssignmentField.onTriggerClick');
+        var me = this;
+
+	var treePanel = Ext.getCmp('ganttTreePanel');
         var value = treePanel.getSelectionModel().getLastSelected();
 
         var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
 	taskPropertyPanel.setValue(value);
         taskPropertyPanel.setActiveTab('taskPropertyAssignments');
         taskPropertyPanel.show();           // Show handled by picker management
-    },
-
-    /**
-     * @private
-     * Focuses the field when collapsing the Date picker.
-     */
-    onCollapse: function() {
-        this.focus(false, 60);
-    },
-
-    /**
-     * Overwrite Picker.collapse() function, 
-     * becaue here is nothing to collapse...
-     */
-    collapse: function() {
-	var me = this;
-	var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
-	taskPropertyPanel.hide();
-	me.isExpanded = false;
-	me.fireEvent('collapse', me);
-	me.onCollapse();
-    },
-    
-    // private
-    beforeBlur : function(){
-        var me = this,
-        v = me.parseAssignments(me.getRawValue()),
-        focusTask = me.focusTask;
-        if (focusTask) { focusTask.cancel(); }
-        if (v) { me.setValue(v); }
     }
 });
 
