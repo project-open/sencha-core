@@ -39,24 +39,14 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	listeners: {
 	    // Load estimated_units + uom_id into te "Work" column
 	    beforeedit: function(editor, context, eOpts) {
-		var model = context.record;
-                var plannedUnits = model.get('planned_units');
-		var uomId = model.get('uom_id');
-		var uom = "";
-		if (320==uomId) { uom = "h"; }
-		if (321==uomId) { uom = "d"; }
-		var value = plannedUnits+uom;
-		Ext.getCmp('planned_units_editor').setValue(value);		// Populate the sub-editor fields
+		console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit'); console.log(context);
 	    },
 	    validateedit: function(cellediting, context, eOpts) {
-		var colText = context.column.text;
-		if ("Work" == colText) {		                       // Write the Work (units+h/d) value into estimated_units + uom_id
-		    var value = context.value;
-		    var uomLetter = value.substr(value.length,1);
-		    value = value.substr(0,value.length-1);
-		    console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit: value='+value+', uomLetter='+uomLetter);
-		    console.log(context);
-		}
+		console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit'); console.log(context);
+		return true;
+	    },
+	    edit: function(cellediting, context, eOpts) {
+		console.log('PO.view.gantt.GanttTreePanel.cellediting.edit'); console.log(context);
 	    }
 	}
     })],
@@ -85,56 +75,24 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
 	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: {allowBlank: false}}, 
-	{
-	    text: 'Work',
-	    renderer: function(value, context, model) {
-		var plannedUnits = model.get('planned_units');
-		var uomId = model.get('uom_id');
-		var uom = "";
-		if (320==uomId) { uom = "h"; }
-		if (321==uomId) { uom = "d"; }
-		return plannedUnits+uom;
-	    },
-	    editor: {
-		xtype: 'textfield',
-		id: 'planned_units_editor',
-		allowBlank: false,
-		regex: /^\d{0,3}\ *[hd]{0,1}$/,
-		regexText: "<b>Error</b></br>ExpectingInvalid Number<br>&nbsp;"
-	    },
-	    listeners: {
-		beforeedit: function(editor, e) {
-		    var model = e.record;
-		    var plannedUnits = model.get('planned_units');
-		    var uomId = model.get('uom_id');
-		    var uom = "";
-		    if (320==uomId) { uom = "h"; }
-		    if (321==uomId) { uom = "d"; }
-		    var value = plannedUnits+uom;
-		    Ext.getCmp('planned_units_editor').setValue(value);             // Populate the sub-editor fields
-		}
-	    }
-	    
-	},
-	
-	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees',
-	 renderer: function(assignees) { return PO.view.field.POTaskAssignment.formatAssignments(assignees); },
-	 editor: { 
-	     xtype: 'potaskassignment',
-	     projectMembers: this.projectMembers,
-	     matchFieldWidth: false                   // Allow the picker to be larger than the field width
-	 }
-	},
-	{text: 'Start', flex: 1, hidden: false, dataIndex: 'start_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
-	{text: 'End', flex: 1, hidden: false, dataIndex: 'end_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
+	{text: 'Work', width: 50, hidden: false, dataIndex: 'planned_units', editor: 'numberfield', renderer: function(value, context, model) {
+	    var plannedUnits = model.get('planned_units');
+	    var uomId = model.get('uom_id');
+	    var uom = "";
+	    if (320==uomId) { uom = "h"; }
+	    if (321==uomId) { uom = "d"; }
+	    return plannedUnits+uom;
+	}},
+	{text: 'Start', width: 75, hidden: false, dataIndex: 'start_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
+	{text: 'End', width: 75, hidden: false, dataIndex: 'end_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
+	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', renderer: function(assignees) {
+	    return PO.view.field.POTaskAssignment.formatAssignments(assignees);
+	}},
 	{text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
-	{text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true, renderer: 
-	 function(value){
+	{text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true, renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
-	     if (undefined === statusStore) { alert('GanttTreePanel.project_status_id.render: undefined taskStatusStore'); }
              var model = statusStore.getById(value);
-             var result = model.get('category');
-             return result;
+             return model.get('category');
          },
          editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}
 	}
