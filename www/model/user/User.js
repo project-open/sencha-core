@@ -80,10 +80,16 @@ Ext.define('PO.model.user.User', {
 	'wa_state',				// 
 	'work_phone',				// 
 
-	{ name: 'full_name',			// 
+	{ name: 'name',			        // 
 	  convert: function(value, record) {
 	      var fullName = record.get('first_names') + ' ' + record.get('last_name');
 	      return fullName;
+	  }
+	},
+	{ name: 'initials',			// 
+	  convert: function(value, record) {
+	      var initials = "" + record.get('first_names').substr(0,1) + record.get('last_name').substr(0,1);
+	      return initials;
 	  }
 	}
     ],

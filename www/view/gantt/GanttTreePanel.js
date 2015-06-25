@@ -28,10 +28,38 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     multiSelect:			true,
     singleExpand:			false,
 
+    overflowX: 'scroll',                            // Allows for horizontal scrolling, but not vertical
+    scrollFlags: {x: true},
+    
     projectMembers:    "test",
 
     // Enable in-line row editing.
-    plugins:				[Ext.create('Ext.grid.plugin.CellEditing', {clicksToEdit: 2})],
+    plugins:				[Ext.create('Ext.grid.plugin.CellEditing', {
+	clicksToEdit: 1,
+	listeners: {
+	    // Load estimated_units + uom_id into te "Work" column
+	    beforeedit: function(editor, context, eOpts) {
+		var model = context.record;
+                var plannedUnits = model.get('planned_units');
+		var uomId = model.get('uom_id');
+		var uom = "";
+		if (320==uomId) { uom = "h"; }
+		if (321==uomId) { uom = "d"; }
+		var value = plannedUnits+uom;
+		Ext.getCmp('planned_units_editor').setValue(value);		// Populate the sub-editor fields
+	    },
+	    validateedit: function(cellediting, context, eOpts) {
+		var colText = context.column.text;
+		if ("Work" == colText) {		                       // Write the Work (units+h/d) value into estimated_units + uom_id
+		    var value = context.value;
+		    var uomLetter = value.substr(value.length,1);
+		    value = value.substr(0,value.length-1);
+		    console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit: value='+value+', uomLetter='+uomLetter);
+		    console.log(context);
+		}
+	    }
+	}
+    })],
 
     // Enabled drag-and-drop for the tree. Yes, that's all...
     viewConfig: {
@@ -57,19 +85,40 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
 	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: {allowBlank: false}}, 
-	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', renderer: function(assignees, columnDisplay, model) {
-	    var result = "";
-	    if (null != assignees && "" != assignees) {
-		assignees.forEach(function(assignee) {
-		    if ("" != result) { result = result + ";"; }
-		    result = result + assignee.initials;
-		    if (100 != assignee.percent) {
-			result = result + '['+assignee.percent+'%]';
-		    }
-		});
+	{
+	    text: 'Work',
+	    renderer: function(value, context, model) {
+		var plannedUnits = model.get('planned_units');
+		var uomId = model.get('uom_id');
+		var uom = "";
+		if (320==uomId) { uom = "h"; }
+		if (321==uomId) { uom = "d"; }
+		return plannedUnits+uom;
+	    },
+	    editor: {
+		xtype: 'textfield',
+		id: 'planned_units_editor',
+		allowBlank: false,
+		regex: /^\d{0,3}\ *[hd]{0,1}$/,
+		regexText: "<b>Error</b></br>ExpectingInvalid Number<br>&nbsp;"
+	    },
+	    listeners: {
+		beforeedit: function(editor, e) {
+		    var model = e.record;
+		    var plannedUnits = model.get('planned_units');
+		    var uomId = model.get('uom_id');
+		    var uom = "";
+		    if (320==uomId) { uom = "h"; }
+		    if (321==uomId) { uom = "d"; }
+		    var value = plannedUnits+uom;
+		    Ext.getCmp('planned_units_editor').setValue(value);             // Populate the sub-editor fields
+		}
 	    }
-	    return result;
-        },
+	    
+	},
+	
+	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees',
+	 renderer: function(assignees) { return PO.view.field.POTaskAssignment.formatAssignments(assignees); },
 	 editor: { 
 	     xtype: 'potaskassignment',
 	     projectMembers: this.projectMembers,

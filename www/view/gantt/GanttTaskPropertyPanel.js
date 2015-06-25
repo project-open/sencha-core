@@ -27,42 +27,81 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     modal: false,
     layout: 'fit',
 
+    taskModel: null,                              // Set by setValue() before show()
+    
     initComponent: function() {
         console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Starting');
         var me = this;
         this.callParent(arguments);
 
-        // New store for keeping assignment data
+        // Define a model for assignments
+        Ext.define("PO.model.gantt.GanttAssignmentModel", {
+            extend: "PO.model.user.User",
+            fields: [
+                {name: 'user_initials', type: 'string'},
+                {name: 'percent', type: 'float'}
+            ]
+        });
+        
+        // New store for keeping assignment data, setValue() adds the data.
         var taskAssignmentStore = Ext.create('Ext.data.Store', {
             id: 'taskAssignmentStore',
-            fields: ['id', 'percent', 'name', 'email', 'initials'],
-            data: []                                   // Data will come from setValue()
+            model: 'PO.model.gantt.GanttAssignmentModel'
         });
+
+        var taskAssignmentRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+            clicksToEdit: 1,
+            clicksToMoveEditor: 1,
+            autoCancel: true,
+	    valueModels: null,                                                 // set by "select" event of combobox
+            listeners: {
+		// The percentage has been changed or the name of the user.
+		// Write the changes back into the taskAssignmentStore.
+                edit: function(rowEditing, context, eOpts) {
+		    if ("name" != context.field && "id" != context.field) { return; }
+
+		    /*
+                    // Check which user has been selected and write appropriate values
+                    var column = context.column;
+                    var editor = column.getEditor();
+		    var userModel = editor.valueModels[0];
+		    */
+		    var userModel = this.valueModels[0];
+		    if (userModel) {
+			var assigModel = context.record;			// get the recored to be edited
+			assigModel.set(userModel.data);
+			return;
+		    }
+		    alert('GanttTaskPropertyPanel.taskAssignmentRowEditing: userModel not defined');
+                }
+            }
+        });
+        
+        // Grid with assigned users
         var taskPropertyAssignments = Ext.create('Ext.grid.Panel', {
             title: 'Assignments',
             id: 'taskPropertyAssignments',
             store: taskAssignmentStore,
             width: 200,
             columns: [
-                { text: 'In.', width: 30, dataIndex: 'initials', hidden: true},
-                { text: 'Name', dataIndex: 'id', flex: 1, editor: {
+                { text: 'Id', width: 30, dataIndex: 'id', hidden: false},
+                { text: 'Initials', width: 60, dataIndex: 'initials', hidden: false},
+                { text: 'UserName', dataIndex: 'name', flex: 1, editor: {
                     xtype: 'combobox',
                     store: Ext.StoreManager.get('projectMemberStore'),
-                    displayField: 'full_name',
-                    valueField: 'user_id',
-		    queryMode: 'local',
-		    listeners: {
-			select: function(comboBox, userModels, idx) {
-			    var gridSel = taskPropertyAssignments.getSelectionModel().getLastSelected();
-			    var comboSel = userModels[0];                 // Single-select mode
-			    alert('select: '+gridSel+', '+comboSel);
-			}
-		    }
-                }, renderer: function(value, columnDisplay, model) {
-		    return model.get('name');
-		}
-		},
-                { text: 'Email', dataIndex: 'email', editor: 'textfield', hidden: false },
+                    displayField: 'name',
+                    valueField: 'name',
+                    queryMode: 'local',
+                    forceSelection: false,
+                    triggerAction: 'all',
+                    allowBlank: false,
+                    editable: true,
+		    listeners: {select: function(combo, records) {
+			combo.valueModels = records;
+			taskAssignmentRowEditing.valueModels = records;
+		    }}  // remember selected user
+                }},
+                { text: 'Email', dataIndex: 'email', flex: 1, hidden: false },
                 { text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
             ],
             dockedItems: [{
@@ -73,20 +112,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     {icon: '/intranet/images/navbar_default/delete.png', tooltip: 'Delete a user', id: 'assigButtonDel'}
                 ]
             }],
-            plugins: [Ext.create('Ext.grid.plugin.CellEditing', {    // Hack the issue that this is a floating panel without Window around
-                clicksToEdit: 1
-            })],
-
-            // Set the value of the picker.
-            // Called by onExpand() below.
-            setValue: function(value) {
-                console.log('POTaskAssignment.picker.setValue='+value);
-                var store = this.store;
-                store.removeAll();
-                value.forEach(function(v) {
-                    store.add(v);
-                });
-            }
+            selType: 'rowmodel',
+            plugins: taskAssignmentRowEditing
         });
 
         // Small controller in order to handle the (+) / (-) buttons for
@@ -265,9 +292,9 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
         var me = this;
 
-	// Write timestamp to make sure that data are modified and redrawn.
-	me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
-	
+        // Write timestamp to make sure that data are modified and redrawn.
+        me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
+        
         var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
         me.taskModel.set(fields);
         fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
@@ -275,9 +302,15 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 
         var assignees = [];
         me.taskAssignmentStore.each(function(assig) {
-	    var user_id = assig.get('user_id');
-	    console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
-            assignees.push(assig.data);
+            var user_id = assig.get('user_id');
+            console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
+	    var rel_id = parseInt(assig.get('rel_id'));
+	    if (!rel_id) { rel_id = null; }
+            assignees.push({
+		id: rel_id,
+		user_id: parseInt(assig.get('user_id')),
+		percent: parseFloat(assig.get('percent'))
+	    });
         });
         me.taskModel.data.assignees = assignees;
 
@@ -308,9 +341,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         var tabPanel = me.taskPropertyTabpanel;
         var tabBar = tabPanel.tabBar;
         tabBar.hide();
-
     },
-    
+
     /**
      * Show the properties of the specified task model.
      * Write changes back to the task immediately (at the moment).
@@ -318,6 +350,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     setValue: function(task) {
         console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Starting');
         var me = this;
+        var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
 
         // Default values for task if not defined yet by ]po[
         if ("" == task.get('planned_units')) { task.set('planned_units', '1'); }
@@ -336,7 +369,14 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         me.taskAssignmentStore.removeAll();
         var assignments = task.get('assignees');
         assignments.forEach(function(v) {
-            me.taskAssignmentStore.add(v);
+
+            var userId = ""+v.user_id;
+            var userModel = projectMemberStore.getById(userId);
+            //var assigModel = Ext.create('PO.model.gantt.GanttAssignmentModel');
+            //assigModel.set(userModel.data);
+	    var assigModel = new PO.model.gantt.GanttAssignmentModel(userModel.data);
+            assigModel.set('percent', v.percent);
+            me.taskAssignmentStore.add(assigModel);
         });
 
         me.taskModel = task;                              // Save the model for reference

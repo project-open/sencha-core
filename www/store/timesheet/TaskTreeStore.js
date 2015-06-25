@@ -15,7 +15,7 @@ Ext.define('PO.store.timesheet.TaskTreeStore', {
     storeId:			'taskTreeStore',
     model:			'PO.model.timesheet.TimesheetTask',
     autoload:			false,
-    autoSync:			true,
+    autoSync:			false,          // We need manual control for saving etc.
     folderSort:			false,		// Needs to be false in order to preserve the MS-Project import order
     proxy: {
         type:			'ajax',
