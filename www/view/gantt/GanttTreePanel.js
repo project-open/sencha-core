@@ -37,9 +37,21 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     plugins:				[Ext.create('Ext.grid.plugin.CellEditing', {
 	clicksToEdit: 1,
 	listeners: {
-	    // Load estimated_units + uom_id into te "Work" column
+	    // Load planned_units + uom_id into te "Work" column
 	    beforeedit: function(editor, context, eOpts) {
 		console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit'); console.log(context);
+		var model = context.record;
+		var field = context.field;
+
+		// Veto editing planned_units for objects of type "im_project":
+		if ("planned_units" == field && "im_project" == model.get('object_type')) { return false; }
+
+		// Veto editing properties of parent objects except for the name.
+		// Their properties are determined by their children via the scheduler.
+		if (model.childNodes.length > 0) {                    // If this is a parent object with children
+		    if ("project_name" != field) { return false; }
+		}
+		return true;
 	    },
 	    validateedit: function(cellediting, context, eOpts) {
 		console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit'); console.log(context);
@@ -47,6 +59,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	    },
 	    edit: function(cellediting, context, eOpts) {
 		console.log('PO.view.gantt.GanttTreePanel.cellediting.edit'); console.log(context);
+		var buttonSave = Ext.getCmp('buttonSave');
+		buttonSave.setDisabled(false);
 	    }
 	}
     })],
@@ -63,7 +77,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     columns: [
 	{text: 'I', xtype: 'actioncolumn', dataIndex: 'project_id', width: 30, items: [{
             icon: '/intranet/images/navbar_default/information.png',
-            tooltip: 'Link',
+            // tooltip: 'Link',
 	    handler: function(grid, rowIndex, colIndex) {
                 console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
                 var rec = grid.getStore().getAt(rowIndex);
@@ -74,28 +88,52 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             }
         }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
-	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: {allowBlank: false}}, 
-	{text: 'Work', width: 50, hidden: false, dataIndex: 'planned_units', editor: 'numberfield', renderer: function(value, context, model) {
-	    var plannedUnits = model.get('planned_units');
-	    var uomId = model.get('uom_id');
-	    var uom = "";
-	    if (320==uomId) { uom = "h"; }
-	    if (321==uomId) { uom = "d"; }
-	    return plannedUnits+uom;
+	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: true, renderer: function(v, context, model, d, e) {
+	    var children = model.childNodes;
+	    if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
+	}}, 
+	{text: 'Work', width: 55, align: 'right', hidden: false, dataIndex: 'planned_units', editor: 'numberfield', renderer: function(value, context, model) {
+	    // Calculate the UoM unit
+	    var planned_units = model.get('planned_units');
+	    if (0 == model.childNodes.length) {
+		// A leaf task - just show the units
+		if ("" != planned_units) { planned_units = planned_units + "h"; }
+		return planned_units;
+	    } else {
+		// A parent node - sum up the planned units of all leafs.
+		var plannedUnits = 0.0;
+		model.cascade(function(child) {
+		    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
+			var puString = child.get('planned_units');
+			if ("" != puString) {
+			    var pu = parseFloat(puString);
+			    if ("number" == typeof pu) { plannedUnits = plannedUnits + pu; }
+			}
+		    }
+		});
+		return "<b>"+plannedUnits+"h</b>";
+	    }
 	}},
-	{text: 'Start', width: 75, hidden: false, dataIndex: 'start_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
-	{text: 'End', width: 75, hidden: false, dataIndex: 'end_date', renderer: function(value) { return value.substring(0,10); }, editor: 'podatefield' },
-	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', renderer: function(assignees) {
-	    return PO.view.field.POTaskAssignment.formatAssignments(assignees);
+	{text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', editor: 'podatefield', renderer: function(value, context, model) {
+	    var isLeaf = (0 == model.childNodes.length);
+	    if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
+	}},
+	{text: 'End', width: 80, hidden: false, dataIndex: 'end_date', editor: 'podatefield', renderer: function(value, context, model) {
+	    var isLeaf = (0 == model.childNodes.length);
+	    if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
+	}},
+	{text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', renderer: function(value, context, model) {
+	    var isLeaf = (0 == model.childNodes.length);
+	    var result = PO.view.field.POTaskAssignment.formatAssignments(value);
+	    if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
 	}},
 	{text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
-	{text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true, renderer: function(value) {
+	{text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
+	 editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}, renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
              return model.get('category');
-         },
-         editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}
-	}
+         }}
 	// {xtype: 'checkcolumn', header: 'Done', hidden: false, dataIndex: 'done', width: 40, stopSelection: false, editor: {xtype: 'checkbox', cls: 'x-grid-checkheader-editor'}}
     ],
 
