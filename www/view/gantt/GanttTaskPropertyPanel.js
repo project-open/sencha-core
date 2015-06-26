@@ -296,23 +296,43 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
         
         var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
+
+	// Fix values
+	fields['planned_units'] = ""+fields['planned_units'];              // Convert the numberfield integer to string used in model.
+	var oldStartDate = me.taskModel.get('start_date');
+	var oldEndDate = me.taskModel.get('end_date');
+	var newStartDate = fields['start_date'];
+	var newEndDate = fields['end_date'];
+	if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
+	if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
         me.taskModel.set(fields);
+	
         fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
         me.taskModel.set(fields);
 
-        var assignees = [];
+	// Deal with Assignations
+	var oldAssignees = me.taskModel.get('assignees');
+        var newAssignees = [];
         me.taskAssignmentStore.each(function(assig) {
             var user_id = assig.get('user_id');
             console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
 	    var rel_id = parseInt(assig.get('rel_id'));
 	    if (!rel_id) { rel_id = null; }
-            assignees.push({
+            newAssignees.push({
 		id: rel_id,
 		user_id: parseInt(assig.get('user_id')),
 		percent: parseFloat(assig.get('percent'))
 	    });
         });
-        me.taskModel.data.assignees = assignees;
+
+	// Compare old with new assignees
+	var oldAssigneesNorm = {};
+	var newAssigneesNorm = {};
+	oldAssignees.forEach(function(v) { oldAssigneesNorm[v.user_id] = v.percent; });
+	newAssignees.forEach(function(v) { newAssigneesNorm[v.user_id] = v.percent; });
+	if (JSON.stringify(oldAssigneesNorm) !== JSON.stringify(newAssigneesNorm)) {
+            me.taskModel.set('assignees', newAssignees);
+	}
 
         me.hide();                              // hide the TaskProperty panel
     },
@@ -369,7 +389,6 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         me.taskAssignmentStore.removeAll();
         var assignments = task.get('assignees');
         assignments.forEach(function(v) {
-
             var userId = ""+v.user_id;
             var userModel = projectMemberStore.getById(userId);
             //var assigModel = Ext.create('PO.model.gantt.GanttAssignmentModel');
