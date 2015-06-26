@@ -100,7 +100,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 
 	'successors',				// List of tasks that depend on the current tasks
 	'predecessors',				// List of tasks on which this task depends
-	'assignees',				// List of users assigned to the task with {id,percent,name,email,initials}
+	'assignees',				// List of users assigned to the task with {id,user_id,percent}
 
 	'expanded',                             // true or false (without quotes), default state for tree
 
