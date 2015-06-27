@@ -109,9 +109,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 
         // Now using offsetX/offsetY instead of getXY()
         var point = me.getMousePoint(e);
-        var baseSprite = me.getSpriteForPoint(point);
-        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point+' -> ' + baseSprite);
-        if (baseSprite == null) { return; }
+        var baseSprites = me.getSpriteForPoint(point);
+        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point+' -> ' + baseSprites);
+        if (0 == baseSprites.length) { return; }
+	var baseSprite = baseSprites[0];
 
         if (e.button == 2) {
             // Right-click on sprite
@@ -169,7 +170,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         console.log('PO.view.gantt.AbstractGanttPanel.onMouseUp: '+point);
 
         // Check where the user has dropped the mouse
-        var dropSprite = me.getSpriteForPoint(point);
+        var dropSprites = me.getSpriteForPoint(point);
+	var dropSprite = null;
+	if (dropSprites.length > 0) { dropSprite = dropSprites[0]; }
         if (dropSprite == me.dndBaseSprite) { dropSprite = null; }		// Dropped on the same sprite? => normal drop
 
         // Reset the offset when just clicking
@@ -192,7 +195,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     },
 
     /**
-     * Returns the item for a x/y mouse coordinate
+     * Returns a list of sprites for a x/y mouse coordinate
      */
     getSpriteForPoint: function(point) {
         var me = this,
@@ -213,10 +216,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             if (bbox.x + bbox.width < x) continue;
             if (bbox.y + bbox.height < y) continue;
 
-            return sprite;
+            result.push(sprite);
         }
 
-        return null;
+        return result;
     },
 
     /**
