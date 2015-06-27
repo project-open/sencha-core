@@ -49,30 +49,23 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             model: 'PO.model.gantt.GanttAssignmentModel'
         });
 
+	// Row editor for the TaskAssignmentsPanel.
         var taskAssignmentRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
             clicksToEdit: 1,
             clicksToMoveEditor: 1,
             autoCancel: true,
-	    valueModels: null,                                                 // set by "select" event of combobox
+            valueModels: null,                                                 // set by "select" event of combobox
             listeners: {
-		// The percentage has been changed or the name of the user.
-		// Write the changes back into the taskAssignmentStore.
+                // The user_id or percent have changed. Write the changes back into the taskAssignmentStore.
                 edit: function(rowEditing, context, eOpts) {
-		    if ("name" != context.field && "id" != context.field) { return; }
+                    if ("name" != context.field && "id" != context.field) { return; }
+		    var userModels = this.valueModels;
+		    if (!userModels) { return; }                                // Nothing selected?
+                    var userModel = this.valueModels[0];
+                    if (!userModel) { return; }                                 // ??
 
-		    /*
-                    // Check which user has been selected and write appropriate values
-                    var column = context.column;
-                    var editor = column.getEditor();
-		    var userModel = editor.valueModels[0];
-		    */
-		    var userModel = this.valueModels[0];
-		    if (userModel) {
-			var assigModel = context.record;			// get the recored to be edited
-			assigModel.set(userModel.data);
-			return;
-		    }
-		    alert('GanttTaskPropertyPanel.taskAssignmentRowEditing: userModel not defined');
+                    var assigModel = context.record;			        // get the recored to be edited
+                    assigModel.set(userModel.data);
                 }
             }
         });
@@ -96,10 +89,10 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     triggerAction: 'all',
                     allowBlank: false,
                     editable: true,
-		    listeners: {select: function(combo, records) {
-			combo.valueModels = records;
-			taskAssignmentRowEditing.valueModels = records;
-		    }}  // remember selected user
+                    listeners: {select: function(combo, records) {
+                	combo.valueModels = records;
+                	taskAssignmentRowEditing.valueModels = records;
+                    }}  // remember selected user
                 }},
                 { text: 'Email', dataIndex: 'email', flex: 1, hidden: false },
                 { text: '%', width: 50, dataIndex: 'percent', editor: 'textfield' }
@@ -297,42 +290,44 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         
         var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
 
-	// Fix values
-	fields['planned_units'] = ""+fields['planned_units'];              // Convert the numberfield integer to string used in model.
-	var oldStartDate = me.taskModel.get('start_date');
-	var oldEndDate = me.taskModel.get('end_date');
-	var newStartDate = fields['start_date'];
-	var newEndDate = fields['end_date'];
-	if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
-	if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
+        // Fix values
+        var oldStartDate = me.taskModel.get('start_date');
+        var oldEndDate = me.taskModel.get('end_date');
+        var newStartDate = fields['start_date'];
+        var newEndDate = fields['end_date'];
+        if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
+        if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
         me.taskModel.set(fields);
-	
+        
         fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
+	var plannedUnits = fields['planned_units'];
+	if (undefined == plannedUnits) { plannedUnits = 0; }
+        fields['planned_units'] = ""+plannedUnits;              // Convert the numberfield integer to string used in model.
         me.taskModel.set(fields);
 
-	// Deal with Assignations
-	var oldAssignees = me.taskModel.get('assignees');
+        // Deal with Assignations
+        var oldAssignees = me.taskModel.get('assignees');
         var newAssignees = [];
         me.taskAssignmentStore.each(function(assig) {
             var user_id = assig.get('user_id');
             console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
-	    var rel_id = parseInt(assig.get('rel_id'));
-	    if (!rel_id) { rel_id = null; }
+            var rel_id = parseInt(assig.get('rel_id'));
+            if (!rel_id) { rel_id = null; }
             newAssignees.push({
-		id: rel_id,
-		user_id: parseInt(assig.get('user_id')),
-		percent: parseFloat(assig.get('percent'))
-	    });
+                id: rel_id,
+                user_id: parseInt(assig.get('user_id')),
+                percent: parseFloat(assig.get('percent'))
+            });
         });
 
-	// Compare old with new assignees
-	var oldAssigneesNorm = {};
-	var newAssigneesNorm = {};
-	oldAssignees.forEach(function(v) { oldAssigneesNorm[v.user_id] = v.percent; });
-	newAssignees.forEach(function(v) { newAssigneesNorm[v.user_id] = v.percent; });
-	if (JSON.stringify(oldAssigneesNorm) !== JSON.stringify(newAssigneesNorm)) {
+        // Compare old with new assignees
+        var oldAssigneesNorm = {};
+        var newAssigneesNorm = {};
+        oldAssignees.forEach(function(v) { oldAssigneesNorm[v.user_id] = v.percent; });
+        newAssignees.forEach(function(v) { newAssigneesNorm[v.user_id] = v.percent; });
+        if (JSON.stringify(oldAssigneesNorm) !== JSON.stringify(newAssigneesNorm)) {
             me.taskModel.set('assignees', newAssignees);
-	}
+        }
 
         me.hide();                              // hide the TaskProperty panel
     },
@@ -391,9 +386,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         assignments.forEach(function(v) {
             var userId = ""+v.user_id;
             var userModel = projectMemberStore.getById(userId);
-            //var assigModel = Ext.create('PO.model.gantt.GanttAssignmentModel');
-            //assigModel.set(userModel.data);
-	    var assigModel = new PO.model.gantt.GanttAssignmentModel(userModel.data);
+	    if (!userModel) { return; }                                      // User not set in assignment row
+            var assigModel = new PO.model.gantt.GanttAssignmentModel(userModel.data);
             assigModel.set('percent', v.percent);
             me.taskAssignmentStore.add(assigModel);
         });

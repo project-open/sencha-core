@@ -200,7 +200,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             end_date: new Date().toISOString().substring(0,10),
             percent_completed: '0',
             project_status_id: '76',
-            project_type_id: '100'
+            project_type_id: '100',
+	    assignees: []
         });
         var rNode = root.createNode(r);
         rNode.set('leaf', true);					// Leafs show a different icon than folders
