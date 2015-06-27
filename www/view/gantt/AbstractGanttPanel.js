@@ -30,6 +30,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     objectStore: null,					// Set during init: Reference to object store (tree or flat)
     preferenceStore: null,				// Set during init: Reference to store with user preferences
 
+    // Start of the date axis
+    axisStartDate: null,				// Set during init
+    axisEndDate: null,					// Set during init
+
     granularity: 'none',				// Set during init: 'week' or 'day'
     granularityWorkDays: 1,				// Set during init: 1 for daily interval, 5 for weekly
 
@@ -45,10 +49,6 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     ganttBarHeight: 12,
 
     // Start of the date axis
-    reportStartDate: null,				// Needs to be set during init
-    reportEndDate: null,				// Needs to be set during init
-    axisStartDate: null,
-    axisEndDate: null,
     axisStartX: 0,
     axisEndX: 0,					// End of the axis. ToDo: Adapt to screen width
     axisHeight: 11,					// Height of each of the two axis levels
@@ -73,8 +73,6 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 
         me.axisStartX = 0;
         me.axisEndX = me.ganttSurfaceWidth;
-        me.axisStartDate = me.reportStartDate;
-        me.axisEndDate = me.reportEndDate;
 
         // New Event: Drag-and-Drop for a Gantt bar
         this.addEvents('spritednd', 'spriterightclick');
