@@ -89,10 +89,14 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
 	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: true, renderer: function(v, context, model, d, e) {
+	    context.style = 'cursor: pointer;'; 
 	    var children = model.childNodes;
 	    if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
 	}}, 
-	{text: 'Work', width: 55, align: 'right', hidden: false, dataIndex: 'planned_units', editor: 'numberfield', renderer: function(value, context, model) {
+	{text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', editor: {
+	    xtype: 'numberfield',
+	    minValue: 0
+	}, renderer: function(value, context, model) {
 	    // Calculate the UoM unit
 	    var planned_units = model.get('planned_units');
 	    if (0 == model.childNodes.length) {
@@ -112,6 +116,33 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		    }
 		});
 		return "<b>"+plannedUnits+"h</b>";
+	    }
+	}},
+	{text: '%Done', width: 50, align: 'right', dataIndex: 'percent_completed', editor: {
+	    xtype: 'numberfield',
+	    minValue: 0,
+            maxValue: 100
+	}, renderer: function(value, context, model) {
+	    var percent_completed = model.get('percent_completed');
+	    var isLeaf = (0 == model.childNodes.length);
+	    if (0 == model.childNodes.length) {		                // A leaf task - just show the units
+		if ("" != percent_completed) { percent_completed = percent_completed + "%"; }
+		return percent_completed;
+	    } else {                                    		// A parent node - sum up the planned units of all leafs.
+		var plannedUnits = 0.0
+		var completedUnits = 0.0;
+		model.cascade(function(child) {
+		    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
+			var plannedString = child.get('planned_units');
+			var completedString = child.get('percent_completed');
+			if (!plannedString || !completedString || "" == plannedString || "" == completedString) { return; }
+			plannedUnits = plannedUnits + parseFloat(plannedString);
+			completedUnits = completedUnits + parseFloat(plannedString) * parseFloat(completedString) / 100;
+		    }
+		});
+		var done = "";
+		if (0 != plannedUnits) { done = Math.floor(100.0 * completedUnits / plannedUnits); }
+		return "<b>"+done+"%</b>";
 	    }
 	}},
 	{text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', editor: 'podatefield', renderer: function(value, context, model) {
