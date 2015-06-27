@@ -24,10 +24,10 @@ Ext.define('PO.store.timesheet.TaskTreeStore', {
             project_id:		0		// Will be set by app before loading
         },
         api: {
-            create:		'/intranet-rest/data-source/project-task-tree.json?create=1',
             read:		'/intranet-rest/data-source/project-task-tree.json?read=1',
-            update:		'/intranet-rest/data-source/project-task-tree-update',
-            destroy:		'/intranet-rest/data-source/project-task-tree.json?destroy=1',
+            create:		'/intranet-rest/data-source/project-task-tree-action?action=create',
+            update:		'/intranet-rest/data-source/project-task-tree-action?action=update',
+            destroy:		'/intranet-rest/data-source/project-task-tree-action?action=delete'
         },
         reader: {
             type:		'json', 
