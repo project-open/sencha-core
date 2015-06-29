@@ -57,10 +57,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit'); console.log(context);
 		return true;
 	    },
+	    // Called after a successfull edit
 	    edit: function(cellediting, context, eOpts) {
 		console.log('PO.view.gantt.GanttTreePanel.cellediting.edit'); console.log(context);
-		var buttonSave = Ext.getCmp('buttonSave');
-		buttonSave.setDisabled(false);
 	    }
 	}
     })],
