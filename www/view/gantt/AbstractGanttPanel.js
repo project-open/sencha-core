@@ -42,6 +42,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     dndBasePoint: null,					// Drag-and-drop starting point
     dndBaseSprite: null,				// DnD sprite being draged
     dndShadowSprite: null,				// DnD shadow generated for BaseSprite
+    dndConfig: null,
 
     // Size of the Gantt diagram
     ganttSurfaceWidth: 1500,
@@ -70,12 +71,13 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         me.dndBasePoint = null;				// Drag-and-drop starting point
         me.dndBaseSprite = null;			// DnD sprite being draged
         me.dndShadowSprite = null;			// DnD shadow generated for BaseSprite
+	me.dndConfig = null;
 
         me.axisStartX = 0;
         me.axisEndX = me.ganttSurfaceWidth;
 
         // New Event: Drag-and-Drop for a Gantt bar
-        this.addEvents('spritednd', 'spriterightclick');
+        this.addEvents('spriterightclick');
 
         // Drag & Drop on the "surface"
         me.on({
@@ -107,22 +109,22 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
         if (!me.dndEnabled) { return; }
 
-        // Now using offsetX/offsetY instead of getXY()
-        var point = me.getMousePoint(e);
-        var baseSprite = me.getSpriteForPoint(point);
-        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point); console.log(baseSprite);
-        if (!baseSprite) { return; }
-
-        if (e.button == 2) {
-            // Right-click on sprite
+        if (e.button == 2) {                                            // Right-click on sprite
             me.fireEvent('spriterightclick', e, baseSprite);
             baseSprite = null;
             return;
         }
 
-        var bBox = baseSprite.getBBox();
-	var radius = 0;
-	if (baseSprite.radius) radius = baseSprite.radius;
+        // Now using offsetX/offsetY instead of getXY()
+        var point = me.getMousePoint(e);
+        var baseSprite = me.getSpriteForPoint(point);                   // Trust on zIndex to get the right sprite
+        if (!baseSprite) { return; }
+	var dndConfig = baseSprite.dndConfig;
+	var dragSprite = dndConfig.dragSprite;
+        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point); console.log(dragSprite);
+
+        var bBox = dragSprite.getBBox();
+	var radius = dragSprite.radius || 0;
         var surface = me.surface;
         var spriteShadow = surface.add({
             type: 'rect',
@@ -135,8 +137,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             'stroke-width': 1
         }).show(true);
 
+	me.dndConfig = dndConfig;
         me.dndBasePoint = point;
-        me.dndBaseSprite = baseSprite;
+        me.dndBaseSprite = dragSprite;
         me.dndShadowSprite = spriteShadow;
     },
 
@@ -146,16 +149,18 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     onMouseMove: function(e) {
         var me = this;
-        if (!me.dndEnabled) { return; }
-
-        if (me.dndBasePoint == null) { return; }				// Only if we are dragging
         var point = me.getMousePoint(e);
-        me.dndShadowSprite.setAttributes({
-            translate: {
-                x: point[0] - me.dndBasePoint[0],
-                y: 0
-            }
-        }, true);
+
+        if (!me.dndEnabled) { return; }
+        if (!me.dndBasePoint) { return; }				// Only if we are dragging
+        if (!me.dndConfig) { return; }				// Only if we are dragging
+	
+	var xDiff = point[0] - me.dndBasePoint[0];
+	var yDiff = point[1] - me.dndBasePoint[1];
+	var diff = [xDiff,yDiff];
+
+	var dndConfig = me.dndConfig;
+	dndConfig.dragAction(me, e, diff, dndConfig);
     },
 
     /**
@@ -164,27 +169,17 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     onMouseUp: function(e) {
         var me = this;
-        if (!me.dndEnabled) { return; }						// DnD is disabled for CostCenter bars
-        if (me.dndBasePoint == null) { return; }				// No DnD? At least inconsistent...
+        if (!me.dndEnabled) { return; }
+        if (!me.dndBasePoint) { return; }				// Only if we are dragging
+        if (!me.dndConfig) { return; }				// Only if we are dragging
 
         var point = me.getMousePoint(e);
-        console.log('PO.view.gantt.AbstractGanttPanel.onMouseUp: '+point);
+	var xDiff = point[0] - me.dndBasePoint[0];
+	var yDiff = point[1] - me.dndBasePoint[1];
+	var diff = [xDiff,yDiff];
 
-        // Check where the user has dropped the mouse
-        var dropSprite = me.getSpriteForPoint(point);
-        if (dropSprite == me.dndBaseSprite) { dropSprite = null; }		// Dropped on the same sprite? => normal drop
-
-        // Reset the offset when just clicking
-        var xDiff = point[0] - me.dndBasePoint[0];
-        var yDiff = point[1] - me.dndBasePoint[1];
-        if (0 == Math.abs(xDiff) + Math.abs(yDiff)) {
-            // Single click - nothing
-        } else {
-            // Fire event in order to notify listerns about the move
-            var model = me.dndBaseSprite.model;
-            var diffPoint = [xDiff,yDiff]
-            me.fireEvent('spritednd', me.dndBaseSprite, dropSprite, diffPoint);
-        }
+	var dndConfig = me.dndConfig;
+	dndConfig.dropAction(me, e, diff, dndConfig);
 
         // Stop DnD'ing
         me.dndBasePoint = null;					// Stop dragging
@@ -206,7 +201,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         for (var i = 0, ln = items.length; i < ln; i++) {
             var sprite = items[i];
             if (!sprite) continue;
-            if (!sprite.model) continue;                // Only check for sprites with a (project) model
+            if (!sprite.dndConfig) continue;                // Only check for sprites with a (project) model
             // if (sprite.type == 'path') continue;	// No drag-and-drop on pathes
 
             var bbox = sprite.getBBox();
