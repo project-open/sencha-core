@@ -95,9 +95,12 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      * because sprites.getBBox() also returns relative coo.
      */
     getMousePoint: function(mouseEvent) {
+	var me = this;
+	var scroll = me.getEl().getScroll();				// We need to adjust the mouse point by the scroll
+
         var surfaceBaseCoo = this.getXY();
         var mouseScreenCoo = mouseEvent.getXY();
-        var mousePoint = [mouseScreenCoo[0] - surfaceBaseCoo[0], mouseScreenCoo[1] - surfaceBaseCoo[1]]
+        var mousePoint = [mouseScreenCoo[0] - surfaceBaseCoo[0] + scroll.left, mouseScreenCoo[1] - surfaceBaseCoo[1]]
         return mousePoint;
     },
 
