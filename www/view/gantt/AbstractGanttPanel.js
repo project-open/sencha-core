@@ -109,37 +109,32 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
         if (!me.dndEnabled) { return; }
 
-        if (e.button == 2) {                                            // Right-click on sprite
-            me.fireEvent('spriterightclick', e, baseSprite);
-            baseSprite = null;
-            return;
+        var point = me.getMousePoint(e);				// Get corrected screen coordinates
+        var mouseSprite = me.getSpriteForPoint(point);                  // Trust on zIndex to get the right sprite
+        if (!mouseSprite) { return; }					// Clicked in the empty surface
+        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point);
+
+        if (e.button == 2) {                                            // Right-click on sprite?
+            me.fireEvent('spriterightclick', e, mouseSprite);
+            return;							// Don't continue with Drag-and-Drop stuff
         }
 
         // Now using offsetX/offsetY instead of getXY()
-        var point = me.getMousePoint(e);
-        var baseSprite = me.getSpriteForPoint(point);                   // Trust on zIndex to get the right sprite
-        if (!baseSprite) { return; }
-	var dndConfig = baseSprite.dndConfig;
-	var dragSprite = dndConfig.dragSprite;
-        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point); console.log(dragSprite);
+	var dndConfig = mouseSprite.dndConfig;				// DnD info stored together with mouseSprite
+	var baseSprite = dndConfig.baseSprite;				// baseSprite is the sprite to be DnD'ed
 
-        var bBox = dragSprite.getBBox();
-	var radius = dragSprite.radius || 0;
-        var surface = me.surface;
-        var spriteShadow = surface.add({
+        var bBox = baseSprite.getBBox();
+	var radius = baseSprite.radius || 0;
+        var spriteShadow = me.surface.add({				// Create a "shadow" copy of the baseSprite with red borders
+            x: bBox.x, y: bBox.y, width: bBox.width, height: bBox.height, radius: radius,
             type: 'rect',
-            x: bBox.x,
-            y: bBox.y,
-            width: bBox.width,
-            height: bBox.height,
-            radius: radius,
             stroke: 'red',
             'stroke-width': 1
         }).show(true);
 
-	me.dndConfig = dndConfig;
+	me.dndConfig = dndConfig;					// Store DnD configuration in the GanttEditor
         me.dndBasePoint = point;
-        me.dndBaseSprite = dragSprite;
+        me.dndBaseSprite = baseSprite;
         me.dndShadowSprite = spriteShadow;
     },
 
