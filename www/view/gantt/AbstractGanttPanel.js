@@ -358,8 +358,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                     for (var v in model.data) { data[v] = model.data[v]; }
                     data['value'] = lastValue;
                     data['maxValue'] = maxGraphArray;
-                    data['startDate'] = segmentStartDate.toISOString().substring(0,10);
-                    data['endDate'] = new Date(lastIntervalEndDate.getTime() - oneDayMilliseconds).toISOString().substring(0,10);
+                    data['startDate'] = segmentStartDate.toPg().substring(0,10);
+                    data['endDate'] = new Date(lastIntervalEndDate.getTime() - oneDayMilliseconds).toPg().substring(0,10);
                     var tip = Ext.create("Ext.tip.ToolTip", {
                         target: spritePath.el,
                         width: 250,
