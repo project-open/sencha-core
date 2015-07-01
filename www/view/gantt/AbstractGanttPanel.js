@@ -30,9 +30,13 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     objectStore: null,					// Set during init: Reference to object store (tree or flat)
     preferenceStore: null,				// Set during init: Reference to store with user preferences
 
-    // Start of the date axis
+    // Axis information - can be overwritten during init
     axisStartDate: null,				// Set during init
     axisEndDate: null,					// Set during init
+    axisStartX: 0,					// Start of the X-axis. Should be 0 always.
+    axisEndX: 2000,					// Set during init
+    axisHeight: 11,					// Height of each of the two axis levels
+    axisScale: 'month',					// Default scale for the time axis
 
     granularity: 'none',				// Set during init: 'week' or 'day'
     granularityWorkDays: 1,				// Set during init: 1 for daily interval, 5 for weekly
@@ -46,14 +50,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 
     // Size of the Gantt diagram
     ganttSurfaceWidth: 1500,
-    ganttSurfaceHeight: 300,
     ganttBarHeight: 12,
-
-    // Start of the date axis
-    axisStartX: 0,
-    axisEndX: 0,					// End of the axis. ToDo: Adapt to screen width
-    axisHeight: 11,					// Height of each of the two axis levels
-    axisScale: 'month',					// Default scale for the time axis
 
     monthThreeChar: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     weekThreeChar: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -72,9 +69,6 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         me.dndBaseSprite = null;			// DnD sprite being draged
         me.dndShadowSprite = null;			// DnD shadow generated for BaseSprite
 	me.dndConfig = null;
-
-        me.axisStartX = 0;
-        me.axisEndX = me.ganttSurfaceWidth;
 
         // New Event: Drag-and-Drop for a Gantt bar
         this.addEvents('spriterightclick');
