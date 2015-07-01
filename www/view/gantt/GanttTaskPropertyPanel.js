@@ -18,6 +18,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 
     title: 'Task Properties',
     id: 'ganttTaskPropertyPanel',
+
     width: 500,
     height: 400,
 

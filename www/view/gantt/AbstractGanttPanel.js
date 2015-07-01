@@ -111,18 +111,25 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     onMouseDown: function(e) {
         var me = this;
         if (!me.dndEnabled) { return; }
-
         var point = me.getMousePoint(e);				// Get corrected screen coordinates
+        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: button='+e.button+", point="+point);
         var mouseSprite = me.getSpriteForPoint(point);                  // Trust on zIndex to get the right sprite
-        if (!mouseSprite) { return; }					// Clicked in the empty surface
-        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: '+point);
 
         if (e.button == 2) {                                            // Right-click on sprite?
-            me.fireEvent('spriterightclick', e, mouseSprite);
-            return;							// Don't continue with Drag-and-Drop stuff
+	    if (!!mouseSprite) {                                        // Found a "real" sprite for the mouse coo
+		me.fireEvent('spriterightclick', e, mouseSprite);
+		return true;
+	    }
+	    var mouseSprites = me.getSpritesForPoint(point, true);	// Get _all_sprites for the point
+	    if (mouseSprites.length > 0) {
+		me.fireEvent('spriterightclick', e, mouseSprites[0]);
+		return true;
+	    }
+            return true;							// Don't continue with Drag-and-Drop stuff
         }
 
         // Now using offsetX/offsetY instead of getXY()
+	if (!mouseSprite) return;
 	var dndConfig = mouseSprite.dndConfig;				// DnD info stored together with mouseSprite
 	var baseSprite = dndConfig.baseSprite;				// baseSprite is the sprite to be DnD'ed
 
@@ -189,7 +196,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     /**
      * Returns a list of sprites for a x/y mouse coordinate
      */
-    getSpritesForPoint: function(point) {
+    getSpritesForPoint: function(point, allSprites) {
         var me = this,
             x = point[0],
             y = point[1];
@@ -199,8 +206,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         for (var i = 0, ln = items.length; i < ln; i++) {
             var sprite = items[i];
             if (!sprite) continue;
-            if (!sprite.dndConfig) continue;                // Only check for sprites with a (project) model
-            // if (sprite.type == 'path') continue;	// No drag-and-drop on pathes
+            if (!allSprites) {					// Check, unless allSprites is "true"
+		if (!sprite.dndConfig) continue;                // Only check for sprites with a (project) model
+	    }
 
             var bbox = sprite.getBBox();
             if (bbox.x > x) continue;
@@ -396,9 +404,11 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (timespanDays > 30) {
             me.drawAxisMonth(h); h = h + me.axisHeight;
         }
+/*
         if (timespanDays > 7 && h < 2 * me.axisHeight) {
             me.drawAxisWeek(h); h = h + me.axisHeight;
         }
+	*/
         if (timespanDays > 1 && h < 2 * me.axisHeight) {
             me.drawAxisDay(h);
         }
