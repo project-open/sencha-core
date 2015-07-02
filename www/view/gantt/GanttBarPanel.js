@@ -228,8 +228,8 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var diffTime = xDiff * (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (me.axisEndX - me.axisStartX);
 	var diffDays = Math.round(diffTime / 24.0 / 3600.0 / 1000.0);
 
-        var startDate = Date.fromPg(projectModel.get('start_date'));
-        var endDate = Date.fromPg(projectModel.get('end_date'));
+        var startDate = PO.Utilities.pgToDate(projectModel.get('start_date'));
+        var endDate = PO.Utilities.pgToDate(projectModel.get('end_date'));
         var startTime = startDate.getTime();
         var endTime = endDate.getTime();
 
@@ -245,8 +245,8 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var newStartDate = new Date(startTime);
         var newEndDate = new Date(endTime);
 
-        projectModel.set('start_date', newStartDate.toPg());
-        projectModel.set('end_date', newEndDate.toPg());
+        projectModel.set('start_date', PO.Utilities.dateToPg(newStartDate));
+        projectModel.set('end_date', PO.Utilities.dateToPg(newEndDate));
 
         me.redraw();
         if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectMove: Finished');
@@ -394,7 +394,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
 
         // Store the start and end points of the Gantt bar
         var id = project.get('id');
-        me.taskBBoxHash[id] = [x, y, x+w, y+h];					// Remember the outer dimensions of the box for dependency drawing
+        me.taskBBoxHash[id] = {x: x, y: y, width: w, height: h};		// Remember the outer dimensions of the box for dependency drawing
         me.taskModelHash[id] = project;						// Remember the models per ID
 
         if (!project.hasChildNodes()) {						// Parent tasks don't have DnD and look different
@@ -557,7 +557,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
 
         for (var i = 0, len = predecessors.length; i < len; i++) {
             var dependencyModel = predecessors[i];
-            me.drawDependency(dependencyModel);
+            me.drawDependency(dependencyModel);					// Draw a dependency arrow between Gantt bars
         }
     },
 
@@ -569,64 +569,59 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
 	if (me.debug) if (me.debug) console.log('PO.view.portfolio_planner.PortfolioPlannerProjectPanel.drawTaskDependency: Starting');
 
         var fromId = dependencyModel.pred_id;
-        var toId = dependencyModel.succ_id;
-        var s = me.arrowheadSize;
-
-        var fromBBox = me.taskBBoxHash[fromId];					// We start drawing with the end of the first bar...
         var fromModel = me.taskModelHash[fromId]
-        var toBBox = me.taskBBoxHash[toId];			        	// .. and draw towards the start of the 2nd bar.
+        var toId = dependencyModel.succ_id;
         var toModel = me.taskModelHash[toId]
-        if (!fromBBox || !toBBox) { return; }
 
-        // Add a tool tip to the dependency
+        // Text for dependency tool tip
         var html = "<b>Task dependency</b>:<br>" +
             "From <a href='/intranet/projects/view?project_id=" + fromId + "' target='_blank'>" + fromModel.get('project_name') + "</a> " +
             "to <a href='/intranet/projects/view?project_id=" + toId + "' target='_blank'>" + toModel.get('project_name') + "</a>";
 
 	me.drawDependencyMsp(dependencyModel,html);
+
 	if (me.debug) if (me.debug) console.log('PO.view.portfolio_planner.PortfolioPlannerProjectPanel.drawTaskDependency: Finished');
     },
-
-
 
     /**
      * Draws a dependency line from one bar to the next one
      */
-    drawDependencyMsp: function(dependencyModel) {
+    drawDependencyMsp: function(dependencyModel, tooltipHtml) {
         var me = this;
 
         var fromId = dependencyModel.pred_id;
-        var toId = dependencyModel.succ_id;
-        var s = me.arrowheadSize;
-
         var fromBBox = me.taskBBoxHash[fromId];					// We start drawing with the end of the first bar...
         var fromModel = me.taskModelHash[fromId]
+
+        var toId = dependencyModel.succ_id;
         var toBBox = me.taskBBoxHash[toId];			        	// .. and draw towards the start of the 2nd bar.
         var toModel = me.taskModelHash[toId]
         if (!fromBBox || !toBBox) { return; }
 
-        var startX = fromBBox[2];						// End-to-start dependencies from a earlier task to a later task
-        var startY = fromBBox[3];
-        var endX = toBBox[0];
-        var endY = toBBox[1];
+        var s = me.arrowheadSize;
+        var startX = fromBBox.x + fromBBox.width;				// End-to-start dependencies from a earlier task to a later task
+        var startY = fromBBox.y + fromBBox.height/2;
+        var endX = toBBox.x + s;
+        var endY = toBBox.y;
 
         // Color: Arrows are black if dependencies are OK, or red otherwise
         var color = '#222';
         if (endX < startX) { color = 'red'; }
 
-        // Set the vertical start point to Correct the start/end Y position
-        // and the direction of the arrow head
-        var sDirected = null;
-        if (endY > startY) {
-            // startY = startY + me.barHeight;
-            sDirected = -s;							// Draw "normal" arrowhead pointing downwards
-            startY = startY - 2;
-            endY = endY + 0;
-        } else {
-            startY = startY - me.barHeight + 4;
-            endY = endY + me.barHeight - 2;
-            sDirected = +s;							// Draw arrowhead pointing upward
-        }
+        // Draw the main connection line between start and end.
+        var arrowLine = me.surface.add({
+            type: 'path',
+            stroke: color,
+            'shape-rendering': 'crispy-edges',
+            'stroke-width': 0.5,
+            zIndex: -100,
+            path: 'M '+ (startX)    + ', ' + (startY)
+                + 'L '+ (endX)      + ', ' + (startY)
+                + 'L '+ (endX)      + ', ' + (endY)
+        }).show(true);
+        arrowLine.dependencyModel = dependencyModel;
+        Ext.create("Ext.tip.ToolTip", { target: arrowLine.el, width: 250, html: tooltipHtml, hideDelay: 1000 });
+
 
         // Draw the arrow head (filled)
         var arrowHead = me.surface.add({
@@ -636,34 +631,13 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
             'stroke-width': 0.5,
             zIndex: -100,
             path: 'M '+ (endX)   + ', ' + (endY)					// Point of arrow head
-                + 'L '+ (endX-s) + ', ' + (endY + sDirected)
-                + 'L '+ (endX+s) + ', ' + (endY + sDirected)
+                + 'L '+ (endX-s) + ', ' + (endY-s)
+                + 'L '+ (endX+s) + ', ' + (endY-s)
                 + 'L '+ (endX)   + ', ' + (endY)
         }).show(true);
         arrowHead.dependencyModel = dependencyModel;
+        Ext.create("Ext.tip.ToolTip", { target: arrowHead.el, width: 250, html: tooltipHtml, hideDelay: 1000 });
 
-        // Draw the main connection line between start and end.
-        var arrowLine = me.surface.add({
-            type: 'path',
-            stroke: color,
-            'shape-rendering': 'crispy-edges',
-            'stroke-width': 0.5,
-            zIndex: -100,
-            path: 'M '+ (startX) + ', ' + (startY)
-                + 'L '+ (startX) + ', ' + (startY - sDirected)
-                + 'L '+ (endX)   + ', ' + (endY + sDirected * 2)
-                + 'L '+ (endX)   + ', ' + (endY + sDirected)
-        }).show(true);
-        arrowHead.dependencyModel = dependencyModel;
-
-        // Add a tool tip to the dependency
-        var html = "<b>Task dependency</b>:<br>" +
-            "From <a href='/intranet/projects/view?project_id=" + fromId + "' target='_blank'>" + fromModel.get('project_name') + "</a> " +
-            "to <a href='/intranet/projects/view?project_id=" + toId + "' target='_blank'>" + toModel.get('project_name') + "</a>";
-
-        // Give 1 second to click on project link
-        var tip1 = Ext.create("Ext.tip.ToolTip", { target: arrowHead.el, width: 250, html: html, hideDelay: 1000 });
-        var tip2 = Ext.create("Ext.tip.ToolTip", { target: arrowLine.el, width: 250, html: html, hideDelay: 1000 });
         if (me.debug) console.log('PO.view.portfolio_planner.PortfolioPlannerProjectPanel.drawTaskDependency: Finished');
         return;
     }
