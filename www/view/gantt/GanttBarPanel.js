@@ -33,7 +33,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
      */
     initComponent: function() {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.initComponent: Starting');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.initComponent: Starting');
         this.callParent(arguments);
 
         me.barHeight = 15;
@@ -82,7 +82,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
 
         this.addEvents('move');
 
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.initComponent: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.initComponent: Finished');
     },
 
     /**
@@ -127,16 +127,16 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
      */
     onProjectGridViewReady: function() {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectGridViewReady: Starting');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectGridViewReady: Starting');
 
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectGridViewReady: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectGridViewReady: Finished');
     },
 
     onProjectGridSortChange: function(headerContainer, column, direction, eOpts) {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectGridSortChange: Starting');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectGridSortChange: Starting');
         me.redraw();
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectGridSortChange: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectGridSortChange: Finished');
     },
 
     /**
@@ -144,7 +144,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
      */
     onSpriteRightClick: function(event, sprite) {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onSpriteRightClick: Starting: '+ sprite);
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onSpriteRightClick: Starting: '+ sprite);
         if (null == sprite) { return; }     				    	// Something went completely wrong...
 
         var dndConfig = sprite.dndConfig;
@@ -158,7 +158,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
             this.onDependencyRightClick(event, sprite);
             return;
         }
-        if (me.debug) { console.log('PO.view.gantt_editor.GanttBarPanel.onSpriteRightClick: Unknown sprite:'); console.log(sprite); }
+        if (me.debug) { console.log('PO.view.gantt.GanttBarPanel.onSpriteRightClick: Unknown sprite:'); console.log(sprite); }
     },
 
     /**
@@ -166,7 +166,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
      */
     onDependencyRightClick: function(event, sprite) {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onDependencyRightClick: Starting: '+ sprite);
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onDependencyRightClick: Starting: '+ sprite);
         if (null == sprite) { return; }     					// Something went completely wrong...
         var dependencyModel = sprite.dependencyModel;
 
@@ -200,7 +200,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
             });
         }
         me.dependencyContextMenu.showAt(event.getXY());
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onDependencyRightClick: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onDependencyRightClick: Finished');
     },
 
     /**
@@ -208,7 +208,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
      */
     onProjectRightClick: function(event, sprite) {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectRightClick: '+ sprite);
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectRightClick: '+ sprite);
         if (null == sprite) { return; }     					// Something went completely wrong...
     },
 
@@ -222,7 +222,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var projectModel = projectSprite.dndConfig.model;
         if (!projectModel) return;
         var projectId = projectModel.get('id');
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectMove: Starting');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectMove: Starting');
 
         var bBox = me.dndBaseSprite.getBBox();					// Get the current coordinates of the moved Gantt bar
         var diffTime = xDiff * (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (me.axisEndX - me.axisStartX);
@@ -249,7 +249,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         projectModel.set('end_date', newEndDate.toPg());
 
         me.redraw();
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectMove: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectMove: Finished');
     },
 
     /**
@@ -262,7 +262,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var projectModel = projectSprite.dndConfig.model;
         if (!projectModel) return;
         var projectId = projectModel.get('id');
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectResize: Starting');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectResize: Starting');
 
         var bBox = me.dndBaseSprite.getBBox();
         var diffTime = Math.floor(1.0 * xDiff * (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (me.axisEndX - me.axisStartX));
@@ -277,7 +277,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         projectModel.set('end_date', endDate.toPg());
 
         me.redraw();
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectResize: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectResize: Finished');
     },
 
     /**
@@ -288,7 +288,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var projectModel = projectSprite.dndConfig.model;
         if (!projectModel) return;
         var projectId = projectModel.get('id');
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectPercentResize: Starting');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectPercentResize: Starting');
 
         var projectBBox = projectSprite.getBBox();
         var percentBBox = percentSprite.getBBox();
@@ -301,7 +301,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         projectModel.set('percent_completed', ""+percent);			// Write to project model and update tree via events
 
         me.redraw();			      					// redraw the entire Gantt editor surface. ToDo: optimize
-        if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.onProjectPercentResize: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectPercentResize: Finished');
     },
 
     /**
@@ -375,7 +375,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
      */
     drawProjectBar: function(project) {
         var me = this;
-        if (me.debug) { if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.drawProjectBar'); }
+        if (me.debug) { if (me.debug) console.log('PO.view.gantt.GanttBarPanel.drawProjectBar'); }
 
         var surface = me.surface;
         var project_name = project.get('project_name');
@@ -417,7 +417,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
                     shadow.setAttributes({translate: {x: diff[0], y: 0}}, true);// Move shadow according to mouse position
                 },
                 dropAction: function(panel, e, diff, dndConfig) {		// Executed onMouseUp in AbastractGanttPanel
-                    if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.drawProjectBar.spriteBar.dropAction:');
+                    if (me.debug) console.log('PO.view.gantt.GanttBarPanel.drawProjectBar.spriteBar.dropAction:');
                     var point = me.getMousePoint(e);				// Corrected mouse coordinates
                     var baseSprite = panel.dndBaseSprite;			// spriteBar to be affected by DnD
                     if (!baseSprite) { return; }				// Something went completely wrong...
@@ -448,7 +448,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
                 model: project,							// Store the task information for the sprite
                 baseSprite: spriteBar,
                 dragAction: function(panel, e, diff, dndConfig) {
-                    if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.drawProjectBar.spriteBarHandle.dragAction:');
+                    if (me.debug) console.log('PO.view.gantt.GanttBarPanel.drawProjectBar.spriteBarHandle.dragAction:');
                     var baseBBox = panel.dndBaseSprite.getBBox();
                     var shadow = panel.dndShadowSprite;
                     shadow.setAttributes({
@@ -456,7 +456,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
                     }).show(true);
                 },
                 dropAction: function(panel, e, diff, dndConfig) {
-                    if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.drawProjectBar.spriteBarHandle.dropAction:');
+                    if (me.debug) console.log('PO.view.gantt.GanttBarPanel.drawProjectBar.spriteBarHandle.dropAction:');
                     me.onProjectResize(panel.dndBaseSprite, diff[0]);		// Changing end-date to match x coo
                 }
             };
@@ -490,7 +490,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
                 baseSprite: spriteBarPercent,
                 projectSprite: spriteBar,
                 dragAction: function(panel, e, diff, dndConfig) {
-                    if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.drawProjectBar.spriteBarPercent.dragAction:');
+                    if (me.debug) console.log('PO.view.gantt.GanttBarPanel.drawProjectBar.spriteBarPercent.dragAction:');
                     var baseBBox = panel.dndBaseSprite.getBBox();
                     var shadow = panel.dndShadowSprite;
                     shadow.setAttributes({
@@ -498,7 +498,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
                     }).show(true);
                 },
                 dropAction: function(panel, e, diff, dndConfig) {
-                    if (me.debug) console.log('PO.view.gantt_editor.GanttBarPanel.drawProjectBar.spriteBarPercent.dropAction:');
+                    if (me.debug) console.log('PO.view.gantt.GanttBarPanel.drawProjectBar.spriteBarPercent.dropAction:');
                     var shadow = panel.dndShadowSprite;
                     me.onProjectPercentResize(dndConfig.projectSprite, shadow);	// Changing end-date to match x coo
                 }

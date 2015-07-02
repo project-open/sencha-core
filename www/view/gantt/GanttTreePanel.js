@@ -39,7 +39,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	listeners: {
 	    // Load planned_units + uom_id into te "Work" column
 	    beforeedit: function(editor, context, eOpts) {
-		console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit'); console.log(context);
+		var me = this;
+		if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit');
 		var model = context.record;
 		var field = context.field;
 
@@ -54,12 +55,14 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		return true;
 	    },
 	    validateedit: function(cellediting, context, eOpts) {
-		console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit'); console.log(context);
+		var me = this;
+		if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit');
 		return true;
 	    },
 	    // Called after a successfull edit
 	    edit: function(cellediting, context, eOpts) {
-		console.log('PO.view.gantt.GanttTreePanel.cellediting.edit'); console.log(context);
+		var me = this;
+		if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.edit');
 	    }
 	}
     })],
@@ -78,7 +81,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             icon: '/intranet/images/navbar_default/information.png',
             // tooltip: 'Link',
 	    handler: function(grid, rowIndex, colIndex) {
-                console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
+		var me = this;
+                if (me.debug) console.log('GanttTreePanel: column=Link: rowIndex='+rowIndex);
                 var rec = grid.getStore().getAt(rowIndex);
 		var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
 		taskPropertyPanel.setValue(rec);
@@ -105,7 +109,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	    } else {
 		// A parent node - sum up the planned units of all leafs.
 		var plannedUnits = 0.0;
-		model.cascade(function(child) {
+		model.cascadeBy(function(child) {
 		    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
 			var puString = child.get('planned_units');
 			if ("" != puString) {
@@ -130,7 +134,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	    } else {                                    		// A parent node - sum up the planned units of all leafs.
 		var plannedUnits = 0.0
 		var completedUnits = 0.0;
-		model.cascade(function(child) {
+		model.cascadeBy(function(child) {
 		    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
 			var plannedString = child.get('planned_units');
 			var completedString = child.get('percent_completed');
@@ -140,8 +144,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		    }
 		});
 		var done = "";
-		if (0 != plannedUnits) { done = Math.floor(100.0 * completedUnits / plannedUnits); }
-		return "<b>"+done+"%</b>";
+		if (0 != plannedUnits) { done = ""+Math.floor(100.0 * completedUnits / plannedUnits); }
+		if ("" != done) { done = done + "%"; }
+		return "<b>"+done+"</b>";
 	    }
 	}},
 	{text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', editor: 'podatefield', renderer: function(value, context, model) {
@@ -169,7 +174,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     initComponent: function() {
         var me = this;
-        console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
+        if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
         this.callParent(arguments);
 
         me.store.on({
@@ -182,18 +187,18 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	    'scope': this
 	});
 	
-        console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
+        if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
     },
 
     onCellDblClick: function(a,b,c,e) {
-        console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Starting');
-        console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Finished');
+        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Starting');
+        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Finished');
     },
     
     onDataChanged: function(store, options, c,d,e,f) {
         var me = this;
-        console.log('PO.view.gantt.GantTreePanel.onDataChange: Starting');
-        console.log('PO.view.gantt.GantTreePanel.onDataChange: Finished');
+        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onDataChange: Starting');
+        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onDataChange: Finished');
     },
 
     /**
@@ -201,8 +206,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
      * Insert a new task in the position of the last selection.
      */
     onButtonAdd: function() {
-        console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
         var rowEditing = me.plugins[0];
         var taskTreeStore = me.getStore();
         var root = taskTreeStore.getRootNode();
@@ -257,8 +262,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
      * Delete the currently selected task from the tree.
      */
     onButtonDelete: function() {
-        console.log('PO.view.gantt.GanttTreePanel.onButtonDelete: ');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTreePanel.onButtonDelete: ');
         var rowEditing = me.plugins[0];
         var taskTreeStore = me.getStore();
         var selectionModel = me.getSelectionModel();
@@ -294,8 +299,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
      * We will interpret this as the request to create a new task at the end.
      */
     onContainerClick: function() {
-        console.log('PO.view.gantt.GanttTreePanel.onContainerClick: ');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTreePanel.onContainerClick: ');
 
         // Clear the selection in order to force adding the task at the bottom
         var selectionModel = me.getSelectionModel();
@@ -311,7 +316,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
      * make this node a child of it.
      */
     onButtonIncreaseIndent: function() {
-        console.log('GanttTreePanel.onButtonIncreaseIndent');
+	var me = this;
+        if (me.debug) console.log('GanttTreePanel.onButtonIncreaseIndent');
         var selectionModel = this.getSelectionModel();
         var lastSelected = selectionModel.getLastSelected();
         var lastSelectedParent = lastSelected.parentNode;
@@ -344,7 +350,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
      * Move the task more to the left if possible.
      */
     onButtonReduceIndent: function() {
-        console.log('GanttTreePanel.onButtonReduceIndent');
+	var me = this;
+        if (me.debug) console.log('GanttTreePanel.onButtonReduceIndent');
 
         var selectionModel = this.getSelectionModel();
         var lastSelected = selectionModel.getLastSelected();

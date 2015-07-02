@@ -19,6 +19,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     title: 'Task Properties',
     id: 'ganttTaskPropertyPanel',
 
+    debug: false,
     width: 500,
     height: 400,
 
@@ -31,8 +32,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     taskModel: null,                              // Set by setValue() before show()
     
     initComponent: function() {
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Starting');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Starting');
         this.callParent(arguments);
 
         // Define a model for assignments
@@ -124,17 +125,16 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                 return this;
             },
             onAssigButtonAdd: function(button, event) {
-                console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
                 var me = this;
+                if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
                 var newRecord = me.taskAssignmentStore.add({percent:100})[0];
                 var editing = me.taskPropertyAssignments.editingPlugin;
                 editing.cancelEdit();
                 editing.startEdit(newRecord, 0);                       // Start editing the first row
             },
             onAssigButtonDel: function(button, event) {
-                console.log('POTaskAssignment.pickerController.onAssigButtonDel');
                 var me = this;
-                
+                if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonDel');
                 taskAssignmentStore.add({});
             }
         }).init();
@@ -276,15 +276,15 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         me.taskPropertyTabpanel = taskPropertyTabpanel;
 
         // me.on('close', this.onClose, this);	// capture the close event
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Finished');
     },
 
     /**
      * Save the modified form values into the model.
      */
     onButtonOK: function(button, event) {
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
 
         // Write timestamp to make sure that data are modified and redrawn.
         me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
@@ -311,7 +311,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         var newAssignees = [];
         me.taskAssignmentStore.each(function(assig) {
             var user_id = assig.get('user_id');
-            console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
+            if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
             var rel_id = parseInt(assig.get('rel_id'));
             if (!rel_id) { rel_id = null; }
             newAssignees.push({
@@ -338,8 +338,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
      * This automatically discards any changes.
      */
     onButtonCancel: function(button, event) {
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonCancel');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonCancel');
         me.hide();                              // hide the TaskProperty panel
     },
 
@@ -352,8 +352,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
      * Try to hide the list of tabs and the outer frame
      */
     hideTabs: function() {
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.hideTabs: Starting');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.hideTabs: Starting');
         var tabPanel = me.taskPropertyTabpanel;
         var tabBar = tabPanel.tabBar;
         tabBar.hide();
@@ -364,8 +364,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
      * Write changes back to the task immediately (at the moment).
      */
     setValue: function(task) {
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Starting');
         var me = this;
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Starting');
         var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
 
         // Default values for task if not defined yet by ]po[
@@ -394,7 +394,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         });
 
         me.taskModel = task;                              // Save the model for reference
-        console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Finished');
+        if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Finished');
     }
 }); 
 

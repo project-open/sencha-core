@@ -62,7 +62,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     initComponent: function() {
         var me = this;
-        console.log('PO.view.gantt.AbstractGanttPanel.initComponent: Starting');
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.initComponent: Starting');
         this.callParent(arguments);
 
         me.dndBasePoint = null;				// Drag-and-drop starting point
@@ -81,7 +81,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             'mousemove': me.onMouseMove,
             'scope': this
         });
-        console.log('PO.view.gantt.AbstractGanttPanel.initComponent: Finished');
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.initComponent: Finished');
     },
 
     /**
@@ -106,7 +106,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
         if (!me.dndEnabled) { return; }
         var point = me.getMousePoint(e);				// Get corrected screen coordinates
-        console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: button='+e.button+", point="+point);
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: button='+e.button+", point="+point);
         var mouseSprite = me.getSpriteForPoint(point);                  // Trust on zIndex to get the right sprite
 
         if (e.button == 2) {                                            // Right-click on sprite?
@@ -241,7 +241,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      * Draw all Gantt bars
      */
     redraw: function() {
-        console.log('PO.view.gantt.AbstractGanttPanel.redraw: Needs to be overwritten');
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.redraw: Needs to be overwritten');
         var me = this;
         me.surface.removeAll();
         me.drawAxis();							// Draw the top axis
@@ -276,7 +276,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     graphOnGanttBar: function(ganttSprite, model, graphArray, maxGraphArray, spriteBarStartDate, colorConf, tooltipTemplate) {
         var me = this;
         var surface = me.surface;
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.graphOnGanttBar'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.graphOnGanttBar');
 
         // Add a -1 at the end of the graphArray, "-1" indicates the end of the array
         if (graphArray[graphArray.length-1] != -1) {
@@ -388,7 +388,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     drawAxis: function() {
         var me = this;
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting');
         var h = 0;
         
         var timespanDays = (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (1000 * 3600 * 24);
@@ -406,7 +406,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (timespanDays > 1 && h < 2 * me.axisHeight) {
             me.drawAxisDay(h);
         }
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Finished'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Finished');
     },
 
     /**
@@ -414,7 +414,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     drawAxisYear: function(h) {
         var me = this;
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisYear: Starting'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisYear: Starting');
 
         // Draw Yearly blocks
         var startYear = me.axisStartDate.getFullYear();
@@ -443,7 +443,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                 font: "10px Arial"
             }).show(true);
         }
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisYear: Finished'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisYear: Finished');
     },
 
     /**
@@ -451,7 +451,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     drawAxisMonth: function(h) {
         var me = this;
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Starting'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Starting');
 
         // Draw monthly blocks
         var startYear = me.axisStartDate.getFullYear();
@@ -484,7 +484,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             }
         }
 
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Finished'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Finished');
     },
 
     /**
@@ -502,7 +502,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     drawAxisWeek: function(h) {
         var me = this;
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Starting'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Starting');
 
         // Start with a Sunday
         var now = new Date(me.axisStartDate.getTime());
@@ -520,7 +520,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
             var axisText = me.surface.add({type: 'text', text:""+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
         }
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished');
     },
 
 
@@ -529,7 +529,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      */
     drawAxisDay: function(h) {
         var me = this;
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Starting'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Starting');
         var now = new Date(me.axisStartDate.getTime());
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
@@ -541,7 +541,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
             var axisText = me.surface.add({type: 'text', text:""+day, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
         }
-        if (me.debug) { console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Finished'); }
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Finished');
     },
 
 

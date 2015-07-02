@@ -19,12 +19,13 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	'PO.model.helpdesk.Ticket',
 	'PO.store.helpdesk.TicketStore'
     ],
-    
+    debug: false,
     slaId: null,
     confItemId: null,
 
     initComponent: function() {
-	console.log('PO.view.menu.AlphaMenu.initComponent: Starting')
+	var me = this;
+	if (me.debug) console.log('PO.view.menu.AlphaMenu.initComponent: Starting')
         var me = this;
         this.callParent(arguments);
 
@@ -49,7 +50,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	}
 	ticketStore.load({
             callback: function(a,b,c,d,e,f) {
-		console.log('PO.view.menu.AlphaMenu.initComponent: ticketStore.load.callback: Starting');
+		if (me.debug) console.log('PO.view.menu.AlphaMenu.initComponent: ticketStore.load.callback: Starting');
 		ticketStore.each(function(model) {
 		    var ticketId = model.get('ticket_id');
 		    var ticketNr = model.get('project_nr');
@@ -64,10 +65,10 @@ Ext.define('PO.view.menu.AlphaMenu', {
 		    });
 		    me.add(item);
 		});
-		console.log('PO.view.menu.AlphaMenu.initComponent: ticketStore.load.callback: Finished');
+		if (me.debug) console.log('PO.view.menu.AlphaMenu.initComponent: ticketStore.load.callback: Finished');
 	    }
 	});
-	console.log('PO.view.menu.AlphaMenu.initComponent: Finished')
+	if (me.debug) console.log('PO.view.menu.AlphaMenu.initComponent: Finished')
     }
 });
 

@@ -22,9 +22,6 @@ Ext.define('PO.store.timesheet.TaskStatusStore', {
     extend:         'PO.class.CategoryStore',
     model: 	    'PO.model.category.Category',
     storeId:	    'taskStatusStore',
-    autoLoad:	    true,
-    remoteFilter:   true,
-    pageSize:	    1000,
     proxy: {
 	type:       'rest',
 	url:        '/intranet-rest/im_category',
