@@ -266,7 +266,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
 
         var bBox = me.dndBaseSprite.getBBox();
         var diffTime = Math.floor(1.0 * xDiff * (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (me.axisEndX - me.axisStartX));
-        var endTime = new Date(projectModel.get('end_date')).getTime();
+        var endTime = PO.Utilities.pgToDate(projectModel.get('end_date')).getTime();
 
         // Save original start- and end time in non-model variables
         if (!projectModel.orgEndTime) {
@@ -274,7 +274,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         }
         endTime = endTime + diffTime;
         var endDate = new Date(endTime);
-        projectModel.set('end_date', endDate.toPg());
+        projectModel.set('end_date', PO.Utilities.dateToPg(endDate));
 
         me.redraw();
         if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onProjectResize: Finished');
@@ -315,7 +315,7 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var toTaskModel = toSprite.dndConfig.model;
         if (null == fromTaskModel) return;
         if (null == toTaskModel) return;
-        if (me.debug) console.log('PO.view.portfolio_planner.PortfolioPlannerTaskPanel.onCreateDependency: Starting: '+fromTaskModel.get('id')+' -> '+toTaskModel.get('id'));
+        if (me.debug) console.log('PO.view.gantt.GanttBarPanel.onCreateDependency: Starting: '+fromTaskModel.get('id')+' -> '+toTaskModel.get('id'));
 
         // Try connecting the two tasks via a task dependency
         var fromTaskId = fromTaskModel.get('task_id');				// String value!
@@ -382,8 +382,9 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         var percentCompleted = parseFloat(project.get('percent_completed'));
         var predecessors = project.get('predecessors');
         var assignees = project.get('assignees');				// Array of {id, percent, name, email, initials}
-        var startTime = new Date(project.get('start_date')).getTime();				// milliseconds after 1970-01-01
-        var endTime = new Date(project.get('end_date')).getTime();	// end_date means 23:59:59 of that day
+
+	var startTime = PO.Utilities.pgToDate(project.get('start_date')).getTime()
+	var endTime = PO.Utilities.pgToDate(project.get('end_date')).getTime()
 
         var x = me.date2x(startTime);						// X position based on time scale
         var y = me.calcGanttBarYPosition(project);				// Y position based on TreePanel y position of task.
