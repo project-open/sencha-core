@@ -35,6 +35,20 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	var serverUrl = "http://www.project-open.net";
 
 	var item = Ext.create('Ext.menu.Item', {
+	    text: "Register yourself at ]po[ Server",
+	    href: serverUrl+"/register/user-new",
+	    hrefTarget: '_blank'
+	});
+	me.add(item);
+	
+	var item = Ext.create('Ext.menu.Item', {
+	    text: "Gantt Editor Ticket Tracker",
+	    href: serverUrl+"/intranet-helpdesk/index?sla_id="+sla_id,
+	    hrefTarget: '_blank'
+	});
+	me.add(item);
+	
+	var item = Ext.create('Ext.menu.Item', {
 	    text: "Create a new ticket",
 	    href: serverUrl+"/intranet-helpdesk/new?ticket_sla_id="+sla_id,
 	    hrefTarget: '_blank'
