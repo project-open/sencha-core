@@ -39,19 +39,6 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         me.barHeight = 15;
         me.arrowheadSize = 5;
 
-        // Attract events from the TreePanel showing the task names etc.
-        me.objectPanel.on({
-            'itemexpand': me.onItemExpand,
-            'itemcollapse': me.onItemCollapse,
-            'itemmove': me.redraw,
-            'itemremove': me.redraw,
-            'iteminsert': me.redraw,
-            'itemappend': me.redraw,
-            'resize': me.redraw,
-            'columnschanged': me.redraw,
-            'scope': this
-        });;
-
         // Catch the moment when the "view" of the Project grid
         // is ready in order to draw the GanttBars for the first time.
         // The view seems to take a while...
@@ -83,40 +70,6 @@ Ext.define('PO.view.gantt.GanttBarPanel', {
         this.addEvents('move');
 
         if (me.debug) console.log('PO.view.gantt.GanttBarPanel.initComponent: Finished');
-    },
-
-    /**
-     * The user has collapsed a super-task in the GanttTreePanel.
-     * We now save the 'c'=closed status using a ]po[ URL.
-     * These values will appear in the TaskTreeStore.
-     */
-    onItemCollapse: function(taskModel) {
-        var me = this;
-        var object_id = taskModel.get('id');
-        Ext.Ajax.request({
-            url: '/intranet/biz-object-tree-open-close.tcl',
-            params: { 'object_id': object_id, 'open_p': 'c' }
-        });
-
-        me.redraw();
-    },
-
-   /**
-     * The user has expanded a super-task in the GanttTreePanel.
-     * Please see onItemCollapse for further documentation.
-     */
-    onItemExpand: function(taskModel) {
-        var me = this;
-        if (me.debug) console.log('PO.class.GanttDrawComponent.onItemExpand: ');
-
-        // Remember the new state
-        var object_id = taskModel.get('id');
-        Ext.Ajax.request({
-            url: '/intranet/biz-object-tree-open-close.tcl',
-            params: { 'object_id': object_id, 'open_p': 'o' }
-        });
-
-        me.redraw();
     },
 
     /**

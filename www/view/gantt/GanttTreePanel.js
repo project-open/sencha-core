@@ -17,7 +17,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     requires: [
         'PO.view.field.PODateField'				// Custom ]po[ data field for PostgreSQL timestamptz data
     ],
-    id:                                 'ganttTreePanel',
     alias:				'ganttTreePanel',
     title:				false,
     shrinkWrap:				true,
@@ -34,10 +33,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     projectMembers:    "test",
 
     // Enable in-line row editing.
-    plugins:				[Ext.create('Ext.grid.plugin.CellEditing', {
+    plugins: [Ext.create('Ext.grid.plugin.CellEditing', {
 	clicksToEdit: 1,
 	listeners: {
-	    // Load planned_units + uom_id into te "Work" column
+	    // Veto editing for certain columns and rows
 	    beforeedit: function(editor, context, eOpts) {
 		var me = this;
 		if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit');
@@ -48,21 +47,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		if ("planned_units" == field && "im_project" == model.get('object_type')) { return false; }
 
 		// Veto editing properties of parent objects except for the name.
-		// Their properties are determined by their children via the scheduler.
 		if (model.childNodes.length > 0) {                    // If this is a parent object with children
-		    if ("project_name" != field) { return false; }
+		    if ("project_name" != field) { return false; }    // ONLY the project_name is editable
 		}
 		return true;
-	    },
-	    validateedit: function(cellediting, context, eOpts) {
-		var me = this;
-		if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit');
-		return true;
-	    },
-	    // Called after a successfull edit
-	    edit: function(cellediting, context, eOpts) {
-		var me = this;
-		if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.edit');
 	    }
 	}
     })],
@@ -70,8 +58,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     // Enabled drag-and-drop for the tree. Yes, that's all...
     viewConfig: {
         plugins: {
-            ptype:			'treeviewdragdrop',
-            containerScroll:		true
+            ptype: 'treeviewdragdrop',
+            containerScroll: true
         }
     },
 
@@ -177,202 +165,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
         this.callParent(arguments);
 
-        me.store.on({
-            'datachanged': me.onDataChanged,
-            'scope': this
-        });
-
-	me.on({
-	    'celldblclick': me.onCellDblClick,
-	    'scope': this
-	});
-	
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
-    },
-
-    onCellDblClick: function(a,b,c,e) {
-        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Starting');
-        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onCellDblClick: Finished');
-    },
-    
-    onDataChanged: function(store, options, c,d,e,f) {
-        var me = this;
-        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onDataChange: Starting');
-        if (me.debug) console.log('PO.view.gantt.GantTreePanel.onDataChange: Finished');
-    },
-
-    /**
-     * "Add" (+) button pressed.
-     * Insert a new task in the position of the last selection.
-     */
-    onButtonAdd: function() {
-        var me = this;
-        if (me.debug) console.log('PO.view.gantt.GanttTreePanel.onButtonAdd: ');
-        var rowEditing = me.plugins[0];
-        var taskTreeStore = me.getStore();
-        var root = taskTreeStore.getRootNode();
-
-        rowEditing.cancelEdit();
-        taskTreeStore.sync();
-        var selectionModel = me.getSelectionModel();
-        var lastSelected = selectionModel.getLastSelected();
-        var lastSelectedParent = null;
-
-        if (null == lastSelected) {
-            lastSelected = root;	 			// Use the root as the last selected node
-            lastSelectedParent = root;
-        } else {
-            lastSelectedParent = lastSelected.parentNode;
-        }
-
-	// Create a model instance and decorate with NodeInterface
-        var r = Ext.create('PO.model.timesheet.TimesheetTask', {
-            project_name: "New Task",
-            project_nr: "task_0018",
-            parent_id: lastSelected.get('parent_id'),
-            company_id: lastSelected.get('company_id'),
-            start_date: new Date().toISOString().substring(0,10),
-            end_date: new Date().toISOString().substring(0,10),
-            percent_completed: '0',
-            project_status_id: '76',
-            project_type_id: '100',
-	    assignees: []
-        });
-        var rNode = root.createNode(r);
-        rNode.set('leaf', true);					// Leafs show a different icon than folders
-
-        var appendP = false;
-        if (!selectionModel.hasSelection()) { appendP = true; }
-        if (root == lastSelected) { appendP = true; }
-        if (lastSelected.getDepth() <= 1) { appendP = true; }			// Don't allow to add New Task before the root.
-        if (appendP) {
-            root.appendChild(rNode);	 				// Add the task at the end of the root
-        } else {
-            lastSelectedParent.insertBefore(rNode, lastSelected);	    // Insert into tree
-        }
-
-        // Start the column editor
-        selectionModel.deselectAll();
-        selectionModel.select([rNode]);
-        rowEditing.startEdit(rNode, 0);
-    },
-
-    /**
-     * "Delete" (-) button pressed.
-     * Delete the currently selected task from the tree.
-     */
-    onButtonDelete: function() {
-        var me = this;
-        if (me.debug) console.log('PO.view.gantt.GanttTreePanel.onButtonDelete: ');
-        var rowEditing = me.plugins[0];
-        var taskTreeStore = me.getStore();
-        var selectionModel = me.getSelectionModel();
-        var lastSelected = selectionModel.getLastSelected();
-        var lastSelectedParent = lastSelected.parentNode;
-        var lastSelectedIndex = lastSelectedParent.indexOf(lastSelected);
-
-        rowEditing.cancelEdit();
-
-        // Remove the selected element
-        lastSelected.remove();
-
-        // Select the next node
-        var newNode = lastSelectedParent.getChildAt(lastSelectedIndex);
-        if (typeof(newNode) == "undefined") {
-            lastSelectedIndex = lastSelectedIndex -1;
-            if (lastSelectedIndex < 0) { lastSelectedIndex = 0; }
-            newNode = lastSelectedParent.getChildAt(lastSelectedIndex);
-        }
-
-        if (typeof(newNode) == "undefined") {
-            // lastSelected was the last child of it's parent, so select the parent.
-            selectionModel.select(lastSelectedParent);
-        } else {
-            newNode = lastSelectedParent.getChildAt(lastSelectedIndex);
-            selectionModel.select(newNode);
-        }
-        
-    },
-
-    /**
-     * The user has clicked below the last task.
-     * We will interpret this as the request to create a new task at the end.
-     */
-    onContainerClick: function() {
-        var me = this;
-        if (me.debug) console.log('PO.view.gantt.GanttTreePanel.onContainerClick: ');
-
-        // Clear the selection in order to force adding the task at the bottom
-        var selectionModel = me.getSelectionModel();
-        selectionModel.deselectAll();
-
-        me.onButtonAdd();
-    },
-
-    /**
-     * Move the task more to the right if possible.
-     *
-     * Take the node just above the selected one and 
-     * make this node a child of it.
-     */
-    onButtonIncreaseIndent: function() {
-	var me = this;
-        if (me.debug) console.log('GanttTreePanel.onButtonIncreaseIndent');
-        var selectionModel = this.getSelectionModel();
-        var lastSelected = selectionModel.getLastSelected();
-        var lastSelectedParent = lastSelected.parentNode;
-        if (null == lastSelectedParent) { return; }					// We can't indent the root element
-
-        var lastSelectedIndex = lastSelectedParent.indexOf(lastSelected);
-        var prevNodeIndex = lastSelectedIndex -1;
-        if (prevNodeIndex < 0) { return; }						// We can't indent the root element
-
-        var prevNode = lastSelectedParent.getChildAt(prevNodeIndex);
-
-        // Remove the item from the tree
-        prevNode.set('leaf', false);
-        prevNode.appendChild(lastSelected);			// Add to the previous node as a child
-        prevNode.expand();
-
-        // Focus back on the task, so that it will accept the next keyboard commands
-        this.getView().focusNode(lastSelected);
-
-	// ToDo: Remove !!!
-	prevNode.set('start_date', '2015-10-01');
-
-
-        // ToDo: It seems the TreePanel looses focus here
-        // selectionModel.select(lastSelected);
-        // selectionModel.setLastFocused(lastSelected);
-    },
-
-    /**
-     * Move the task more to the left if possible.
-     */
-    onButtonReduceIndent: function() {
-	var me = this;
-        if (me.debug) console.log('GanttTreePanel.onButtonReduceIndent');
-
-        var selectionModel = this.getSelectionModel();
-        var lastSelected = selectionModel.getLastSelected();
-        var lastSelectedParent = lastSelected.parentNode;
-        if (null == lastSelectedParent) { return; }					// We can't indent the root element
-
-        var lastSelectedParentParent = lastSelectedParent.parentNode;
-        if (null == lastSelectedParentParent) { return; }					// We can't indent the root element
-
-        var lastSelectedParentIndex = lastSelectedParentParent.indexOf(lastSelectedParent);
-        lastSelectedParentParent.insertChild(lastSelectedParentIndex+1, lastSelected);
-
-        // Check if the parent has now become a leaf
-        var parentNumChildren = lastSelectedParent.childNodes.length;
-        if (0 == parentNumChildren) {
-            lastSelectedParent.set('leaf', true);
-        }
-
-        // Focus back on the task, so that it will accept the next keyboard commands
-        this.getView().focusNode(lastSelected);
-    }
+    }    
 
 });
 
