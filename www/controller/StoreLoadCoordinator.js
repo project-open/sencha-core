@@ -1,12 +1,13 @@
-// /sencha-core/www/controller/StoreLoadCoordinator.js
-//
-// Copyright (C) 2013 ]project-open[
-//
-// All rights reserved. Please see
-// http://www.project-open.com/license/ for details.
-//
-
 /*
+ * StoreLoadCoordinator.js
+ *
+ * Copyright (c) 2011 - 2014 ]project-open[ Business Solutions, S.L.
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 or alternatively unter the terms of the ]po[
+ * FL or CL license as specified in www.project-open.com/en/license.
+ */
+
+/**
  * This coodinator is initiated with:
  * stores: A list of stores that need to be loaded and
  * listeners: {
@@ -19,7 +20,6 @@
  * Ext.Loader has finished loading classes and before
  * the start of the actual application.
 */
-
 Ext.define('PO.controller.StoreLoadCoordinator', {
     
     /**

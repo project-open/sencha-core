@@ -47,9 +47,6 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     dndBaseSprite: null,				// DnD sprite being draged
     dndShadowSprite: null,				// DnD shadow generated for BaseSprite
     dndConfig: null,
-
-    // Size of the Gantt diagram
-    ganttSurfaceWidth: 1500,
     ganttBarHeight: 12,
 
     monthThreeChar: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
