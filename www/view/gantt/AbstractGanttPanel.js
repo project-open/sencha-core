@@ -549,23 +549,23 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     date2x: function(date) {
         var me = this;
 
-        var t = typeof date;
         var dateMilliJulian = 0;
-
-        if ("number" == t) {
+	switch (typeof date) {
+	case "number":
             dateMilliJulian = date;
-        } else if ("object" == t) {
+	    break;
+	case "object":
             if (date instanceof Date) {
                 dateMilliJulian = date.getTime();
             } else {
-                console.error('GanttDrawComponent.date2x: Unknown object type for date argument:'+t);
+                console.error('GanttDrawComponent.date2x: Unknown object type for date argument:'+typeof date);
             }
-        } else {
+	    break;
+	default:
             console.error('GanttDrawComponent.date2x: Unknown type for date argument:'+t);
-        }
-
+	}
+	
         var axisWidth = me.axisEndX - me.axisStartX;
-
         var axisStartTime = me.axisStartDate.getTime();
         var axisEndTime = me.axisEndDate.getTime();
 
@@ -574,14 +574,27 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                 (1.0 * axisEndTime - axisStartTime)
         );
 
-        // Allow for negative starts:
-        // Projects are determined by start_date + width,
-        // so projects would be shifted to the right
-        // if (x < 0) { x = 0; }
-
-
         return x;
     },
+
+    /**
+     * Convert a x coordinate on the surface to the corresponding date.
+     */
+    x2time: function(x) {
+        var me = this;
+
+	if ("number" != typeof x) {
+            console.error('GanttDrawComponent.x2date: Unknown object type for number argument:'+typeof x);
+	}
+	
+        var axisWidth = me.axisEndX - me.axisStartX;
+        var axisStartTime = me.axisStartDate.getTime();
+        var axisEndTime = me.axisEndDate.getTime();
+
+	var time = axisStartTime + (axisEndTime - axisStartTime) * x / axisWidth;
+	return Math.round(time);
+    },
+
 
     /**
      * Advance a date to the 1st of the next month
