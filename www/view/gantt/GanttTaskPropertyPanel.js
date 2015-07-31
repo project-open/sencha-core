@@ -51,7 +51,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             model: 'PO.model.gantt.GanttAssignmentModel'
         });
 
-	// Row editor for the TaskAssignmentsPanel.
+        // Row editor for the TaskAssignmentsPanel.
         var taskAssignmentRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
             clicksToEdit: 1,
             clicksToMoveEditor: 1,
@@ -61,8 +61,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                 // The user_id or percent have changed. Write the changes back into the taskAssignmentStore.
                 edit: function(rowEditing, context, eOpts) {
                     if ("name" != context.field && "id" != context.field) { return; }
-		    var userModels = this.valueModels;
-		    if (!userModels) { return; }                                // Nothing selected?
+                    var userModels = this.valueModels;
+                    if (!userModels) { return; }                                // Nothing selected?
                     var userModel = this.valueModels[0];
                     if (!userModel) { return; }                                 // ??
 
@@ -78,6 +78,11 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             id: 'taskPropertyAssignments',
             store: taskAssignmentStore,
             width: 200,
+            debug: me.debug,
+            stateful: true,
+            stateId: 'taskPropertyAssignments',
+            selType: 'rowmodel',
+            plugins: taskAssignmentRowEditing,
             columns: [
                 { text: 'Id', width: 30, dataIndex: 'id', hidden: false},
                 { text: 'Initials', width: 60, dataIndex: 'initials', hidden: false},
@@ -92,8 +97,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     allowBlank: false,
                     editable: true,
                     listeners: {select: function(combo, records) {
-                	combo.valueModels = records;
-                	taskAssignmentRowEditing.valueModels = records;
+                        combo.valueModels = records;
+                        taskAssignmentRowEditing.valueModels = records;
                     }}  // remember selected user
                 }},
                 { text: 'Email', dataIndex: 'email', flex: 1, hidden: false },
@@ -106,9 +111,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     {icon: '/intranet/images/navbar_default/add.png', tooltip: 'Add a user', id: 'assigButtonAdd'}, 
                     {icon: '/intranet/images/navbar_default/delete.png', tooltip: 'Delete a user', id: 'assigButtonDel'}
                 ]
-            }],
-            selType: 'rowmodel',
-            plugins: taskAssignmentRowEditing
+            }]
         });
 
         // Small controller in order to handle the (+) / (-) buttons for
@@ -175,36 +178,36 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     fieldLabel: 'Duration',
                     layout: 'hbox',
                     items: [{
-                	xtype: 'numberfield',
-                	name: 'planned_units',
-                	hideLabel: true,
-                	width: 70,
-                	value: '1',
-                	minValue: 0,
-                	allowBlank: false
+                        xtype: 'numberfield',
+                        name: 'planned_units',
+                        hideLabel: true,
+                        width: 70,
+                        value: '1',
+                        minValue: 0,
+                        allowBlank: false
                     }, {
-                	xtype: 'combobox',
-                	name: 'uom_id',
-                	displayField: 'category',
-                	valueField: 'category_id',
-                	queryMode: 'local',
-                	emptyText: 'Day',
-                	hideLabel: true,
-                	width: 50,
-                	margins: '0 6 0 0',
-                	store: Ext.create('Ext.data.Store', { fields: ['category_id', 'category'], data: [
-                	    {category_id: 321, category: 'Day'},
-                	    {category_id: 320, category: 'Hour'}
-                	]}),
-                	allowBlank: false,
-                	forceSelection: true
+                        xtype: 'combobox',
+                        name: 'uom_id',
+                        displayField: 'category',
+                        valueField: 'category_id',
+                        queryMode: 'local',
+                        emptyText: 'Day',
+                        hideLabel: true,
+                        width: 50,
+                        margins: '0 6 0 0',
+                        store: Ext.create('Ext.data.Store', { fields: ['category_id', 'category'], data: [
+                            {category_id: 321, category: 'Day'},
+                            {category_id: 320, category: 'Hour'}
+                        ]}),
+                        allowBlank: false,
+                        forceSelection: true
                     }, {
-                	xtype: 'checkbox',
-                	name: 'estimated_p',
-                	boxLabel: 'Estimated',
-                	hideLabel: true,
-                	checked: false,
-                	margin: '0 0 10 0'
+                        xtype: 'checkbox',
+                        name: 'estimated_p',
+                        boxLabel: 'Estimated',
+                        hideLabel: true,
+                        checked: false,
+                        margin: '0 0 10 0'
                     }]
                 }, {
                     xtype: 'numberfield',
@@ -301,8 +304,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         me.taskModel.set(fields);
         
         fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
-	var plannedUnits = fields['planned_units'];
-	if (undefined == plannedUnits) { plannedUnits = 0; }
+        var plannedUnits = fields['planned_units'];
+        if (undefined == plannedUnits) { plannedUnits = 0; }
         fields['planned_units'] = ""+plannedUnits;              // Convert the numberfield integer to string used in model.
         me.taskModel.set(fields);
 
@@ -387,7 +390,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         assignments.forEach(function(v) {
             var userId = ""+v.user_id;
             var userModel = projectMemberStore.getById(userId);
-	    if (!userModel) { return; }                                      // User not set in assignment row
+            if (!userModel) { return; }                                      // User not set in assignment row
             var assigModel = new PO.model.gantt.GanttAssignmentModel(userModel.data);
             assigModel.set('percent', v.percent);
             me.taskAssignmentStore.add(assigModel);
