@@ -21,6 +21,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
     ],
     debug: false,
     slaId: null,
+    ticketStatusId: 30000,							// "Open"
     confItemId: null,
 
     initComponent: function() {
@@ -30,6 +31,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
         this.callParent(arguments);
 
 	var sla_id = me.slaId;
+	var ticket_status_id = me.ticketStatusId;
 	var conf_item_id = me.confItemId;
 	var ticketStore = Ext.create('PO.store.helpdesk.TicketStore');
 	var serverUrl = "http://www.project-open.net";
@@ -59,9 +61,13 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	// Use the REST server-side "proxy" to get data from www.project-open.net
 	ticketStore.getProxy().url = "/intranet-rest/data-source/domain-proxy";
 
-	if (null != sla_id) {
-	    ticketStore.getProxy().extraParams = { url: serverUrl+"/intranet-rest/im_ticket?format=json&parent_id=1478943&deref_p=1&user_id=0&auth_token=0" };
-	}
+	var url = serverUrl+"/intranet-rest/im_ticket?format=json&deref_p=1&user_id=0&auth_token=0";
+        if (null != sla_id) { url = url + "&parent_id="+sla_id; }
+        if (null != ticket_status_id) { url = url + "&ticket_status_id="+ticket_status_id; }
+	if (null != conf_item_id) { url = url + "&ticket_conf_item_id="+conf_item_id; }
+        ticketStore.getProxy().extraParams = { 'url': url };
+
+	// Load the data
 	ticketStore.load({
             callback: function(a,b,c,d,e,f) {
 		if (me.debug) console.log('PO.view.menu.AlphaMenu.initComponent: ticketStore.load.callback: Starting');
