@@ -6,7 +6,7 @@
 // http://www.project-open.com/license/ for details.
 
 Ext.define('PO.store.project.ProjectStatusStore', {
-    extend:         'PO.class.CategoryStore',
+    extend:         'PO.store.CategoryStore',
     model: 	    'PO.model.category.Category',
     storeId:	    'projectStatusStore',
     autoLoad:	    true,

@@ -14,23 +14,28 @@
  */
 Ext.define('PO.view.gantt.GanttTreePanel', {
     extend:				'Ext.tree.Panel',
-    requires: [
-        'PO.view.field.PODateField'				// Custom ]po[ data field for PostgreSQL timestamptz data
-    ],
+    requires: ['PO.view.field.PODateField'],				// Custom ]po[ data field for PostgreSQL timestamptz data
     alias:				'ganttTreePanel',
     title:				false,
     shrinkWrap:				true,
-    animate:				false,			// Animation messes up bars on the right side
+    animate:				false,				// Animation messes up bars on the right side
     collapsible:			false,
     useArrows:				true,
     rootVisible:			false,
     multiSelect:			true,
     singleExpand:			false,
 
-    overflowX: 'scroll',                            // Allows for horizontal scrolling, but not vertical
+    // Scrolling
+    overflowX: 'scroll',						// Allows for horizontal scrolling, but not vertical
     scrollFlags: {x: true},
     
+    // ToDo: Remove(?)
     projectMembers:    "test",
+
+    // Stateful collapse/expand
+    stateful : true,
+    stateId : 'ganttTreePanel',
+    saveDelay: 0,							// Workaround: Delayed saving doesn't work on Ext.tree.Panel
 
     // Enable in-line row editing.
     plugins: [Ext.create('Ext.grid.plugin.CellEditing', {
@@ -166,7 +171,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         this.callParent(arguments);
 
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
-    }    
+    }
 
 });
 

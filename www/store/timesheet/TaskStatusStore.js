@@ -19,7 +19,7 @@ Ext.define('PO.store.timesheet.TaskStatusStore', {
 
 
 Ext.define('PO.store.timesheet.TaskStatusStore', {
-    extend:         'PO.class.CategoryStore',
+    extend:         'PO.store.CategoryStore',
     model: 	    'PO.model.category.Category',
     storeId:	    'taskStatusStore',
     proxy: {
