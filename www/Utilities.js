@@ -40,6 +40,7 @@ Ext.define('PO.Utilities', {
 	pgToDate: function(s) {
 	    // PostgreSQL Timestamp: "2015-06-31 15:33:59+02"
             var rx = /^(\d{4})\-(\d\d)\-(\d\d) (\d\d):(\d\d):(\d\d)([\+\-]\d\d)$/;
+	    var p;
             if ((p = rx.exec(s)) !== null) {
 		var date = new Date(parseInt(p[1]), parseInt(p[2])-1, parseInt(p[3]), parseInt(p[4]), parseInt(p[5]), parseInt(p[6]));
 		var time = date.getTime();
