@@ -98,12 +98,26 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	'uom_id_deref',				// Unit of measure (should alsways be "Hour")
 	'on_track_status_id_deref',		// Is the task on-track? "Green", "Yellow" or "Red"
 
+	//	'icon', 				// Used by ExtJS for the icon in the tree (2015-08-04 doesn't seem to work...)
+
 	'successors',				// List of tasks that depend on the current tasks
 	'predecessors',				// List of tasks on which this task depends
 	'assignees',				// List of users assigned to the task with {id,user_id,percent}
 
 	'expanded',                             // true or false (without quotes), default state for tree
 
+	{   name: 'icon',			// A &nbsp; sequence representing the project indentation
+            convert: function(value, record) {
+		var typeId = parseInt(record.get('project_type_id'));
+		// console.log('PO.model.timesheet.TimesheetTask.icon: Type='+typeId);
+		switch (typeId) {
+		case 101: return '/intranet/images/navbar_default/tag_blue.png'; break;		// Ticket
+		case 2502: return '/intranet/images/navbar_default/table.png'; break;		// SLA
+		default:
+		    return '';			// Empty string - enables default behavior
+		}
+            }
+        },
 	{   name: 'indent',			// A &nbsp; sequence representing the project indentation
             convert: function(value, record) {
                 var level = record.get('level');
