@@ -89,6 +89,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	    var children = model.childNodes;
 	    if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
 	}}, 
+	{text: 'Nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
 	{text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', editor: {
 	    xtype: 'numberfield',
 	    minValue: 0
