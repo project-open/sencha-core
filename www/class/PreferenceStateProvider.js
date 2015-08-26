@@ -16,6 +16,7 @@
 Ext.define('PO.class.PreferenceStateProvider', {
     extend: 'Ext.state.Provider',
     requires: [
+        'PO.Utilities',
         'PO.model.user.SenchaPreference',
         'PO.store.user.SenchaPreferenceStore'
     ],
@@ -26,12 +27,11 @@ Ext.define('PO.class.PreferenceStateProvider', {
      */
     constructor : function(config){
         var me = this;
-        me.currentUserId = me.currentUserId();
+        me.currentUserId = PO.Utilities.currentUserId();
         me.currentUrl = config.url;
 	if (typeof me.currentUrl == "undefined" || me.currentUrl === null) {
 	    me.currenturl = window.location.pathname;
 	}
-        me.prefix = 'ad_';
         me.callParent(arguments);
         me.state = me.readPreferences();
     },
@@ -50,29 +50,6 @@ Ext.define('PO.class.PreferenceStateProvider', {
         this.clearPreference(name);
         this.callParent(arguments);
     },
-
-    /**
-     * Extract the current userId from the OpenACS session cookie
-     */
-    currentUserId : function(){
-        var me = this;
-        var userId = 0;							// user_id=0 represents "anonymous visitor"
-        var c = document.cookie + ";";
-        var re = /\s?(.*?)=(.*?);/g;
-        var prefix = me.prefix;
-        var prefixLen = prefix.length;
-
-        while((matches = re.exec(c)) != null){
-            var key = matches[1];
-            var valueUndecoded = matches[2];
-            if (key == 'ad_user_login') {
-                var userIdString = valueUndecoded.substr(0, valueUndecoded.indexOf('%')); 
-                userId = parseInt(userIdString);
-            }
-        }
-        return userId;
-    },
-
 
     /**
      * Retreive all available preferences for this user and this URL from the server
