@@ -45,7 +45,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	
 	var item = Ext.create('Ext.menu.Item', {
 	    text: "Gantt Editor Ticket Tracker",
-	    href: serverUrl+"/intranet-helpdesk/index?sla_id="+sla_id,
+	    href: serverUrl+"/intranet-helpdesk/index?mine_p=all&ticket_sla_id="+sla_id,
 	    hrefTarget: '_blank'
 	});
 	me.add(item);
