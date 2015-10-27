@@ -84,7 +84,12 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             }
         }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
-	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', editor: true, renderer: function(v, context, model, d, e) {
+	{text: 'Sort Order', flex: 1, dataIndex: 'sort_order', hidden: true, editor: {
+	    xtype: 'numberfield',
+	    minValue: 0	    
+	}}, 
+	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
+	 editor: true, renderer: function(v, context, model, d, e) {
 	    context.style = 'cursor: pointer;'; 
 	    var children = model.childNodes;
 	    if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
