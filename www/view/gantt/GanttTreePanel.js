@@ -21,7 +21,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     animate:				false,				// Animation messes up bars on the right side
     collapsible:			false,
     useArrows:				true,
-    rootVisible:			false,
+    rootVisible:			true,
     multiSelect:			true,
     singleExpand:			false,
 
@@ -84,7 +84,11 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             }
         }]},
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
-	{text: 'Sort Order', flex: 1, dataIndex: 'sort_order', hidden: true, editor: {
+	{text: 'Par', flex: 0, width: 40, dataIndex: 'parent_id', hidden: false, editor: {
+	    xtype: 'numberfield',
+	    minValue: 0	    
+	}}, 
+	{text: 'Sort', flex: 0, width: 40, dataIndex: 'sort_order', hidden: false, editor: {
 	    xtype: 'numberfield',
 	    minValue: 0	    
 	}}, 
