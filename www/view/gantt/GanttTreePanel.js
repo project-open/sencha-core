@@ -171,11 +171,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		return "<b>"+done+"</b>";
 	    }
 	}},
-	{text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', editor: 'podatefield', renderer: function(value, context, model) {
+	{text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', hidden: true, 
+	 editor: 'podatefield', renderer: function(value, context, model) {
 	    var isLeaf = (0 == model.childNodes.length);
 	    if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
 	}},
-	{text: 'End', width: 80, hidden: false, dataIndex: 'end_date', editor: 'podatefield', renderer: function(value, context, model) {
+	{text: 'End', width: 80, hidden: false, dataIndex: 'end_date', hidden: true,
+	 editor: 'podatefield', renderer: function(value, context, model) {
 	    var isLeaf = (0 == model.childNodes.length);
 	    if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
 	}},
