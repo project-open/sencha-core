@@ -21,7 +21,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     animate:				false,				// Animation messes up bars on the right side
     collapsible:			false,
     useArrows:				true,
-    rootVisible:			true,
+    rootVisible:			false,
     multiSelect:			true,
     singleExpand:			false,
 
@@ -83,15 +83,17 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 		taskPropertyPanel.show();
             }
         }]},
+/*
 	{text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
-	{text: 'Par', flex: 0, width: 40, dataIndex: 'parent_id', hidden: false, editor: {
+	{text: 'Par', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true, editor: {
 	    xtype: 'numberfield',
 	    minValue: 0	    
 	}}, 
-	{text: 'Sort', flex: 0, width: 40, dataIndex: 'sort_order', hidden: false, editor: {
+	{text: 'Sort', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
 	    xtype: 'numberfield',
 	    minValue: 0	    
-	}}, 
+	}},
+*/
 	{text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
 	 editor: true, renderer: function(v, context, model, d, e) {
 	    context.style = 'cursor: pointer;'; 
