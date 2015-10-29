@@ -65,7 +65,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         me.dndBasePoint = null;				// Drag-and-drop starting point
         me.dndBaseSprite = null;			// DnD sprite being draged
         me.dndShadowSprite = null;			// DnD shadow generated for BaseSprite
-	me.dndConfig = null;
+        me.dndConfig = null;
 
         // New Event: Drag-and-Drop for a Gantt bar
         this.addEvents('spriterightclick');
@@ -86,8 +86,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      * because sprites.getBBox() also returns relative coo.
      */
     getMousePoint: function(mouseEvent) {
-	var me = this;
-	var scroll = me.getEl().getScroll();				// We need to adjust the mouse point by the scroll
+        var me = this;
+        var scroll = me.getEl().getScroll();				// We need to adjust the mouse point by the scroll
 
         var surfaceBaseCoo = this.getXY();
         var mouseScreenCoo = mouseEvent.getXY();
@@ -107,25 +107,25 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var mouseSprite = me.getSpriteForPoint(point);                  // Trust on zIndex to get the right sprite
 
         if (e.button == 2) {                                            // Right-click on sprite?
-	    if (!!mouseSprite) {                                        // Found a "real" sprite for the mouse coo
-		me.fireEvent('spriterightclick', e, mouseSprite);
-		return true;
-	    }
-	    var mouseSprites = me.getSpritesForPoint(point, true);	// Get _all_sprites for the point
-	    if (mouseSprites.length > 0) {
-		me.fireEvent('spriterightclick', e, mouseSprites[0]);
-		return true;
-	    }
+            if (!!mouseSprite) {                                        // Found a "real" sprite for the mouse coo
+                me.fireEvent('spriterightclick', e, mouseSprite);
+                return true;
+            }
+            var mouseSprites = me.getSpritesForPoint(point, true);	// Get _all_sprites for the point
+            if (mouseSprites.length > 0) {
+                me.fireEvent('spriterightclick', e, mouseSprites[0]);
+                return true;
+            }
             return true;							// Don't continue with Drag-and-Drop stuff
         }
 
         // Now using offsetX/offsetY instead of getXY()
-	if (!mouseSprite) return;
-	var dndConfig = mouseSprite.dndConfig;				// DnD info stored together with mouseSprite
-	var baseSprite = dndConfig.baseSprite;				// baseSprite is the sprite to be DnD'ed
+        if (!mouseSprite) return;
+        var dndConfig = mouseSprite.dndConfig;				// DnD info stored together with mouseSprite
+        var baseSprite = dndConfig.baseSprite;				// baseSprite is the sprite to be DnD'ed
 
         var bBox = baseSprite.getBBox();
-	var radius = baseSprite.radius || 0;
+        var radius = baseSprite.radius || 0;
         var spriteShadow = me.surface.add({				// Create a "shadow" copy of the baseSprite with red borders
             x: bBox.x, y: bBox.y, width: bBox.width, height: bBox.height, radius: radius,
             type: 'rect',
@@ -133,7 +133,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             'stroke-width': 1
         }).show(true);
 
-	me.dndConfig = dndConfig;					// Store DnD configuration in the GanttEditor
+        me.dndConfig = dndConfig;					// Store DnD configuration in the GanttEditor
         me.dndBasePoint = point;
         me.dndBaseSprite = baseSprite;
         me.dndShadowSprite = spriteShadow;
@@ -150,13 +150,13 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (!me.dndEnabled) { return; }
         if (!me.dndBasePoint) { return; }				// Only if we are dragging
         if (!me.dndConfig) { return; }				// Only if we are dragging
-	
-	var xDiff = point[0] - me.dndBasePoint[0];
-	var yDiff = point[1] - me.dndBasePoint[1];
-	var diff = [xDiff,yDiff];
+        
+        var xDiff = point[0] - me.dndBasePoint[0];
+        var yDiff = point[1] - me.dndBasePoint[1];
+        var diff = [xDiff,yDiff];
 
-	var dndConfig = me.dndConfig;
-	dndConfig.dragAction(me, e, diff, dndConfig);
+        var dndConfig = me.dndConfig;
+        dndConfig.dragAction(me, e, diff, dndConfig);
     },
 
     /**
@@ -170,12 +170,12 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (!me.dndConfig) { return; }				// Only if we are dragging
 
         var point = me.getMousePoint(e);
-	var xDiff = point[0] - me.dndBasePoint[0];
-	var yDiff = point[1] - me.dndBasePoint[1];
-	var diff = [xDiff,yDiff];
+        var xDiff = point[0] - me.dndBasePoint[0];
+        var yDiff = point[1] - me.dndBasePoint[1];
+        var diff = [xDiff,yDiff];
 
-	var dndConfig = me.dndConfig;
-	dndConfig.dropAction(me, e, diff, dndConfig);
+        var dndConfig = me.dndConfig;
+        dndConfig.dropAction(me, e, diff, dndConfig);
 
         // Stop DnD'ing
         me.dndBasePoint = null;					// Stop dragging
@@ -198,8 +198,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var sprite = items[i];
             if (!sprite) continue;
             if (!allSprites) {					// Check, unless allSprites is "true"
-		if (!sprite.dndConfig) continue;                // Only check for sprites with a (project) model
-	    }
+                if (!sprite.dndConfig) continue;                // Only check for sprites with a (project) model
+            }
 
             var bbox = sprite.getBBox();
             if (bbox.x > x) continue;
@@ -399,7 +399,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (timespanDays > 7 && h < 2 * me.axisHeight) {
             me.drawAxisWeek(h); h = h + me.axisHeight;
         }
-	*/
+        */
         if (timespanDays > 1 && h < 2 * me.axisHeight) {
             me.drawAxisDay(h);
         }
@@ -550,21 +550,21 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
 
         var dateMilliJulian = 0;
-	switch (typeof date) {
-	case "number":
+        switch (typeof date) {
+        case "number":
             dateMilliJulian = date;
-	    break;
-	case "object":
+            break;
+        case "object":
             if (date instanceof Date) {
                 dateMilliJulian = date.getTime();
             } else {
                 console.error('GanttDrawComponent.date2x: Unknown object type for date argument:'+typeof date);
             }
-	    break;
-	default:
+            break;
+        default:
             console.error('GanttDrawComponent.date2x: Unknown type for date argument:'+t);
-	}
-	
+        }
+        
         var axisWidth = me.axisEndX - me.axisStartX;
         var axisStartTime = me.axisStartDate.getTime();
         var axisEndTime = me.axisEndDate.getTime();
@@ -583,16 +583,16 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     x2time: function(x) {
         var me = this;
 
-	if ("number" != typeof x) {
+        if ("number" != typeof x) {
             console.error('GanttDrawComponent.x2date: Unknown object type for number argument:'+typeof x);
-	}
-	
+        }
+        
         var axisWidth = me.axisEndX - me.axisStartX;
         var axisStartTime = me.axisStartDate.getTime();
         var axisEndTime = me.axisEndDate.getTime();
 
-	var time = axisStartTime + (axisEndTime - axisStartTime) * x / axisWidth;
-	return Math.round(time);
+        var time = axisStartTime + (axisEndTime - axisStartTime) * x / axisWidth;
+        return Math.round(time);
     },
 
 

@@ -68,6 +68,23 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }
     },
 
+/* Additional columns to add
+	'material_id',				// The type of activity (-> im_materials)
+	'cost_center_id',			// Optional department/cost center of who executes this activity.
+	'priority',				// Priority of the task (-> im_categories)
+	'scheduling_constraint_id',		// MS-Project: Type of scheduling constraint (-> im_cost_centers)
+	'scheduling_constraint_date',		// MS-Project: Field for "should not start before" constraint or similar
+	'effort_driven_p',			// MS-Project: Effort driven?
+	'effort_driven_type_id',		// MS-Project: Specific way to to determine effort driven
+	'deadline_date',			// MS-Project: Deadline for this activitiy
+	'project_status_id',			// Projects may have many states, but tasks should be either 76=open or 81=closed.
+	'project_type_id',			// Type of the project. This value should be 100=Task always.
+	'project_lead_id',			// Single person responsible for the success of the task.
+	'on_track_status_id',			// Is the task on-track? Normally not used for tasks. 66=green, 67=yellow, 68=red
+	'successors',				// List of tasks that depend on the current tasks
+	'predecessors',				// List of tasks on which this task depends
+*/
+
     // the 'columns' property is now 'headers'
     columns: [
 	{text: 'I', xtype: 'actioncolumn', dataIndex: 'project_id', width: 30, items: [{

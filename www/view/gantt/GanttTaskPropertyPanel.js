@@ -372,13 +372,14 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
 
         // Default values for task if not defined yet by ]po[
-        if ("" == task.get('planned_units')) { task.set('planned_units', '1'); }
-        if ("" == task.get('uom_i')) { task.set('uom_id', '320'); } // "Day" as UoM
+        // ToDo: Unify with default values in onButtonAdd
+        if ("" == task.get('planned_units')) { task.set('planned_units', '0'); }
+        if ("" == task.get('uom_id')) { task.set('uom_id', ""+default_uom_id); } // "Day" as UoM
+        if ("" == task.get('material_id')) { task.set('material_id', ""+default_material_id); } // "Default" material
         if ("" == task.get('priority')) { task.set('priority', '500'); }
         if ("" == task.get('start_date')) { task.set('start_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
-        if ("" == task.get('')) { task.set('', ''); }
         
         // Load the data into the various forms
         me.taskPropertyFormGeneral.getForm().loadRecord(task);
