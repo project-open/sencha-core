@@ -1,7 +1,7 @@
 /* 
  * /sencha-core/www/model/user/User.js
  *
- * Copyright (C) 2014 ]user-open[
+ * Copyright (C) 2014 ]project-open[
  * All rights reserved. Please see
  * http://www.user-open.com/license/sencha/ for details.
  *

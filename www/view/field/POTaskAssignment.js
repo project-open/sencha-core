@@ -119,6 +119,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
             console.log('PO.view.field.POTaskAssignment.formatAssignments: '); console.log(assig);
             if (Ext.isString(assig)) { return assig; }
             var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
+            var groupStore = Ext.StoreManager.get('groupStore');
 
             var result = "";
             if (null != assig) {
@@ -126,11 +127,17 @@ Ext.define('PO.view.field.POTaskAssignment', {
                     if ("" != result) { result = result + ";"; }
                     var userId = ""+assignee.user_id;
                     var userModel = projectMemberStore.getById(userId);
-		    if (null == userModel) { 
+		    var groupModel = groupStore.getById(userId);
+		    if (null == userModel && null == groupModel) { 
 			// This can happen when moving sub-projects around, even though it shouldn't...
 			result = result + '#'+userId;
 		    } else {
-			result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
+			if (null != userModel) {
+			    result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
+			}
+			if (null != groupModel) {
+			    result = result + groupModel.get('group_name').substr(0,2);
+			}
 		    }
                     if (100 != assignee.percent) {
                         result = result + '['+assignee.percent+'%]';
