@@ -136,7 +136,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
 			    result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
 			}
 			if (null != groupModel) {
-			    result = result + groupModel.get('group_name').substr(0,2);
+			    result = result + groupModel.get('group_name');
 			}
 		    }
                     if (100 != assignee.percent) {
