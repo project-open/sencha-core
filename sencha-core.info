@@ -17,8 +17,8 @@
         <description format="text/plain">Contains models and stores for ]po[ core objects.</description>
         <maturity>0</maturity>
 
-        <requires url="sencha-extjs" version="4.1.0.0.0"/>
         <provides url="sencha-core" version="4.1.0.0.0"/>
+        <requires url="sencha-extjs-v421" version="4.1.0.0.0"/>
 
         <callbacks>
         </callbacks>
@@ -28,3 +28,4 @@
 
     </version>
 </package>
+
