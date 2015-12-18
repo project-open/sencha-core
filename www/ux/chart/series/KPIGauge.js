@@ -138,9 +138,10 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
 					type: 'text',
 					text: value,
 					fill: me.needle.pivotFill || '#222',
-					font: '18px Arial',
+					font: '14px Arial',
 					x: centerX - (pivotRadius),
-					y: centerY - (me.radius / 2)
+					// y: centerY - (me.radius / 2)
+					y: me.radius + 35
 				});
 			} else {
 				if (animate) {
