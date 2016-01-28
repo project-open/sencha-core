@@ -51,7 +51,6 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
         }
         
         value = me.value;
-				
 		for (r = 0, rl = ranges.length; r < rl; r++) {
 			splitFromAngle = -180 * (1 - (ranges[r].from - minimum) / (maximum - minimum));
 			splitToAngle = -180 * (1 - (ranges[r].to - minimum) / (maximum - minimum));
@@ -62,6 +61,13 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
 				color: ranges[r].color
 			});
 		}
+
+	// KH: Make showing value optional
+	if (me.showValue) {
+	    valueDisplay = value;
+        } else {
+	    valueDisplay = "";
+	}
 		
         //do pie slices after.
         for (i = 0, ln = slices.length; i < ln; i++) {
@@ -136,13 +142,14 @@ Ext.define('Ext.ux.chart.series.KPIGauge', {
 				});
 				me.valueSprite = me.chart.surface.add({
 					type: 'text',
-					text: value,
+					text: valueDisplay,
 					fill: me.needle.pivotFill || '#222',
-					font: '14px Arial',
+					font: 'bold 14px Arial',
 					x: centerX - (pivotRadius),
 					// y: centerY - (me.radius / 2)
 					y: me.radius + 35
 				});
+				console.log('pivotRadius:' + pivotRadius);
 			} else {
 				if (animate) {
 					me.onAnimate(me.needlePivotSprite, {
