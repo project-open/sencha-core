@@ -38,8 +38,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     axisHeight: 11,					// Height of each of the two axis levels
     axisScale: 'month',					// Default scale for the time axis
 
+    // fraber 160412: We should get rid of granularity, or at least separate it from the data axis
     granularity: 'none',				// Set during init: 'week' or 'day'
-    granularityWorkDays: 1,				// Set during init: 1 for daily interval, 5 for weekly
 
     // Drag-and-drop state variables
     dndEnabled: true,					// Enable drag-and-drop at all?
@@ -283,7 +283,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         // Granularity
         var oneDayMilliseconds = 1000.0 * 3600 * 24 * 1.0;
         var intervalTimeMilliseconds;
+
         switch(me.granularity) {
+        case 'month': intervalTimeMilliseconds = oneDayMilliseconds * 30.0; break;	// One month
         case 'week': intervalTimeMilliseconds = oneDayMilliseconds * 7.0; break;	// One week
         case 'day':  intervalTimeMilliseconds = oneDayMilliseconds * 1.0; break;	// One day
         default:     alert('Undefined granularity: '+me.granularity);
@@ -381,11 +383,38 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     },
 
     /**
-     * Draw a date axis on the top of the diagram
+     * Draw a date axis on the top of the diagram with auto
      */
     drawAxis: function() {
         var me = this;
-        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting');
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting: granularity='+me.granularity);
+        var h = 0;
+
+        switch (me.granularity) {
+        case "day":
+            me.drawAxisMonth(h); h = h + me.axisHeight;	    
+            me.drawAxisDay(h); h = h + me.axisHeight;
+            break;
+        case "week":
+            me.drawAxisMonth(h); h = h + me.axisHeight;
+            me.drawAxisWeek(h); h = h + me.axisHeight;
+            break;
+        case "month":
+            me.drawAxisYear(h); h = h + me.axisHeight;
+            me.drawAxisMonth(h); h = h + me.axisHeight;	    
+            break;
+        default:
+            me.drawAxisAuto();
+        }
+    },
+
+    /**
+     * Draw a date axis on the top of the diagram
+     * with auto-scaling
+     */
+    drawAxisAuto: function() {
+        var me = this;
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Starting');
         var h = 0;
         
         var timespanDays = (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (1000 * 3600 * 24);
@@ -395,15 +424,15 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (timespanDays > 30) {
             me.drawAxisMonth(h); h = h + me.axisHeight;
         }
-/*
+	
         if (timespanDays > 7 && h < 2 * me.axisHeight) {
             me.drawAxisWeek(h); h = h + me.axisHeight;
         }
-        */
+
         if (timespanDays > 1 && h < 2 * me.axisHeight) {
             me.drawAxisDay(h);
         }
-        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Finished');
+        if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Finished');
     },
 
     /**

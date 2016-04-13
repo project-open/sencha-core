@@ -108,37 +108,52 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Finished');
     },
 
-    onSwitchToFullScreen: function () {
+    onSwitchToFullScreen: function (renderDiv) {
         var me = this;
 	me.fullScreenP = true; 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Starting');
 
-	// Set the outer container to the browser screen size
 	me.outerContainer.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
 
-	// Fraber 160413: Nothing to do, really.
+	renderDiv.setWidth('100%');
+	renderDiv.setHeight('100%');
+	renderDiv.applyStyles({ 
+	    'position':'absolute',
+	    'z-index': '2000',
+	    'left': '0',
+	    'top': '0'
+	});
+          
+	// Disable the "resizable" properties of the outer panel
+	me.outerContainer.resizer.resizeTracker.disable();
 
+	// Disable scrolling in the browser
+	document.documentElement.style.overflow = 'hidden';		// firefox, chrome
+	document.body.scroll = "no";	      				// ie only
+      
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
 
-    onSwitchBackFromFullScreen: function () {
+    onSwitchBackFromFullScreen: function (renderDiv) {
         var me = this;
 	me.fullScreenP = false; 
-	
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchBackFromFullScreen: Starting');
-	
-        var sideBar = Ext.get('sidebar');                                   // ]po[ left side bar component
-        var sideBarWidth = sideBar.getSize().width;
-	
-        if (undefined === sideBarWidth) {
-            sideBarWidth = Ext.get('sidebar').getSize().width;
-        }
-	
-        var screenSize = Ext.getBody().getViewSize();
-        var width = screenSize.width - sideBarWidth - 100;
-        var height = screenSize.height - 280;
-	
-        me.outerContainer.setSize(width, height);
+
+        renderDiv.setWidth('auto');
+        renderDiv.setHeight('auto');
+        renderDiv.applyStyles({
+            'position':'relative',
+            'z-index': '0',
+        });
+
+        // Re-enable the "resizable" properties of the outer panel
+        me.outerContainer.resizer.resizeTracker.enable();
+
+        // Disable scrolling in the browser
+        document.documentElement.style.overflow = 'auto';		// firefox, chrome
+        document.body.scroll = "yes";	      				// ie only
+
+	me.onWindowResize();   						// scale DIV back to suitable size
 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchBackFromFullScreen: Finished');
     }
