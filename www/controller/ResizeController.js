@@ -19,13 +19,7 @@
 Ext.define('PO.controller.ResizeController', {
     extend: 'Ext.app.Controller',
     debug: false,
-    'ganttPanelContainer': null,						// Defined during initialization
-    'ganttTreePanel': null,							// Defined during initialization
-    'ganttBarPanel': null,							// Defined during initialization
-
-    refs: [
-        { ref: 'ganttTreePanel', selector: '#ganttTreePanel' }
-    ],
+    'outerContainer': null,						// Defined during initialization
 
     init: function() {
         var me = this;
@@ -34,12 +28,12 @@ Ext.define('PO.controller.ResizeController', {
         var sideBarTab = Ext.get('sideBarTab');	    			// ]po[ side-bar collapses the left-hand menu
         sideBarTab.on('click', me.onSideBarResize, me);			// Handle collapsable side menu
         Ext.EventManager.onWindowResize(me.onWindowResize, me);		// Deal with resizing the main window
-        me.ganttPanelContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
+        me.outerContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
         return this;
     },
 
     /**
-     * Adapt the size of the ganttPanelContainer (the outer Gantt panel)
+     * Adapt the size of the outerContainer (the outer Gantt panel)
      * to the available drawing area.
      * Takes the size of the browser and subtracts the sideBar at the
      * left and the size of the menu on top.
@@ -47,16 +41,16 @@ Ext.define('PO.controller.ResizeController', {
     onResize: function (sideBarWidth) {
         var me = this;
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onResize: Starting');
-        var sideBar = Ext.get('sidebar');					// ]po[ left side bar component
+        var sideBar = Ext.get('sidebar');				// ]po[ left side bar component
 
         if (undefined === sideBarWidth) {
             sideBarWidth = sideBar.getSize().width;
         }
 
         var screenSize = Ext.getBody().getViewSize();			// Total browser size
-        var width = screenSize.width - sideBarWidth - 100;			// What's left after ]po[ side borders
+        var width = screenSize.width - sideBarWidth - 100;		// What's left after ]po[ side borders
         var height = screenSize.height - 280;	  			// What's left after ]po[ menu bar on top
-        me.ganttPanelContainer.setSize(width, height);
+        me.outerContainer.setSize(width, height);
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onResize: Finished');
     },
 
@@ -66,7 +60,7 @@ Ext.define('PO.controller.ResizeController', {
     onSideBarResize: function () {
         var me = this;
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSidebarResize: Starting');
-        var sideBar = Ext.get('sidebar');					// ]po[ left side bar component
+        var sideBar = Ext.get('sidebar');				// ]po[ left side bar component
         var sideBarWidth = sideBar.getSize().width;
         // We get the event _before_ the sideBar has changed it's size.
         // So we actually need to the the oposite of the sidebar size:
@@ -75,7 +69,7 @@ Ext.define('PO.controller.ResizeController', {
         } else {
             sideBarWidth = 245;						// Determines size when Sidebar visible
         }
-        me.onResize(sideBarWidth);						// Perform actual resize
+        me.onResize(sideBarWidth);					// Perform actual resize
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSidebarResize: Finished');
     },
 
@@ -90,9 +84,9 @@ Ext.define('PO.controller.ResizeController', {
 	    var sideBar = Ext.get('sidebar');// ]po[ left side bar component
 	    var sideBarWidth = sideBar.getSize().width;
 	    if (sideBarWidth > 100) {
-		sideBarWidth = 340;// Determines size when Sidebar visible
+		sideBarWidth = 245;					// Determines size when Sidebar visible
 	    } else {
-		sideBarWidth = 85;// Determines size when Sidebar collapsed
+		sideBarWidth = 2;					// Determines size when Sidebar collapsed
 	    }
 	    me.onResize(sideBarWidth);
 	} else {
@@ -103,12 +97,14 @@ Ext.define('PO.controller.ResizeController', {
     },
 
     /**
-     * Manually changed the size of the ganttPanelContainer
+     * Manually changed the size of the outerContainer
      */
     onGanttPanelContainerResize: function () {
         var me = this;
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Starting');
-        me.ganttBarPanel.redraw();						// Perform actual resize
+
+	// Fraber 160413: Nothing to do, really.
+
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Finished');
     },
 
@@ -116,9 +112,12 @@ Ext.define('PO.controller.ResizeController', {
         var me = this;
 	me.fullScreenP = true; 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Starting');
-	me.ganttPanelContainer.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
-	me.ganttBarPanel.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
-        me.ganttBarPanel.redraw();
+
+	// Set the outer container to the browser screen size
+	me.outerContainer.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
+
+	// Fraber 160413: Nothing to do, really.
+
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
 
@@ -139,7 +138,7 @@ Ext.define('PO.controller.ResizeController', {
         var width = screenSize.width - sideBarWidth - 100;
         var height = screenSize.height - 280;
 	
-        me.ganttPanelContainer.setSize(width, height);
+        me.outerContainer.setSize(width, height);
 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchBackFromFullScreen: Finished');
     }
