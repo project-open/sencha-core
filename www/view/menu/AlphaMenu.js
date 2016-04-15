@@ -19,6 +19,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	'PO.model.helpdesk.Ticket',
 	'PO.store.helpdesk.TicketStore'
     ],
+    alphaComponent: 'undefined',
     debug: false,
     slaId: null,
     ticketStatusId: 30000,							// "Open"
@@ -44,7 +45,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	me.add(item);
 	
 	var item = Ext.create('Ext.menu.Item', {
-	    text: "Gantt Editor Ticket Tracker",
+	    text: me.alphaComponent + " Ticket Tracker",
 	    href: serverUrl+"/intranet-helpdesk/index?mine_p=all&ticket_sla_id="+sla_id,
 	    hrefTarget: '_blank'
 	});
