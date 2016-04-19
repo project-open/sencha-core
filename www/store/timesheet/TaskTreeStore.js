@@ -40,6 +40,21 @@ Ext.define('PO.store.timesheet.TaskTreeStore', {
     },
 
     /**
+     * Returns an entry for a task_id
+     */
+    getById: function(task_id) {
+	var rootNode = this.getRootNode();
+	var resultModel = null;
+        rootNode.cascadeBy(function(model) {
+	    var id = model.get('id');
+	    if (task_id == id) { 
+		resultModel = model; 
+	    }
+        });
+	return resultModel;
+    },
+
+    /**
      * Return an array with the tree items ordered by sort_order.
      * The resulting array should not have "holes".
      */
