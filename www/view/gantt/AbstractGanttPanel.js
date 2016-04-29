@@ -488,7 +488,6 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var mon = startMonth;
 
         while (yea * 100 + mon <= endYear * 100 + endMonth) {
-
             var xEndMon = mon+1;
             var xEndYea = yea;
             if (xEndMon > 11) { xEndMon = 0; xEndYea = xEndYea + 1; }
@@ -496,8 +495,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var xEnd = me.date2x(new Date(xEndYea+"-"+  ("0"+(xEndMon+1)).slice(-2)  +"-01"));
             var w = xEnd - x;
 
-            // var text = ""+(mon+1);
+	    // Calculate name of month, including year if possible
             var text = me.monthThreeChar[mon];
+	    if (w > 30) { text = text + " " + (""+yea).substring(2,4); }
+
             var axisBar = me.surface.add(
                 {type: 'rect', x: x, y: h, width: w, height: me.axisHeight, fill: '#cdf', stroke: 'grey'}).show(true);
             var axisText = me.surface.add(
