@@ -84,14 +84,4 @@ Ext.define('PO.model.finance.CostCenter', {
 	    type:		'json'				// Allow Sencha to write ticket changes
 	}
     }
-
-/*
-
-    fields: [
-
-
-    ]
-
-
-    */
 });
