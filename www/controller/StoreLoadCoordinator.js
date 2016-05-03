@@ -25,7 +25,7 @@ Ext.define('PO.controller.StoreLoadCoordinator', {
     /**
      * Enable console debugging messages
      */
-    debug: 0,
+    debug: false,
 
     mixins: {
         observable: 'Ext.util.Observable'
