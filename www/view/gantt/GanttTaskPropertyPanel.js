@@ -85,6 +85,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             plugins: taskAssignmentRowEditing,
             columns: [
                 { text: 'Id', width: 30, dataIndex: 'id', hidden: false},
+                { text: 'Dept', width: 30, dataIndex: 'department_id', hidden: false},
                 { text: 'Initials', width: 60, dataIndex: 'initials', hidden: false},
                 { text: 'UserName', dataIndex: 'name', flex: 1, editor: {
                     xtype: 'combobox',

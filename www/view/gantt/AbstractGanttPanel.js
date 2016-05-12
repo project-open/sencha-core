@@ -23,8 +23,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         'Ext.layout.component.Draw'
     ],
 
-    // surface						// Inherited from draw.Component
-    debug: 0,
+    // surface: null,					// Inherited from draw.Component
+    debug: false,
 
     objectPanel: null,					// Set during init: Reference to grid or tree panel at the left
     objectStore: null,					// Set during init: Reference to object store (tree or flat)
@@ -252,6 +252,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     calcGanttBarYPosition: function(model) {
         var me = this;
         var objectPanelView = me.objectPanel.getView();						// The "view" for the GridPanel with HTML elements
+        var projectNode = objectPanelView.getNode(0);
+	if (!projectNode) { return 0; }
         var projectNodeHeight = objectPanelView.getNode(0).getBoundingClientRect().height;	// Height of a project node
         var projectYFirstProject = objectPanelView.getNode(0).getBoundingClientRect().top;	// Y position of the very first project
         var centerOffset = (projectNodeHeight - me.ganttBarHeight) / 2.0;			// Small offset in order to center Gantt

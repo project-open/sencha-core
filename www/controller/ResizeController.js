@@ -19,6 +19,8 @@
 Ext.define('PO.controller.ResizeController', {
     extend: 'Ext.app.Controller',
     debug: false,
+
+    'renderDiv': null,
     'outerContainer': null,						// Defined during initialization
 
     init: function() {
@@ -108,16 +110,16 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Finished');
     },
 
-    onSwitchToFullScreen: function (renderDiv) {
+    onSwitchToFullScreen: function () {
         var me = this;
 	me.fullScreenP = true; 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Starting');
 
 	me.outerContainer.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
 
-	renderDiv.setWidth('100%');
-	renderDiv.setHeight('100%');
-	renderDiv.applyStyles({ 
+	me.renderDiv.setWidth('100%');
+	me.renderDiv.setHeight('100%');
+	me.renderDiv.applyStyles({ 
 	    'position':'absolute',
 	    'z-index': '2000',
 	    'left': '0',
@@ -134,14 +136,14 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
 
-    onSwitchBackFromFullScreen: function (renderDiv) {
+    onSwitchBackFromFullScreen: function () {
         var me = this;
 	me.fullScreenP = false; 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchBackFromFullScreen: Starting');
 
-        renderDiv.setWidth('auto');
-        renderDiv.setHeight('auto');
-        renderDiv.applyStyles({
+        me.renderDiv.setWidth('auto');
+        me.renderDiv.setHeight('auto');
+        me.renderDiv.applyStyles({
             'position':'relative',
             'z-index': '0',
         });
