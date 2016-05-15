@@ -167,13 +167,15 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             },
             items: [{
                 xtype: 'fieldset',
-                title: 'General Information',
+                title: 'General',
                 defaultType: 'textfield',
                 layout: 'anchor',
                 items: [{
                     fieldLabel: 'Name',
                     name: 'project_name',
+		    width: 400,
                     allowBlank: false
+/*
                 }, {
                     xtype: 'fieldcontainer',
                     fieldLabel: 'Duration',
@@ -210,6 +212,15 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                         checked: false,
                         margin: '0 0 10 0'
                     }]
+*/
+                }, {
+                    xtype: 'numberfield',
+                    fieldLabel: 'Work',
+                    name: 'planned_units',
+                    width: 140,
+                    value: '0',
+                    minValue: 0,
+                    allowBlank: true
                 }, {
                     xtype: 'numberfield',
                     fieldLabel: '% Done',
@@ -293,9 +304,9 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         // Write timestamp to make sure that data are modified and redrawn.
         me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
         
+	// ---------------------------------------------------------------
+	// "General" form panel with start- and end date, %done, work etc.
         var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
-
-        // Fix values
         var oldStartDate = me.taskModel.get('start_date');
         var oldEndDate = me.taskModel.get('end_date');
         var newStartDate = fields['start_date'];
@@ -303,13 +314,17 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
         if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
         me.taskModel.set(fields);
-        
-        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
+
         var plannedUnits = fields['planned_units'];
         if (undefined == plannedUnits) { plannedUnits = 0; }
         fields['planned_units'] = ""+plannedUnits;              // Convert the numberfield integer to string used in model.
         me.taskModel.set(fields);
+        
+	// ---------------------------------------------------------------
+	// Notes form
+        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
 
+	// ---------------------------------------------------------------
         // Deal with Assignations
         var oldAssignees = me.taskModel.get('assignees');
         var newAssignees = [];
@@ -381,6 +396,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         if ("" == task.get('start_date')) { task.set('start_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
+        if ("" == task.get('planned_units')) { task.set('planned_units', '0'); }
         
         // Load the data into the various forms
         me.taskPropertyFormGeneral.getForm().loadRecord(task);

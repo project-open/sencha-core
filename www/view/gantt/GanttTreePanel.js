@@ -138,6 +138,11 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }}, 
         {text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
+        {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, editor: {
+            xtype: 'numberfield',
+            minValue: 0,
+	    maxValue: 1000
+        }},
         {text: 'Nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
         {text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', editor: {
             xtype: 'numberfield',
@@ -157,7 +162,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                         var puString = child.get('planned_units');
                         if ("" != puString) {
                             var pu = parseFloat(puString);
-                            if ("number" == typeof pu) { plannedUnits = plannedUnits + pu; }
+                            if ("number" == typeof pu) { 
+				plannedUnits = plannedUnits + pu; 
+			    }
                         }
                     }
                 });
