@@ -91,7 +91,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 
         var surfaceBaseCoo = this.getXY();
         var mouseScreenCoo = mouseEvent.getXY();
-        var mousePoint = [mouseScreenCoo[0] - surfaceBaseCoo[0] + scroll.left, mouseScreenCoo[1] - surfaceBaseCoo[1]]
+        var mousePoint = [mouseScreenCoo[0] - surfaceBaseCoo[0] + scroll.left, mouseScreenCoo[1] - surfaceBaseCoo[1] + scroll.top]
         return mousePoint;
     },
 
