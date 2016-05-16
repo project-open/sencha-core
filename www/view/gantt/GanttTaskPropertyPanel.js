@@ -173,7 +173,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                 items: [{
                     fieldLabel: 'Name',
                     name: 'project_name',
-		    width: 400,
+                    width: 450,
                     allowBlank: false
 /*
                 }, {
@@ -239,6 +239,10 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     minValue: 0,
                     maxValue: 1000,
                     allowBlank: false
+                }, {
+                    xtype: 'checkbox',
+                    fieldLabel: 'Milestone',
+                    name: 'milestone_p'
                 }]
             }, {
                 xtype: 'fieldset',
@@ -290,7 +294,6 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         me.taskPropertyFormNotes = taskPropertyFormNotes;
         me.taskPropertyTabpanel = taskPropertyTabpanel;
 
-        // me.on('close', this.onClose, this);	// capture the close event
         if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.initialize: Finished');
     },
 
@@ -304,27 +307,35 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         // Write timestamp to make sure that data are modified and redrawn.
         me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
         
-	// ---------------------------------------------------------------
-	// "General" form panel with start- and end date, %done, work etc.
-        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);
+        // ---------------------------------------------------------------
+        // "General" form panel with start- and end date, %done, work etc.
+        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);         // get all fields into object
+
         var oldStartDate = me.taskModel.get('start_date');
         var oldEndDate = me.taskModel.get('end_date');
         var newStartDate = fields['start_date'];
         var newEndDate = fields['end_date'];
         if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
         if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
-        me.taskModel.set(fields);
 
+	// fix boolean vs. 't'/'f' checkbox for milestone_p
+	switch (fields['milestone_p']) {
+	    case true: fields['milestone_p'] = 't'; break;
+	    default: fields['milestone_p'] = ''; break;                                     // '' is database "null" value in ]po[
+	}
+	
         var plannedUnits = fields['planned_units'];
         if (undefined == plannedUnits) { plannedUnits = 0; }
         fields['planned_units'] = ""+plannedUnits;              // Convert the numberfield integer to string used in model.
-        me.taskModel.set(fields);
-        
-	// ---------------------------------------------------------------
-	// Notes form
-        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
 
-	// ---------------------------------------------------------------
+        me.taskModel.set(fields);                                                             // write all fields into model
+        
+        // ---------------------------------------------------------------
+        // Notes form
+        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
+        me.taskModel.set(fields);
+
+        // ---------------------------------------------------------------
         // Deal with Assignations
         var oldAssignees = me.taskModel.get('assignees');
         var newAssignees = [];
@@ -396,7 +407,12 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         if ("" == task.get('start_date')) { task.set('start_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
-        if ("" == task.get('planned_units')) { task.set('planned_units', '0'); }
+
+	// fix boolean vs. 't'/'f' checkbox for milestone_p
+	switch (task.get('milestone_p')) {
+	    case 't': task.set('milestone_p', true); break;
+	    default: task.set('milestone_p', false); break;
+	}
         
         // Load the data into the various forms
         me.taskPropertyFormGeneral.getForm().loadRecord(task);
