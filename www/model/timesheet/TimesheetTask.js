@@ -150,6 +150,17 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         writer: {
             type:		'json'		// Allow Sencha to write ticket changes
         }
+    },
+
+    isMilestone: function() {
+	var me = this;
+	var milestoneString = me.get('milestone_p');
+	if ("t" == milestoneString) return true;
+
+	var startTime = PO.Utilities.pgToDate(me.get('start_date')).getTime();
+        var endTime = PO.Utilities.pgToDate(me.get('end_date')).getTime();
+	if (startTime == endTime) return true;
+	return false;
     }
 
 });
