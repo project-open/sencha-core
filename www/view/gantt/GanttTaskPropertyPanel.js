@@ -132,6 +132,8 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                 var me = this;
                 if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
                 var newRecord = me.taskAssignmentStore.add({percent:100})[0];
+
+		// Cancel editing
                 var editing = me.taskPropertyAssignments.editingPlugin;
                 editing.cancelEdit();
                 editing.startEdit(newRecord, 0);                       // Start editing the first row
@@ -139,7 +141,21 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             onAssigButtonDel: function(button, event) {
                 var me = this;
                 if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonDel');
-                taskAssignmentStore.add({});
+console.log('POTaskAssignment.pickerController.onAssigButtonDel');
+
+		// Cancel editing
+                var editing = me.taskPropertyAssignments.editingPlugin;
+                editing.cancelEdit();
+
+		var lastSelected = me.taskPropertyAssignments.getSelectionModel().getLastSelected();
+		if (lastSelected) {
+		    me.taskAssignmentStore.remove(lastSelected);
+		} else {
+		    // Apparently no row selected yet. Never mind, use the last one...
+		    var last = me.taskAssignmentStore.last();
+		    if (last)
+			me.taskAssignmentStore.remove(last);
+		}
             }
         }).init();
 
@@ -318,12 +334,12 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
         if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
 
-	// fix boolean vs. 't'/'f' checkbox for milestone_p
-	switch (fields['milestone_p']) {
-	    case true: fields['milestone_p'] = 't'; break;
-	    default: fields['milestone_p'] = ''; break;                                     // '' is database "null" value in ]po[
-	}
-	
+        // fix boolean vs. 't'/'f' checkbox for milestone_p
+        switch (fields['milestone_p']) {
+            case true: fields['milestone_p'] = 't'; break;
+            default: fields['milestone_p'] = ''; break;                                     // '' is database "null" value in ]po[
+        }
+        
         var plannedUnits = fields['planned_units'];
         if (undefined == plannedUnits) { plannedUnits = 0; }
         fields['planned_units'] = ""+plannedUnits;              // Convert the numberfield integer to string used in model.
@@ -408,11 +424,11 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
 
-	// fix boolean vs. 't'/'f' checkbox for milestone_p
-	switch (task.get('milestone_p')) {
-	    case 't': task.set('milestone_p', true); break;
-	    default: task.set('milestone_p', false); break;
-	}
+        // fix boolean vs. 't'/'f' checkbox for milestone_p
+        switch (task.get('milestone_p')) {
+            case 't': task.set('milestone_p', true); break;
+            default: task.set('milestone_p', false); break;
+        }
         
         // Load the data into the various forms
         me.taskPropertyFormGeneral.getForm().loadRecord(task);
