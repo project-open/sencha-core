@@ -99,7 +99,8 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'uom_id_deref',				// Unit of measure (should alsways be "Hour")
         'on_track_status_id_deref',		// Is the task on-track? "Green", "Yellow" or "Red"
 
-        //	'icon', 				// Used by ExtJS for the icon in the tree (2015-08-04 doesn't seem to work...)
+        'icon', 				// Used by ExtJS for the icon in the tree (2015-08-04 doesn't seem to work...)
+	'iconCls',                              // Used by ExtJS for the icon, seems to work
 
         'successors',				// List of tasks that depend on the current tasks
         'predecessors',				// List of tasks on which this task depends
