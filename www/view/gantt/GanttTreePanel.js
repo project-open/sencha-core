@@ -136,7 +136,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             context.style = 'cursor: pointer;'; 
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
-        }}, 
+        }},
         {text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
         {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, editor: {
             xtype: 'numberfield',
