@@ -441,8 +441,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             me.drawAxisWeek(h); h = h + me.axisHeight;
         }
 
-            me.drawAxisDay(h);
         if (timespanDays > 1 && h < 2 * me.axisHeight) {
+            me.drawAxisDay(h);
         }
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Finished');
     },
