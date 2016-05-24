@@ -104,10 +104,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (!me.dndEnabled) { return; }
         var point = me.getMousePoint(e);				// Get corrected screen coordinates
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.onMouseDown: button='+e.button+", point="+point);
-        var mouseSprite = me.getSpriteForPoint(point);                  // Trust on zIndex to get the right sprite
+        var mouseSprite = me.getSpriteForPoint(point);  		// Trust on zIndex to get the right sprite
 
-        if (e.button == 2) {                                            // Right-click on sprite?
-            if (!!mouseSprite) {                                        // Found a "real" sprite for the mouse coo
+        if (e.button == 2) {                            		// Right-click on sprite?
+            if (!!mouseSprite) {                        		// Found a "real" sprite for the mouse coo
                 me.fireEvent('spriterightclick', e, mouseSprite);
                 return true;
             }
@@ -150,7 +150,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (!me.dndEnabled) { return; }
         if (!me.dndBasePoint) { return; }				// Only if we are dragging
         if (!me.dndConfig) { return; }				// Only if we are dragging
-        
+
         var xDiff = point[0] - me.dndBasePoint[0];
         var yDiff = point[1] - me.dndBasePoint[1];
         var diff = [xDiff,yDiff];
@@ -198,7 +198,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var sprite = items[i];
             if (!sprite) continue;
             if (!allSprites) {					// Check, unless allSprites is "true"
-                if (!sprite.dndConfig) continue;                // Only check for sprites with a (project) model
+                if (!sprite.dndConfig) continue;		// Only check for sprites with a (project) model
             }
 
             var bbox = sprite.getBBox();
@@ -214,7 +214,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     },
 
     /**
-     * Return the topmost sprite of the list returned 
+     * Return the topmost sprite of the list returned
      * by getSpritesForPoint().
      */
     getSpriteForPoint: function(point) {
@@ -222,7 +222,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var sprites = me.getSpritesForPoint(point);
         var result = null;
         var maxZIndex = -1000;
-        
+
         sprites.forEach(function(v) {
             if (v.attr.zIndex > maxZIndex) {
                 maxZIndex = v.attr.zIndex;
@@ -241,7 +241,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.redraw: Needs to be overwritten');
         var me = this;
         me.surface.removeAll();
-        me.drawAxis();							// Draw the top axis
+        me.drawAxisAuto();							// Draw the top axis
     },
 
     /**
@@ -253,7 +253,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
         var objectPanelView = me.objectPanel.getView();						// The "view" for the GridPanel with HTML elements
         var projectNode = objectPanelView.getNode(0);
-	if (!projectNode) { return 0; }
+        if (!projectNode) { return 0; }
         var projectNodeHeight = objectPanelView.getNode(0).getBoundingClientRect().height;	// Height of a project node
         var projectYFirstProject = objectPanelView.getNode(0).getBoundingClientRect().top;	// Y position of the very first project
         var centerOffset = (projectNodeHeight - me.ganttBarHeight) / 2.0;			// Small offset in order to center Gantt
@@ -358,11 +358,11 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                     var tip = Ext.create("Ext.tip.ToolTip", {
                         target: spritePath.el,
                         width: 250,
-                        html: tooltipTemplate.apply(data)                 // Replace {0} in the template with value
+                        html: tooltipTemplate.apply(data) 		// Replace {0} in the template with value
                     });
                 }
 
-                path = "M" + intervalStartX + " " + intervalY;              // Start point for path
+                path = "M" + intervalStartX + " " + intervalY;      	// Start point for path
 
                 // A new segment will start here.
                 segmentStartDate = intervalStartDate;
@@ -392,9 +392,14 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting: granularity='+me.granularity);
         var h = 0;
 
+        var startDate = me.axisStartDate;
+	startDate.setHours(0,0,0,0);
+        var endDate = me.axisEndDate;
+	endDate.setHours(0,0,0,0);
+
         switch (me.granularity) {
         case "day":
-            me.drawAxisMonth(h); h = h + me.axisHeight;	    
+            me.drawAxisMonth(h); h = h + me.axisHeight;
             me.drawAxisDay(h); h = h + me.axisHeight;
             break;
         case "week":
@@ -403,7 +408,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             break;
         case "month":
             me.drawAxisYear(h); h = h + me.axisHeight;
-            me.drawAxisMonth(h); h = h + me.axisHeight;	    
+            me.drawAxisMonth(h); h = h + me.axisHeight;
             break;
         default:
             me.drawAxisAuto();
@@ -418,7 +423,12 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Starting');
         var h = 0;
-        
+
+        var startDate = me.axisStartDate;
+	startDate.setHours(0,0,0,0);
+        var endDate = me.axisEndDate;
+	endDate.setHours(0,0,0,0);
+
         var timespanDays = (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (1000 * 3600 * 24);
         if (timespanDays > 365) {
             me.drawAxisYear(h); h = h + me.axisHeight;
@@ -426,13 +436,13 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (timespanDays > 30) {
             me.drawAxisMonth(h); h = h + me.axisHeight;
         }
-	
+
         if (timespanDays > 7 && h < 2 * me.axisHeight) {
             me.drawAxisWeek(h); h = h + me.axisHeight;
         }
 
-        if (timespanDays > 1 && h < 2 * me.axisHeight) {
             me.drawAxisDay(h);
+        if (timespanDays > 1 && h < 2 * me.axisHeight) {
         }
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Finished');
     },
@@ -497,9 +507,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var xEnd = me.date2x(new Date(xEndYea+"-"+  ("0"+(xEndMon+1)).slice(-2)  +"-01"));
             var w = xEnd - x;
 
-	    // Calculate name of month, including year if possible
+            // Calculate name of month, including year if possible
             var text = me.monthThreeChar[mon];
-	    if (w > 30) { text = text + " " + (""+yea).substring(2,4); }
+            if (w > 30) { text = text + " " + (""+yea).substring(2,4); }
 
             var axisBar = me.surface.add(
                 {type: 'rect', x: x, y: h, width: w, height: me.axisHeight, fill: '#cdf', stroke: 'grey'}).show(true);
@@ -517,37 +527,51 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     },
 
     /**
-     * Get the week of the year of the data argument.
-     */
-    getWeek: function(date) {
-        var d = new Date(date);
-        d.setHours(0,0,0);
-        d.setDate(d.getDate()+4-(d.getDay()||7));
-        return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
-    },
-
-    /**
      * Draw a date axis on the top of the diagram
      */
     drawAxisWeek: function(h) {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Starting');
 
-        // Start with a Sunday
-        var now = new Date(me.axisStartDate.getTime());
-        while (0 != now.getDay()) { 
-            now = new Date(now.getTime() + 1000 * 3600 * 24);
+        // Calculate the start of the first week of the year
+        var axisStartTime = me.axisStartDate.getTime();
+        var firstThu = new Date(axisStartTime);
+        firstThu.setMonth(0,1);                                       		// First Thursday of that year
+        firstThu.setHours(0,0,0,0);                                   		// Reset hour and minute to 0
+        if (firstThu.getDay() != 4) {
+            firstThu.setMonth(0, 1 + ((7 + 4 - firstThu.getDay())) % 7);      	// First Thursday of the year.
         }
-        
+        var startOfFirstWeek = new Date(firstThu.getTime() - 1000 * 3600 * 24 * 3);   // Monday of this first week
+        var year = firstThu.getYear();
+
+        // Search the start of the first week within the data axis
+        var week = 0;
+        var now = new Date(startOfFirstWeek.getTime());
+        while (now.getTime() < axisStartTime) {
+            now = new Date(now.getTime() + 1000 * 3600 * 24 * 7);     		// advance by one week
+            week = week + 1;
+        }
+
+        // "now" points to the start of the first week (Monday 00:00 at night) within the data axis
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
-            var week = me.getWeek(now);
             now = new Date(now.getTime() + 1000 * 3600 * 24 * 7);
             var endX = me.date2x(now);
             var w = endX - startX;
 
+            week = week + 1;
+            if (now.getYear() > year) {
+                // The end of the week is in the new year.
+                // We now need to change if the Thursday of this week is still in the new year
+        	var thu = new Date(now.getTime() - 1000 * 3600 * 24 * 4);
+        	if (thu.getYear() > year) {
+        	    week = 1;
+        	    year = now.getYear();
+        	}
+            }
             var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
             var axisText = me.surface.add({type: 'text', text:""+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
+
         }
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished');
     },
@@ -560,6 +584,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Starting');
         var now = new Date(me.axisStartDate.getTime());
+        now.setHours(0,0,0,0);                                   		// Reset hour and minute to 0
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
             var day = now.getDate(now);
@@ -596,7 +621,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         default:
             console.error('GanttDrawComponent.date2x: Unknown type for date argument:'+t);
         }
-        
+
         var axisWidth = me.axisEndX - me.axisStartX;
         var axisStartTime = me.axisStartDate.getTime();
         var axisEndTime = me.axisEndDate.getTime();
@@ -618,7 +643,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if ("number" != typeof x) {
             console.error('GanttDrawComponent.x2date: Unknown object type for number argument:'+typeof x);
         }
-        
+
         var axisWidth = me.axisEndX - me.axisStartX;
         var axisStartTime = me.axisStartDate.getTime();
         var axisEndTime = me.axisEndDate.getTime();
