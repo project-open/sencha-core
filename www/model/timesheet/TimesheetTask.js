@@ -91,7 +91,6 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         // the REST interface URL
         'project_status_id_deref',		// Project Status ("Open" or "Closed")
         'project_type_id_deref',		// Project Type (always "Task")
-        'project_priority_id_deref',		// Project Priority
         'company_id_deref',			// Customer name
         'parent_id_deref',			// Name of parent project or task
         'project_lead_id_deref',		// Project manager name

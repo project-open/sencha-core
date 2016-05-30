@@ -56,7 +56,6 @@ Ext.define('PO.model.project.Project', {
 	'sort_order',				// Used for portfolio views
 	'company_project_nr',			// The order ID of the customer
 	'project_cost_center_id',		// Assign this project to some cost/profit center?
-	'project_priority_id',			// Priority for portfolio management
 
 	'presales_probability',			// Presales tracking
 	'presales_value',
@@ -93,9 +92,6 @@ Ext.define('PO.model.project.Project', {
 	'project_type',				// denormalized project_type_id (English), may not be set depending on query
 	'company_name',				// denormalized company_id
 	'project_lead_name',			// Project manager
-
-	'project_priority_name',		// 
-	'project_priority_num',			// 
 
 	// ------------				// Denormalized fields used by Portfolio Planner
         'start_j',				// Julian start date of the project
