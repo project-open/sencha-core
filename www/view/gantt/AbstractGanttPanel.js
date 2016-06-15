@@ -234,6 +234,26 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         return result;
     },
 
+    /**
+     * Calculate the number of nodes in an arbitrary tree model
+     */
+    nodesInTree: function(node) {
+	var me = this;
+	var count = 1;
+        // if (me.debug) console.log('PO.view.gantt.GanttBarPanel.nodesInTree: Starting');
+
+	if (node.isExpanded() || node.isRoot()) {
+	    var children = node.childNodes;
+	    children.forEach(function(child) {
+		count = count + me.nodesInTree(child);
+	    });
+	}
+
+        // if (me.debug) console.log('PO.view.gantt.GanttBarPanel.nodesInTree: Finished');
+	return count;
+    },
+
+
 
     /**
      * Draw all Gantt bars
