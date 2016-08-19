@@ -81,3 +81,57 @@ ad_proc -public im_sencha_column_config_nuke {
 } {
     db_string im_sencha_column_config_nuke "SELECT im_sencha_column_config__delete(:column_config_id) from dual"
 }
+
+
+
+
+ad_proc -public im_sencha_sql_to_store {
+    -sql:required
+} {
+    Takes a SQL and returns the JSON code for an inline store.
+    This code comes in handy for small Sencha indicators etc.
+    Empty values from the DB are stored in the JSON as "NULL",
+    because this function doesn't know how to interpret them
+    depending on the data type (empty string, null date or null
+    integer).
+} {
+    # Execute the sql and create inline store code.
+    set json_list [list]
+    db_with_handle db {
+	# Execute SQL and get the list of rows returned
+	set selection [db_exec select $db query $sql 1]
+	set col_names [ad_ns_set_keys $selection]
+	
+	# Loop through the list of rows returned
+	while { [db_getrow $db $selection] } {
+	    
+	    set json_entry {}
+	    for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
+		set var [lindex $col_names $i]
+		set val [ns_set value $selection $i]
+		if {"" eq $val} {
+		    lappend json_entry "$var: NULL"
+		} elseif {[string is integer $val]} {
+		    lappend json_entry "$var: $val"
+		} else {
+		    regsub -all "'" $val "\\'" val_quoted
+		    lappend json_entry "$var: '$val_quoted'"
+		}
+	    }
+	    lappend json_list [join $json_entry ", "]
+	}
+    }
+    db_release_unused_handles
+    set cols_json "'[join $col_names "', '"]'"
+    set data_json [join $json_list "\},\n\t\t\{"]
+
+    return "Ext.create('Ext.data.Store', {
+	fields: \[$cols_json\],
+        data: \[
+		\{$data_json\}
+	]
+	});
+    "
+
+}
+
