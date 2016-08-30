@@ -110,7 +110,7 @@ ad_proc -public im_sencha_sql_to_store {
 		set var [lindex $col_names $i]
 		set val [ns_set value $selection $i]
 		if {"" eq $val} {
-		    lappend json_entry "$var: NULL"
+		    lappend json_entry "$var: null"
 		} elseif {[string is integer $val]} {
 		    lappend json_entry "$var: $val"
 		} else {
