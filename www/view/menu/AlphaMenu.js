@@ -24,6 +24,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
     slaId: null,
     ticketStatusId: 30000,							// "Open"
     confItemId: null,
+    style: {overflow: 'visible'},						// For the Combo popup
 
     initComponent: function() {
 	var me = this;

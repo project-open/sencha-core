@@ -16,6 +16,9 @@ Ext.define('PO.view.menu.HelpMenu', {
     requires: [
         'Ext.menu.Menu'
     ],
+
+    style: {overflow: 'visible'},     // For the Combo popup
+
     initComponent: function() {
         var me = this;
         this.callParent(arguments);
