@@ -28,7 +28,8 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) { if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController: init'); }
 
         var sideBarTab = Ext.get('sideBarTab');	    			// ]po[ side-bar collapses the left-hand menu
-        sideBarTab.on('click', me.onSideBarResize, me);			// Handle collapsable side menu
+	if (sideBarTab)
+            sideBarTab.on('click', me.onSideBarResize, me);			// Handle collapsable side menu
         Ext.EventManager.onWindowResize(me.onWindowResize, me);		// Deal with resizing the main window
         me.outerContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
         return this;
