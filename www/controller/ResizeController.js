@@ -47,7 +47,10 @@ Ext.define('PO.controller.ResizeController', {
         var sideBar = Ext.get('sidebar');				// ]po[ left side bar component
 
         if (undefined === sideBarWidth) {
-            sideBarWidth = sideBar.getSize().width;
+	    if (sideBar)
+		sideBarWidth = sideBar.getSize().width;
+	    else
+		sideBarWidth = 0;
         }
 
         var screenSize = Ext.getBody().getViewSize();			// Total browser size
@@ -85,7 +88,8 @@ Ext.define('PO.controller.ResizeController', {
 
 	if (!me.fullScreenP) {
 	    var sideBar = Ext.get('sidebar');// ]po[ left side bar component
-	    var sideBarWidth = sideBar.getSize().width;
+	    var sideBarWidth = 2;
+	    if (sideBar) sideBarWidth = sideBar.getSize().width;
 	    if (sideBarWidth > 100) {
 		sideBarWidth = 245;					// Determines size when Sidebar visible
 	    } else {
