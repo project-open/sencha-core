@@ -21,7 +21,6 @@ Ext.define('PO.view.field.POTaskAssignment', {
          * array of user assignments
          */
         parseAssignments: function(value) {
-            // console.log('POTaskAssignment.parseAssignments: value='+value);
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
@@ -29,7 +28,6 @@ Ext.define('PO.view.field.POTaskAssignment', {
             for(var i = 0; i < names.length; i++) {
                 var name = names[i];						// BB[20%]
                 var assigObject = this.parseAssignment(name);
-                // console.log('POTaskAssignment.parseAssignments: i='+i+', name='+name+' -> '+assigObject);
                 if (!Ext.isString(assigObject) && null != assigObject) {
                     result.push(assigObject);
                 }
@@ -60,7 +58,6 @@ Ext.define('PO.view.field.POTaskAssignment', {
                 percentString = percentString.substring(1,value.length);
             }
             var percent = this.parseAssignmentPercent(percentString.trim());	// Number indicating percent or an error
-            // console.log("POTaskAssignment.parseAssignmentPercent: '"+percentString+"' -> '"+percent+"'");
             if (Ext.isString(percent)) { return percent; }	     		// Return an error string
 
             // ToDo: Sort the user store alphabetically in order to create
@@ -116,7 +113,6 @@ Ext.define('PO.view.field.POTaskAssignment', {
          * Format assignments to a String
          */
         formatAssignments: function(assig) {
-            console.log('PO.view.field.POTaskAssignment.formatAssignments: '); console.log(assig);
             if (Ext.isString(assig)) { return assig; }
             var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
             var groupStore = Ext.StoreManager.get('groupStore');
@@ -150,7 +146,6 @@ Ext.define('PO.view.field.POTaskAssignment', {
     
     initValue: function() {
         var me = this;
-        console.log('POTaskAssignment.initValue');
         var value = me.value;
         if (Ext.isString(value)) {
             me.value = me.rawToValue(value);					// If a String value was supplied, try to convert it to a proper Date
@@ -164,18 +159,15 @@ Ext.define('PO.view.field.POTaskAssignment', {
     },
 
     rawToValue: function(rawValue) {
-        // console.log('POTaskAssignment.rawToValue: rawValue='+rawValue);
         return this.statics().parseAssignments(rawValue) || rawValue || null;
     },
 
     valueToRaw: function(value) {
-        // console.log('POTaskAssignment.valueToRaw: value='+value);
         return this.statics().formatAssignments(value);
     },
 
     getSubmitValue: function() {
         var value = this.getValue();
-        console.log('POTaskAssignment.getSubmitValue: ToDo');
         return value;
     },
 
@@ -185,12 +177,9 @@ Ext.define('PO.view.field.POTaskAssignment', {
      * tab open in order to edit assignments.
      */
     onTriggerClick: function(a, b, c, d) {
-        console.log('PO.view.field.POTaskAssignmentField.onTriggerClick');
         var me = this;
-
         var treePanel = Ext.getCmp('ganttTreePanel');
         var value = treePanel.getSelectionModel().getLastSelected();
-
         var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
         taskPropertyPanel.setValue(value);
         taskPropertyPanel.setActiveTab('taskPropertyAssignments');
