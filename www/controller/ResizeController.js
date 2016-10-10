@@ -35,7 +35,11 @@ Ext.define('PO.controller.ResizeController', {
         if (sideBarTab)
             sideBarTab.on('click', me.onSideBarResize, me);			// Handle collapsable side menu
         Ext.EventManager.onWindowResize(me.onWindowResize, me);			// Deal with resizing the main window
+
         me.outerContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
+
+        me.redrawPanel.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the inner boundaries
+
         return this;
     },
 
@@ -124,6 +128,9 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Finished');
     },
 
+    /**
+      * Somebody pressed the "Fullscreen" button...
+      */
     onSwitchToFullScreen: function () {
         var me = this;
         me.fullScreenP = true; 
@@ -153,6 +160,9 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
 
+    /**
+      * Somebody pressed the "Resize" button to return from fullscreen mode.
+      */
     onSwitchBackFromFullScreen: function () {
         var me = this;
         me.fullScreenP = false; 
