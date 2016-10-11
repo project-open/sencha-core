@@ -46,8 +46,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     singleExpand:			false,
 
     // Scrolling
-    overflowX: 'scroll',						// Allows for horizontal scrolling, but not vertical
-    scrollFlags: {x: true},
+    overflowX: 'scroll',						// Allows for horizontal scrolling, but not vertical...
+    scrollFlags: {x: true},						// ... vertical scrolling is handled by the GanttTree
     
     // ToDo: Remove(?)
     projectMembers:    "test",
