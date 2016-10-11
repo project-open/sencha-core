@@ -21,6 +21,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
     model: 		'PO.model.user.SenchaPreference',	// Uses standard User as model
     autoLoad:		false,
     remoteFilter:	true,					// Do not filter on the Sencha side
+    debug:              false,
     pageSize:		100000,					// Load all projects, no matter what size(?)
     proxy: {
         type:		'rest',					// Standard ]po[ REST interface for loading
@@ -39,6 +40,16 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
             type:		'json'				// Allow Sencha to write ticket changes
         }
     },
+    deferredSync: null,
+
+    constructor: function(config) {
+        var me = this;
+        if (me.debug) console.log('SenchaPreferenceStore.constructor: Started');
+        me.callParent([config]);
+        me.deferredSync = Ext.Function.createBuffered(me.sync, 1000, me);	// POST the object to the REST API, performing an update
+        if (me.debug) console.log('SenchaPreferenceStore.constructor: Finished');
+    },
+
 
     /**
      * Store a preference into the store, either updating
@@ -46,32 +57,34 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      * The preference is written to the server REST back-end.
      */
     setPreference: function(preferenceKey, preferenceValue) {
-	var preferenceUrl = window.location.pathname;
+        var me = this;
+        var preferenceUrl = window.location.pathname;
         var prefModel = this.findRecord('preference_key',preferenceKey);
         if (null == prefModel) {
             // We need to create a new preference
             prefModel = Ext.create('PO.model.user.SenchaPreference', {
-                preference_url: preferenceUrl,         		// URL = "section" of parameters
-                preference_key: preferenceKey,         		// Use the element's ID as key for the true/false preference
+                preference_url: preferenceUrl,	 		// URL = "section" of parameters
+                preference_key: preferenceKey,	 		// Use the element's ID as key for the true/false preference
                 preference_value: ''+preferenceValue   		// The REST Back-end only works with strings
             });
-            prefModel.save();                               	// POST the object to the REST API, creating a new object
+            prefModel.save();					// POST the object to the REST API, creating a new object
             this.add(prefModel);
         } else {
             // The preference already exists
             prefModel.set('preference_value', ''+preferenceValue);
-            prefModel.save();                               	// POST the object to the REST API, performing an update
+
+            me.deferredSync();					// POST the changes, but only after a waiting a second for more.
         }
     },
 
     /**
      * Returns the specified preference as a boolean.
+     * We don't have to look a the preferenceUrl, because
+     * we assume that only keys with the specified URL 
+     * have been loaded into the store.
      */
     getPreference: function(preferenceKey, defaultValue) {
-	var preferenceUrl = window.location.pathname;
-
-	// ToDo: deal with preferenceUrl!!!
-
+        var preferenceUrl = window.location.pathname;
         var prefModel = this.findRecord('preference_key',preferenceKey);
         if (null == prefModel) { return defaultValue; }
         var prefValue = prefModel.get('preference_value');
@@ -92,7 +105,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      */
     getPreferenceBoolean: function(preferenceKey, defaultValue) {
         if (null == defaultValue) { defaultValue = false; }
-	var prefValue = this.getPreferenceString(preferenceKey, defaultValue);
+        var prefValue = this.getPreferenceString(preferenceKey, defaultValue);
         var prefResult = prefValue == 'true' ? true : false;
         return prefResult;
     },
@@ -101,7 +114,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      * Returns the specified preference as an integer.
      */
     getPreferenceInt: function(preferenceKey, defaultValue) {
-	var prefValue = this.getPreferenceString(preferenceKey, defaultValue);
+        var prefValue = this.getPreferenceString(preferenceKey, defaultValue);
         return parseInt(prefValue);
     },
 
@@ -109,10 +122,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      * Check if a key exists
      */
     existsPreference: function(preferenceKey) {
-	var preferenceUrl = window.location.pathname;
-
-	// ToDo: deal with preferenceUrl!!!
-
+        var preferenceUrl = window.location.pathname;
         var prefModel = this.findRecord('preference_key',preferenceKey);
         return (null != prefModel);
     }
