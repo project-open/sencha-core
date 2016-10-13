@@ -21,16 +21,14 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
     model: 		'PO.model.user.SenchaPreference',	// Uses standard User as model
     autoLoad:		false,
     remoteFilter:	true,					// Do not filter on the Sencha side
-    debug:              false,
+    debug:              true,
     pageSize:		100000,					// Load all projects, no matter what size(?)
     proxy: {
         type:		'rest',					// Standard ]po[ REST interface for loading
         url:		'/intranet-rest/im_sencha_preference',
         appendId:	true,
         timeout:	300000,
-        extraParams: {
-            format:		'json'
-        },
+        extraParams: {format: 'json'},				// Overwritten during load()
         reader: {
             type:		'json',				// Tell the Proxy Reader to parse JSON
             root:		'data',				// Where do the data start in the JSON file?
@@ -50,6 +48,44 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
         if (me.debug) console.log('SenchaPreferenceStore.constructor: Finished');
     },
 
+    /**
+     * Normal load(), but adds preferenceUrl parameter to load
+     * only the key-value pairs for this page.
+     */
+    load: function(options) {
+        var me = this;
+        if (me.debug) console.log('SenchaPreferenceStore.load: Started'); console.log(options);
+	
+	var preferenceUrl = "'" + me.myUrl() + "'";
+	me.getProxy().extraParams = {
+	    format: 'json',
+	    preference_url: preferenceUrl
+	};
+        me.callParent(options);
+        if (me.debug) console.log('SenchaPreferenceStore.load: Finished');
+    },
+
+    /**
+     * Normal sync(), but server error messages are automatically
+     * displayed on screen.
+     */
+    sync: function(options) {
+        var me = this;
+        if (me.debug) console.log('SenchaPreferenceStore.sync: Started');
+
+	// Call parent.sync() with options plus additional success/failure callbacks
+	options = Ext.apply({
+	    success: function() { },
+	    failure: function(batch, eOpts) {
+		var msg = batch.proxy.reader.jsonData.message;
+		if (!msg) msg = 'undefined error';
+		PO.Utilities.reportError('Server error while saving preferences', msg);
+	    }
+	}, options);
+        me.callParent([options]);
+
+        if (me.debug) console.log('SenchaPreferenceStore.sync: Finished');
+    },
 
     /**
      * Store a preference into the store, either updating
@@ -58,7 +94,8 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      */
     setPreference: function(preferenceKey, preferenceValue) {
         var me = this;
-        var preferenceUrl = window.location.pathname;
+        if (me.debug) console.log('SenchaPreferenceStore.setPreference('+preferenceKey+','+preferenceValue+'): Started');
+        var preferenceUrl = me.myUrl();
         var prefModel = this.findRecord('preference_key',preferenceKey);
         if (null == prefModel) {
             // We need to create a new preference
@@ -75,16 +112,15 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
 
             me.deferredSync();					// POST the changes, but only after a waiting a second for more.
         }
+        if (me.debug) console.log('SenchaPreferenceStore.setPreference: finished');
     },
 
     /**
      * Returns the specified preference as a boolean.
      * We don't have to look a the preferenceUrl, because
-     * we assume that only keys with the specified URL 
-     * have been loaded into the store.
+     * this has been checked during load already.
      */
     getPreference: function(preferenceKey, defaultValue) {
-        var preferenceUrl = window.location.pathname;
         var prefModel = this.findRecord('preference_key',preferenceKey);
         if (null == prefModel) { return defaultValue; }
         var prefValue = prefModel.get('preference_value');
@@ -122,9 +158,15 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      * Check if a key exists
      */
     existsPreference: function(preferenceKey) {
-        var preferenceUrl = window.location.pathname;
         var prefModel = this.findRecord('preference_key',preferenceKey);
         return (null != prefModel);
+    },
+
+    /**
+     * Returns the URL of the current page
+     */
+    myUrl: function() {
+        return window.location.pathname + window.location.search;
     }
 
 });
