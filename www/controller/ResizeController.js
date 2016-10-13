@@ -151,12 +151,14 @@ Ext.define('PO.controller.ResizeController', {
         me.outerContainer.resizer.resizeTracker.disable();
 
 
-        // fraber 161007: ToDo: Temporarily disabled: There is a bug that the page is partically scrolled up
-        // Maybe set vertical scroll of the browser to zero?
-        // Disable scrolling in the browser
-        // document.documentElement.style.overflow = 'hidden';			// firefox, chrome
-        ///'document.body.scroll = "no";	      				// ie only
-      
+        // Disable scrolling in the browser and set vertical scroll to zero
+        document.documentElement.style.overflow = 'hidden';			// firefox, chrome
+        document.body.scroll = "no";	      				        // ie only
+
+	// Scroll to the top of the page
+        document.body.scrollLeft = 0;
+        document.body.scrollTop = 0;
+
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
 
