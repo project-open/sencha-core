@@ -54,13 +54,13 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      */
     load: function(options) {
         var me = this;
-        if (me.debug) console.log('SenchaPreferenceStore.load: Started'); console.log(options);
-	
-	var preferenceUrl = "'" + me.myUrl() + "'";
-	me.getProxy().extraParams = {
-	    format: 'json',
-	    preference_url: preferenceUrl
-	};
+        if (me.debug) console.log('SenchaPreferenceStore.load: Started');
+        
+        var preferenceUrl = "'" + me.myUrl() + "'";
+        me.getProxy().extraParams = {
+            format: 'json',
+            preference_url: preferenceUrl
+        };
         me.callParent(options);
         if (me.debug) console.log('SenchaPreferenceStore.load: Finished');
     },
@@ -73,15 +73,15 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
         var me = this;
         if (me.debug) console.log('SenchaPreferenceStore.sync: Started');
 
-	// Call parent.sync() with options plus additional success/failure callbacks
-	options = Ext.apply({
-	    success: function() { },
-	    failure: function(batch, eOpts) {
-		var msg = batch.proxy.reader.jsonData.message;
-		if (!msg) msg = 'undefined error';
-		PO.Utilities.reportError('Server error while saving preferences', msg);
-	    }
-	}, options);
+        // Call parent.sync() with options plus additional success/failure callbacks
+        options = Ext.apply({
+            success: function() { },
+            failure: function(batch, eOpts) {
+                  var msg = batch.proxy.reader.jsonData.message;
+                  if (!msg) msg = 'undefined error';
+                  PO.Utilities.reportError('Server error while saving preferences', msg);
+            }
+        }, options);
         me.callParent([options]);
 
         if (me.debug) console.log('SenchaPreferenceStore.sync: Finished');
@@ -104,12 +104,27 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
                 preference_key: preferenceKey,	 		// Use the element's ID as key for the true/false preference
                 preference_value: ''+preferenceValue   		// The REST Back-end only works with strings
             });
-            prefModel.save();					// POST the object to the REST API, creating a new object
+            prefModel.save({					// POST the object to the REST API, creating a new object
+                  success: function(batch, operation) { 
+                      // we need to extract the rest_oid returned by the REST back-end
+                      if (me.debug) console.log('SenchaPreferenceStore.setPreference.save().success:');
+                      responseJson = JSON.parse(operation.response.responseText);
+                      console.log(responseJson);
+                      var restOid = responseJson.data[0].rest_oid;
+                      prefModel.setId(restOid);
+                      prefModel.set('preference_id', restOid);
+                  },
+                  failure: function(batch, eOpts, a, b, c, d) {
+                      if (me.debug) console.log('SenchaPreferenceStore.setPreference.save().failure:');
+                      var msg = batch.proxy.reader.jsonData.message;
+                      if (!msg) msg = 'undefined error';
+                      PO.Utilities.reportError('Server error while saving preferences', msg);
+                  }
+            });
             this.add(prefModel);
         } else {
             // The preference already exists
             prefModel.set('preference_value', ''+preferenceValue);
-
             me.deferredSync();					// POST the changes, but only after a waiting a second for more.
         }
         if (me.debug) console.log('SenchaPreferenceStore.setPreference: finished');
@@ -132,7 +147,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
      * Shortcut for getPreferece
      */
     getPreferenceString: function(preferenceKey, defaultValue) {
-        return this.getPreference(preferenceKey, defaultValue);
+        return this.getPreference(preferenceKey, ''+defaultValue);
     },
 
     /**
