@@ -108,7 +108,7 @@ create index im_sencha_preferences_object_idx on im_sencha_preferences(preferenc
 
 -- Avoid duplicate entries.
 create unique index im_sencha_preferences_object_preference_idx 
-on im_sencha_preferences(preference_object_id, preference_key);
+on im_sencha_preferences(preference_url, preference_object_id, preference_key);
 
 
 create or replace function im_sencha_preference__name(integer)
