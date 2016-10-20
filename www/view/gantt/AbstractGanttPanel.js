@@ -134,10 +134,21 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             'stroke-width': 1
         }).show(true);
 
+        var spriteLink = me.surface.add({                               // Create a "shadow" copy of the baseSprite with red borders
+            type: 'image',
+            x: bBox.x,
+            y: bBox.y,
+            width: 16,
+            height: 16,
+            zIndex: 10,
+            src: '/intranet/images/navbar_default/link.png'
+        }).show(false);
+
         me.dndConfig = dndConfig;					// Store DnD configuration in the GanttEditor
         me.dndBasePoint = point;
         me.dndBaseSprite = baseSprite;
         me.dndShadowSprite = spriteShadow;
+	me.dndLinkSprite = spriteLink;
     },
 
     /**
