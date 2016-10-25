@@ -38,7 +38,8 @@ Ext.define('PO.controller.ResizeController', {
 
         me.outerContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
 
-        me.redrawPanel.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the inner boundaries
+	if (me.redrawPanel)
+            me.redrawPanel.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the inner boundaries
 
         return this;
     },
