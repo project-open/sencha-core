@@ -61,7 +61,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
             format: 'json',
             preference_url: preferenceUrl
         };
-        me.callParent(options);
+        me.callParent([options]);
         if (me.debug) console.log('SenchaPreferenceStore.load: Finished');
     },
 
