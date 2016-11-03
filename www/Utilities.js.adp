@@ -86,6 +86,8 @@ Ext.define('PO.Utilities', {
 	 * Extract the current userId from the OpenACS session cookie
 	 */
 	currentUserId : function(){
+	    return parseInt('@user_id@');
+
             var me = this;
             var userId = 0;							// user_id=0 represents "anonymous visitor"
             var c = document.cookie + ";";
