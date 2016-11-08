@@ -437,6 +437,7 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         // Load assignment information into the assignmentStore
         me.taskAssignmentStore.removeAll();
         var assignments = task.get('assignees');
+	if (assignments.constructor !== Array) { assignments = []; }         // Newly created task...
         assignments.forEach(function(v) {
             var userId = ""+v.user_id;
             var userModel = projectMemberStore.getById(userId);
