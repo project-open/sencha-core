@@ -34,6 +34,11 @@ Ext.define('PO.controller.ResizeController', {
         var sideBarTab = Ext.get('sideBarTab');	    				// ]po[ side-bar collapses the left-hand menu
         if (sideBarTab)
             sideBarTab.on('click', me.onSideBarResize, me);			// Handle collapsable side menu
+
+        var sidebarCloseButton = Ext.get('sidebar-close-button');	    	// ]po[ side-bar collapses the left-hand menu
+        if (sidebarCloseButton)
+            sidebarCloseButton.on('click', me.onSideBarResize, me);		// Handle collapsable side menu
+
         Ext.EventManager.onWindowResize(me.onWindowResize, me);			// Deal with resizing the main window
 
         me.outerContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
