@@ -336,8 +336,14 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
 
         // fix boolean vs. 't'/'f' checkbox for milestone_p
         switch (fields['milestone_p']) {
-            case true: fields['milestone_p'] = 't'; break;
-            default: fields['milestone_p'] = ''; break;                                     // '' is database "null" value in ]po[
+        case true: 
+	    fields['milestone_p'] = 't';
+	    fields['iconCls'] = 'icon-milestone';
+	    break;
+        default: 
+	    fields['milestone_p'] = ''; 
+	    fields['iconCls'] = 'icon-task';
+	    break;                                     // '' is database "null" value in ]po[
         }
         
         var plannedUnits = fields['planned_units'];

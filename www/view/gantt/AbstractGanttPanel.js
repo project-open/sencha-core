@@ -47,6 +47,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     dndBasePoint: null,					// Drag-and-drop starting point
     dndBaseSprite: null,				// DnD sprite being draged
     dndShadowSprite: null,				// DnD shadow generated for BaseSprite
+    dndLinkSprite: null,				// DnD "chain" icon
     dndConfig: null,
     ganttBarHeight: 12,
 
@@ -66,6 +67,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         me.dndBasePoint = null;				// Drag-and-drop starting point
         me.dndBaseSprite = null;			// DnD sprite being draged
         me.dndShadowSprite = null;			// DnD shadow generated for BaseSprite
+        me.dndLinkSprite = null;			// DnD "chain"
         me.dndConfig = null;
 
         // New Event: Drag-and-Drop for a Gantt bar
@@ -138,10 +140,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             type: 'image',
             x: bBox.x,
             y: bBox.y,
-            width: 0,
-            height: 0,
+            width: 16,
+            height: 16,
             src: '/intranet/images/navbar_default/link.png'
-        }).show(true);
+        }).show(false);
 
         me.dndConfig = dndConfig;					// Store DnD configuration in the GanttEditor
         me.dndBasePoint = point;
