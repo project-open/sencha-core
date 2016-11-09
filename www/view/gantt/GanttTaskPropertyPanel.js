@@ -29,7 +29,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
     modal: false,
     layout: 'fit',
 
-    taskModel: null,                              // Set by setValue() before show()
+    taskModel: null,								// Set by setValue() before show()
     
     initComponent: function() {
         var me = this;
@@ -133,29 +133,29 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                 if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
                 var newRecord = me.taskAssignmentStore.add({percent:100})[0];
 
-		// Cancel editing
+                // Cancel editing
                 var editing = me.taskPropertyAssignments.editingPlugin;
                 editing.cancelEdit();
-                editing.startEdit(newRecord, 0);                       // Start editing the first row
+                editing.startEdit(newRecord, 0);                       		// Start editing the first row
             },
             onAssigButtonDel: function(button, event) {
                 var me = this;
                 if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonDel');
 console.log('POTaskAssignment.pickerController.onAssigButtonDel');
 
-		// Cancel editing
+                // Cancel editing
                 var editing = me.taskPropertyAssignments.editingPlugin;
                 editing.cancelEdit();
 
-		var lastSelected = me.taskPropertyAssignments.getSelectionModel().getLastSelected();
-		if (lastSelected) {
-		    me.taskAssignmentStore.remove(lastSelected);
-		} else {
-		    // Apparently no row selected yet. Never mind, use the last one...
-		    var last = me.taskAssignmentStore.last();
-		    if (last)
-			me.taskAssignmentStore.remove(last);
-		}
+                var lastSelected = me.taskPropertyAssignments.getSelectionModel().getLastSelected();
+                if (lastSelected) {
+                    me.taskAssignmentStore.remove(lastSelected);
+                } else {
+                    // Apparently no row selected yet. Never mind, use the last one...
+                    var last = me.taskAssignmentStore.last();
+                    if (last)
+                        me.taskAssignmentStore.remove(last);
+                }
             }
         }).init();
 
@@ -258,7 +258,9 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
                 }, {
                     xtype: 'checkbox',
                     fieldLabel: 'Milestone',
-                    name: 'milestone_p'
+                    name: 'milestone_p',
+                    uncheckedValue: 'f',
+                    inputValue: 't'
                 }]
             }, {
                 xtype: 'fieldset',
@@ -325,32 +327,33 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         
         // ---------------------------------------------------------------
         // "General" form panel with start- and end date, %done, work etc.
-        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);         // get all fields into object
+        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);	// get all fields into object
 
         var oldStartDate = me.taskModel.get('start_date');
         var oldEndDate = me.taskModel.get('end_date');
         var newStartDate = fields['start_date'];
         var newEndDate = fields['end_date'];
-        if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }    // start has no time
-        if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }    // start has no time
+        if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }	// start has no time
+        if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }	 	// start has no time
 
         // fix boolean vs. 't'/'f' checkbox for milestone_p
         switch (fields['milestone_p']) {
         case true: 
-	    fields['milestone_p'] = 't';
-	    fields['iconCls'] = 'icon-milestone';
-	    break;
+            fields['milestone_p'] = 't';						// use 't' and 'f', not true and false!
+            fields['iconCls'] = 'icon-milestone';					// special icon for milestones
+            fields['end_date'] = fields['start_date'];					// Milestones have end_date = start_date
+            break;
         default: 
-	    fields['milestone_p'] = ''; 
-	    fields['iconCls'] = 'icon-task';
-	    break;                                     // '' is database "null" value in ]po[
+            fields['milestone_p'] = 'f'; 
+            fields['iconCls'] = 'icon-task';						// special icon for non-milestones
+            break;	      								// '' is database "null" value in ]po[
         }
         
         var plannedUnits = fields['planned_units'];
         if (undefined == plannedUnits) { plannedUnits = 0; }
-        fields['planned_units'] = ""+plannedUnits;              // Convert the numberfield integer to string used in model.
+        fields['planned_units'] = ""+plannedUnits;              			// Convert the numberfield integer to string used in model.
 
-        me.taskModel.set(fields);                                                             // write all fields into model
+        me.taskModel.set(fields); 							// write all fields into model
         
         // ---------------------------------------------------------------
         // Notes form
@@ -382,7 +385,7 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
             me.taskModel.set('assignees', newAssignees);
         }
 
-        me.hide();                              // hide the TaskProperty panel
+        me.hide();									// hide the TaskProperty panel
     },
 
     /**
@@ -392,7 +395,7 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
     onButtonCancel: function(button, event) {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonCancel');
-        me.hide();                              // hide the TaskProperty panel
+        me.hide();									// hide the TaskProperty panel
     },
 
     setActiveTab: function(tab) {
@@ -423,8 +426,8 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         // Default values for task if not defined yet by ]po[
         // ToDo: Unify with default values in onButtonAdd
         if ("" == task.get('planned_units')) { task.set('planned_units', '0'); }
-        if ("" == task.get('uom_id')) { task.set('uom_id', ""+default_uom_id); } // "Day" as UoM
-        if ("" == task.get('material_id')) { task.set('material_id', ""+default_material_id); } // "Default" material
+        if ("" == task.get('uom_id')) { task.set('uom_id', ""+default_uom_id); } 		// "Day" as UoM
+        if ("" == task.get('material_id')) { task.set('material_id', ""+default_material_id); }	// "Default" material
         if ("" == task.get('priority')) { task.set('priority', '500'); }
         if ("" == task.get('start_date')) { task.set('start_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
@@ -433,6 +436,7 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         // fix boolean vs. 't'/'f' checkbox for milestone_p
         switch (task.get('milestone_p')) {
             case 't': task.set('milestone_p', true); break;
+            case 'true': task.set('milestone_p', true); break;
             default: task.set('milestone_p', false); break;
         }
         
@@ -443,17 +447,17 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         // Load assignment information into the assignmentStore
         me.taskAssignmentStore.removeAll();
         var assignments = task.get('assignees');
-	if (assignments.constructor !== Array) { assignments = []; }         // Newly created task...
+        if (assignments.constructor !== Array) { assignments = []; }         		// Newly created task...
         assignments.forEach(function(v) {
             var userId = ""+v.user_id;
             var userModel = projectMemberStore.getById(userId);
-            if (!userModel) { return; }                                      // User not set in assignment row
+            if (!userModel) { return; }                                      		// User not set in assignment row
             var assigModel = new PO.model.gantt.GanttAssignmentModel(userModel.data);
             assigModel.set('percent', v.percent);
             me.taskAssignmentStore.add(assigModel);
         });
 
-        me.taskModel = task;                              // Save the model for reference
+        me.taskModel = task;								// Save the model for reference
         if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.setValue: Finished');
     }
 }); 
