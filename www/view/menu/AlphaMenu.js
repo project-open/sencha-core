@@ -63,7 +63,8 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	// Use the REST server-side "proxy" to get data from www.project-open.net
 	ticketStore.getProxy().url = "/intranet-rest/data-source/domain-proxy";
 
-	var url = serverUrl+"/intranet-rest/im_ticket?format=json&deref_p=1&user_id=0&auth_token=0";
+	var systemId = PO.Utilities.systemId();
+	var url = serverUrl+"/intranet-rest/im_ticket?format=json&deref_p=1&user_id=0&auth_token=0&system_id="+systemId;
         if (null != sla_id) { url = url + "&parent_id="+sla_id; }
         if (null != ticket_status_id) { url = url + "&ticket_status_id="+ticket_status_id; }
 	if (null != conf_item_id) { url = url + "&ticket_conf_item_id="+conf_item_id; }

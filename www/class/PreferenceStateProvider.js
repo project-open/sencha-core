@@ -1,8 +1,7 @@
 /**
- * sencha-core/www/class/CategoryStore.js
- * Subclass for Categories
+ * sencha-core/www/class/PreferenceStateProvider.js
  *
- * Copyright (C) 2013, ]project-open[
+ * Copyright (C) 2016, ]project-open[
  * @author Frank Bergmann (frank.bergmann@project-open.com)
  * @creation-date 2013-11-29
  * @cvs-id $Id$
@@ -27,7 +26,7 @@ Ext.define('PO.class.PreferenceStateProvider', {
      */
     constructor : function(config){
         var me = this;
-        me.currentUserId = PO.Utilities.currentUserId();
+        me.userId = PO.Utilities.userId();
         me.currentUrl = config.url;
 	if (typeof me.currentUrl == "undefined" || me.currentUrl === null) {
 	    me.currenturl = window.location.pathname;

@@ -57,7 +57,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
         if (me.debug) console.log('SenchaPreferenceStore.load: Started');
         
         var preferenceUrl = "'" + me.myUrl() + "'";
-	var myUserId = PO.Utilities.currentUserId();
+	var myUserId = PO.Utilities.userId();
         me.getProxy().extraParams = {
             format: 'json',
             preference_url: preferenceUrl,

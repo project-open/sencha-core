@@ -85,27 +85,8 @@ Ext.define('PO.Utilities', {
 	/**
 	 * Extract the current userId from the OpenACS session cookie
 	 */
-	currentUserId : function(){
-	    return parseInt('@user_id@');
-
-            var me = this;
-            var userId = 0;							// user_id=0 represents "anonymous visitor"
-            var c = document.cookie + ";";
-            var re = /\s?(.*?)=(.*?);/g;
-            var prefix = 'ad_';
-            var prefixLen = prefix.length;
-
-            while((matches = re.exec(c)) != null){
-		var key = matches[1];
-		var valueUndecoded = matches[2];
-		if (key == 'ad_user_login') {
-                    var userIdString = valueUndecoded.substr(0, valueUndecoded.indexOf('%')); 
-                    userId = parseInt(userIdString);
-		}
-            }
-            return userId;
-	},
-
+	userId : function() { return parseInt('@user_id@'); },
+	systemId : function() { return '@system_id@'; },
 
 	/**
 	 * Convert a date to PostgreSQL "time stamp with timezone" string
