@@ -16,6 +16,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
     extend: 'Ext.menu.Menu',
     requires: [
         'Ext.menu.Menu',
+	'PO.Utilities',
 	'PO.model.helpdesk.Ticket',
 	'PO.store.helpdesk.TicketStore'
     ],

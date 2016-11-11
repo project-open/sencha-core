@@ -1,5 +1,5 @@
 /*
- * PO.js
+ * PO.Utilities.js.adp
  *
  * Copyright (c) 2011 - 2015 ]project-open[ Business Solutions, S.L.
  * This file may be used under the terms of the GNU General Public
