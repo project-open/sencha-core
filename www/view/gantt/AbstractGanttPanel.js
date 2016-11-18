@@ -501,7 +501,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                 y: h,
                 width: w,
                 height: me.axisHeight,
-                fill: '#cdf',						// '#ace'
+                fill: '#e1e2e1',						// '#ace'
                 stroke: 'grey'
             }).show(true);
 
@@ -545,7 +545,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             if (w > 30) { text = text + " " + (""+yea).substring(2,4); }
 
             var axisBar = me.surface.add(
-                {type: 'rect', x: x, y: h, width: w, height: me.axisHeight, fill: '#cdf', stroke: 'grey'}).show(true);
+                {type: 'rect', x: x, y: h, width: w, height: me.axisHeight, fill: '#e1e2e1', stroke: 'grey'}).show(true);
             var axisText = me.surface.add(
                 {type: 'text', text: text, x:x+2, y:h+(me.axisHeight/2), fill: '#000', font: "9px Arial"}).show(true);
 
@@ -602,7 +602,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         	    year = now.getYear();
         	}
             }
-            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
+            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#e1e2e1', stroke:'grey'}).show(true);
             var axisText = me.surface.add({type: 'text', text:""+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
 
         }
@@ -625,7 +625,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var endX = me.date2x(now);
             var w = endX - startX;
 
-            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#cdf', stroke:'grey'}).show(true);
+            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#e1e2e1', stroke:'grey'}).show(true);
             var axisText = me.surface.add({type: 'text', text:""+day, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Finished');
