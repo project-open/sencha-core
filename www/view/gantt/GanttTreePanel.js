@@ -89,10 +89,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     },
 
 /* Additional columns to add
-        'material_id',				// The type of activity (-> im_materials)
         'cost_center_id',			// Optional department/cost center of who executes this activity.
-        'scheduling_constraint_id',		// MS-Project: Type of scheduling constraint
-	'scheduling_constraint_date',		// MS-Project: Field for "should not start before" constraint or similar
         'deadline_date',			// MS-Project: Deadline for this activitiy
 */
 
@@ -112,12 +109,11 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 taskPropertyPanel.show();
             }
         }]},
-        {text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
-        {text: 'Par', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true, editor: {
+        {text: 'Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true, editor: {
             xtype: 'numberfield',
             minValue: 0            
         }}, 
-        {text: 'Sort', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
+        {text: 'Sort Order', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
             xtype: 'numberfield',
             minValue: 0            
         }},
@@ -128,41 +124,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }},
-        {text: 'Id', flex: 1, dataIndex: 'id', hidden: true}, 
-        {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, editor: {
-            xtype: 'numberfield',
-            minValue: 0,
-	    maxValue: 1000
-        }},
-        {text: 'Nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
-        {text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', editor: {
-            xtype: 'numberfield',
-            minValue: 0
-        }, renderer: function(value, context, model) {
-            // Calculate the UoM unit
-            var planned_units = model.get('planned_units');
-            if (0 == model.childNodes.length) {
-                // A leaf task - just show the units
-                if ("" != planned_units) { planned_units = planned_units + "h"; }
-                return planned_units;
-            } else {
-                // A parent node - sum up the planned units of all leafs.
-                var plannedUnits = 0.0;
-                model.cascadeBy(function(child) {
-                    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
-                        var puString = child.get('planned_units');
-                        if ("" != puString) {
-                            var pu = parseFloat(puString);
-                            if ("number" == typeof pu) { 
-				plannedUnits = plannedUnits + pu; 
-			    }
-                        }
-                    }
-                });
-                return "<b>"+plannedUnits+"h</b>";
-            }
-        }},
-        {text: '%Done', width: 50, align: 'right', dataIndex: 'percent_completed', editor: {
+        {text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
+        {text: 'Done %', width: 50, align: 'right', dataIndex: 'percent_completed', editor: {
             xtype: 'numberfield',
             minValue: 0,
             maxValue: 100
@@ -190,29 +153,67 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+done+"</b>";
             }
         }},
-        {text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', hidden: true, 
-         editor: 'podatefield', renderer: function(value, context, model) {
-            var isLeaf = (0 == model.childNodes.length);
-            if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
-        }},
         {text: 'End', width: 80, hidden: false, dataIndex: 'end_date', hidden: true,
          editor: 'podatefield', renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'Assignees', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', renderer: function(value, context, model) {
+        {text: 'Material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: true,
+         editor: {xtype: 'combo', store: 'taskMaterialStore', displayField: 'material_name', valueField: 'material_id'}, renderer: function(value) {
+             var materialStore = Ext.StoreManager.get('taskMaterialStore');
+             var model = materialStore.getById(value);
+             return model.get('material_name');
+        }},
+        {text: 'Nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
+        {text: 'Predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', renderer: ganttTreePanelPredecessorRenderer},
+        {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, editor: {
+            xtype: 'numberfield',
+            minValue: 0,
+	    maxValue: 1000
+        }},
+        {text: 'Resources', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             var result = PO.view.field.POTaskAssignment.formatAssignments(value);
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
-        {text: 'Predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', renderer: ganttTreePanelPredecessorRenderer},
-        {text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
+        {text: 'Start', width: 80, hidden: false, dataIndex: 'start_date', hidden: true, 
+         editor: 'podatefield', renderer: function(value, context, model) {
+            var isLeaf = (0 == model.childNodes.length);
+            if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
+        }},
         {text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
          editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}, renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
              return model.get('category');
-         }}
+        }},
+        {text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', editor: {
+            xtype: 'numberfield',
+            minValue: 0
+        }, renderer: function(value, context, model) {
+            // Calculate the UoM unit
+            var planned_units = model.get('planned_units');
+            if (0 == model.childNodes.length) {
+                // A leaf task - just show the units
+                if ("" != planned_units) { planned_units = planned_units + "h"; }
+                return planned_units;
+            } else {
+                // A parent node - sum up the planned units of all leafs.
+                var plannedUnits = 0.0;
+                model.cascadeBy(function(child) {
+                    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
+                        var puString = child.get('planned_units');
+                        if ("" != puString) {
+                            var pu = parseFloat(puString);
+                            if ("number" == typeof pu) { 
+				plannedUnits = plannedUnits + pu; 
+			    }
+                        }
+                    }
+                });
+                return "<b>"+plannedUnits+"h</b>";
+            }
+        }}
     ],
 
     listeners: {
