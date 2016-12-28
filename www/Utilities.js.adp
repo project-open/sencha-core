@@ -87,6 +87,24 @@ Ext.define('PO.Utilities', {
 	 */
 	userId : function() { return parseInt('@user_id@'); },
 	systemId : function() { return '@system_id@'; },
+	
+	/**
+	 * Which version of Sencha is installed?
+	 * This function relies on the TCL im_sencha_extjs_version function.
+	 */
+	senchaVersion: function() { return '@sencha_version@'; },
+
+	/**
+	 * Production or development version of Sencha?
+	 * Returns true if development version.
+	 */
+	senchaDevP: function() { return ("dev" == '@sencha_version_prod_dev@'); },
+
+	/**
+	 * Production or development version of Sencha?
+	 * Returns true if production version.
+	 */
+	senchaProdP: function() { return ("prod" == '@sencha_version_prod_dev@'); },
 
 	/**
 	 * Convert a date to PostgreSQL "time stamp with timezone" string

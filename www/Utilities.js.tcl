@@ -21,3 +21,8 @@ set platform $::tcl_platform(platform)
 set os $::tcl_platform(os)
 set os_version $::tcl_platform(osVersion)
 
+set sencha_version_tuples [im_sencha_extjs_version]
+set sencha_version [lindex $sencha_version_tuples 0]; # "v421" or similar
+set sencha_version_prod_dev [lindex $sencha_version_tuples 1]; # "dev" or "prod"
+set sencha_version_package [lindex $sencha_version_tuples 2]; # "sencha-extjs-v421-dev" or similar
+
