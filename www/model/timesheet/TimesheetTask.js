@@ -35,7 +35,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'start_date',				// Start of task as ISO timestamp ('2001-01-01 00:00:00+01')
         'end_date',				// End of task as ISO timestamp ('2099-12-31 00:00:00+01')
         'percent_completed',			// 0 - 100: Defines what has already been done.
-	'milestone_p',                          // 't' for Milestone, 'f' or '' for normal task
+        'milestone_p',                          // 't' for Milestone, 'f' or '' for normal task
         'description',				// Description of the task activity
         'note',					// Notes about the task activity
 
@@ -99,7 +99,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'on_track_status_id_deref',		// Is the task on-track? "Green", "Yellow" or "Red"
 
         'icon', 				// Used by ExtJS for the icon in the tree (2015-08-04 doesn't seem to work...)
-	'iconCls',                              // Used by ExtJS for the icon, seems to work
+        'iconCls',                              // Used by ExtJS for the icon, seems to work
 
         'successors',				// List of tasks that depend on the current tasks
         'predecessors',				// List of tasks on which this task depends
@@ -109,24 +109,24 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 
         {   name: 'icon',			// A &nbsp; sequence representing the project indentation
             convert: function(value, record) {
-        	var typeId = parseInt(record.get('project_type_id'));
-        	// console.log('PO.model.timesheet.TimesheetTask.icon: Type='+typeId);
-        	switch (typeId) {
-        	case 101: return '/intranet/images/navbar_default/tag_blue.png'; break;		// Ticket
-        	case 2502: return '/intranet/images/navbar_default/table.png'; break;		// SLA
-        	default:
-        	    return '';			// Empty string - enables default behavior
-        	}
+                var typeId = parseInt(record.get('project_type_id'));
+                // console.log('PO.model.timesheet.TimesheetTask.icon: Type='+typeId);
+                switch (typeId) {
+                case 101: return '/intranet/images/navbar_default/tag_blue.png'; break;		// Ticket
+                case 2502: return '/intranet/images/navbar_default/table.png'; break;		// SLA
+                default:
+                    return '';			// Empty string - enables default behavior
+                }
             }
         },
         {   name: 'indent',			// A &nbsp; sequence representing the project indentation
             convert: function(value, record) {
                 var level = record.get('level');
-        	var result = '';
-        	while (level > 0) {
-        	    result = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + result;
-        	    level = level - 1;
-        	}
+                var result = '';
+                while (level > 0) {
+                    result = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + result;
+                    level = level - 1;
+                }
 
                 return result;
             }
@@ -152,15 +152,24 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         }
     },
 
+    /**
+     * Is this task a milestone?
+     */
     isMilestone: function() {
-	var me = this;
-	var milestoneString = me.get('milestone_p');
-	if ("t" == milestoneString) return true;
+        var me = this;
+        var milestoneString = me.get('milestone_p');
+        if ("t" == milestoneString) return true;
 
-	var startTime = PO.Utilities.pgToDate(me.get('start_date')).getTime();
-        var endTime = PO.Utilities.pgToDate(me.get('end_date')).getTime();
-	if (startTime == endTime) return true;
-	return false;
+        var startDate = PO.Utilities.pgToDate(me.get('start_date'));
+        var endDate = PO.Utilities.pgToDate(me.get('end_date'));
+
+        if (startDate && endDate) {
+            var startTime = PO.Utilities.pgToDate(me.get('start_date')).getTime();
+            var endTime = PO.Utilities.pgToDate(me.get('end_date')).getTime();
+            if (startTime == endTime) return true;
+        }
+
+        return false;
     }
 
 });

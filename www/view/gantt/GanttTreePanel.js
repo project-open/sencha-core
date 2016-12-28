@@ -124,6 +124,12 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }},
+        {text: 'CostCenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: true,
+         editor: {xtype: 'combo', store: 'taskCostCenterStore', displayField: 'cost_center_name', valueField: 'cost_center_id'}, renderer: function(value) {
+             var ccStore = Ext.StoreManager.get('taskCostCenterStore');
+             var model = ccStore.getById(value);
+             return model.get('cost_center_name');
+        }},
         {text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
         {text: 'Done %', width: 50, align: 'right', dataIndex: 'percent_completed', editor: {
             xtype: 'numberfield',
