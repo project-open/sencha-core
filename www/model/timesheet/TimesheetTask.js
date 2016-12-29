@@ -160,14 +160,19 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         var milestoneString = me.get('milestone_p');
         if ("t" == milestoneString) return true;
 
+/* Fraber 161229: Doesn't work, because of date vs. timestamptz.
+
         var startDate = PO.Utilities.pgToDate(me.get('start_date'));
         var endDate = PO.Utilities.pgToDate(me.get('end_date'));
 
         if (startDate && endDate) {
-            var startTime = PO.Utilities.pgToDate(me.get('start_date')).getTime();
-            var endTime = PO.Utilities.pgToDate(me.get('end_date')).getTime();
-            if (startTime == endTime) return true;
+            var startTime = startDate.getTime();
+            var endTime = endDate.getTime();
+            if (startTime == endTime) {
+		return true;
+	    }
         }
+*/
 
         return false;
     }
