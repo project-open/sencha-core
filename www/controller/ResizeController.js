@@ -43,7 +43,7 @@ Ext.define('PO.controller.ResizeController', {
 
         me.outerContainer.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the outer boundaries
 
-	if (me.redrawPanel)
+        if (me.redrawPanel)
             me.redrawPanel.on('resize', me.onGanttPanelContainerResize, me);	// Deal with resizing the inner boundaries
 
         return this;
@@ -128,7 +128,7 @@ Ext.define('PO.controller.ResizeController', {
         var me = this;
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Starting');
 
-	if (me.redrawPanel)
+        if (me.redrawPanel)
             me.redrawPanel.needsRedraw = true;					// Require a redraw before passing control back to the browser
 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onGanttPanelContainerResize: Finished');
@@ -159,9 +159,9 @@ Ext.define('PO.controller.ResizeController', {
 
         // Disable scrolling in the browser and set vertical scroll to zero
         document.documentElement.style.overflow = 'hidden';			// firefox, chrome
-        document.body.scroll = "no";	      				        // ie only
+        document.body.scroll = "no";	      					// ie only
 
-	// Scroll to the top of the page
+        // Scroll to the top of the page
         document.body.scrollLeft = 0;
         document.body.scrollTop = 0;
 
