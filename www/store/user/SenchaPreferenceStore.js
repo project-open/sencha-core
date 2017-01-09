@@ -44,7 +44,8 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
         var me = this;
         if (me.debug) console.log('SenchaPreferenceStore.constructor: Started');
         me.callParent([config]);
-        me.deferredSync = Ext.Function.createBuffered(me.sync, 1000, me);	// POST the object to the REST API, performing an update
+        // POST the object to the REST API, performing an update
+        me.deferredSync = Ext.Function.createBuffered(me.sync, 1000, me);
         if (me.debug) console.log('SenchaPreferenceStore.constructor: Finished');
     },
 
