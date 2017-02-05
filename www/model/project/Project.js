@@ -41,7 +41,6 @@ Ext.define('PO.model.project.Project', {
 	'note',
 
 	'project_budget',			// Budget
-	'project_budget_currency',
 	'project_budget_hours',
 
 	'program_id',				// Is this project part of a program or portfolio?
