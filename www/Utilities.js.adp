@@ -86,6 +86,7 @@ Ext.define('PO.Utilities', {
 	 * Extract the current userId from the OpenACS session cookie
 	 */
 	userId : function() { return parseInt('@user_id@'); },
+	authToken : function() { return '<%= [im_generate_auto_login -user_id $user_id] %>' },
 	systemId : function() { return '@system_id@'; },
 	
 	/**

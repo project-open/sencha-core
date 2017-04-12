@@ -59,10 +59,14 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
         
         var preferenceUrl = "'" + me.myUrl() + "'";
 	var myUserId = PO.Utilities.userId();
+	var authToken = PO.Utilities.authToken();
+
         me.getProxy().extraParams = {
             format: 'json',
             preference_url: preferenceUrl,
-	    preference_object_id: myUserId
+	    preference_object_id: myUserId,
+	    user_id: myUserId,
+	    auth_token: authToken
         };
         me.callParent([options]);
         if (me.debug) console.log('SenchaPreferenceStore.load: Finished');
