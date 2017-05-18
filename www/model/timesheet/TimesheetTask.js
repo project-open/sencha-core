@@ -39,12 +39,9 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	// A boolean "true" or "false" value breaks the database, so we make sure it's "t" or "f".
 	{name: 'milestone_p',			// 't' for Milestone, 'f' or '' for normal task
 	 convert: function(value, record) {	// fix boolean vs. 't'/'f' checkbox for milestone_p
-             switch (record.get('milestone_p')) {
-             case 't': return 't';
-             case 'true': return 't';
-	     case true: return 't';
-             }
-             return 'f';
+	     var result = record.get('milestone_p');
+	     if ("t" == result || "true" == result || true == result) return "t";
+	     return "f";
 	 }
 	},
 
@@ -65,7 +62,13 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         // This information determines how tasks are scheduled by the task scheduler.
         'scheduling_constraint_id',		// MS-Project: Type of scheduling constraint (-> im_cost_centers)
         'scheduling_constraint_date',		// MS-Project: Field for "should not start before" constraint or similar
-        'effort_driven_p',			// MS-Project: Effort driven?
+        { name: 'effort_driven_p',			// MS-Project: Effort driven?
+	 convert: function(value, record) {	// fix boolean vs. 't'/'f' issues in the DB
+	     var result = record.get('effort_driven_p');
+	     if ("t" == result || "true" == result || true == result) return "t";
+	     return "f";
+	 }
+	},
         'effort_driven_type_id',		// MS-Project: Specific way to to determine effort driven
         'deadline_date',			// MS-Project: Deadline for this activitiy
 
