@@ -35,11 +35,23 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'start_date',				// Start of task as ISO timestamp ('2001-01-01 00:00:00+01')
         'end_date',				// End of task as ISO timestamp ('2099-12-31 00:00:00+01')
         'percent_completed',			// 0 - 100: Defines what has already been done.
-        'milestone_p',                          // 't' for Milestone, 'f' or '' for normal task
+	// milestone_p gives a lot of trouble, because this field is stored as a char(1) on the server-side.
+	// A boolean "true" or "false" value breaks the database, so we make sure it's "t" or "f".
+	{name: 'milestone_p',			// 't' for Milestone, 'f' or '' for normal task
+	 convert: function(value, record) {	// fix boolean vs. 't'/'f' checkbox for milestone_p
+             switch (record.get('milestone_p')) {
+             case 't': return 't';
+             case 'true': return 't';
+	     case true: return 't';
+             }
+             return 'f';
+	 }
+	},
+
         'description',				// Description of the task activity
         'note',					// Notes about the task activity
 
-        // Advanced properties of a task
+	// Advanced properties of a task
         'material_id',				// The type of activity (-> im_materials)
         'uom_id',				// Unit or Measure, should nearly always be 320="Hour" (-> im_categories)
         'planned_units',			// Planned duration of the activity
