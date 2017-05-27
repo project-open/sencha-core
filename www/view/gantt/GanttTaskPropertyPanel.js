@@ -18,6 +18,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 
     title: 'Task Properties',
     id: 'ganttTaskPropertyPanel',
+    senchaPreferenceStore: null,
 
     debug: false,
     width: 500,
@@ -321,6 +322,15 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
     onButtonOK: function(button, event) {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
+
+	// Check if read-only
+	var readOnly = me.senchaPreferenceStore.getPreferenceBoolean('read_only',true);
+	var dirty = me.taskModel.dirty;
+	if (readOnly && dirty) { 
+	    me.ganttTreePanelController.readOnlyWarning(); 
+	    me.hide();
+	    return; 
+	}
 
         // Write timestamp to make sure that data are modified and redrawn.
         me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
