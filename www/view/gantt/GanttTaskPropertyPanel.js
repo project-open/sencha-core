@@ -346,22 +346,23 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }	// start has no time
         if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }	 	// start has no time
 
+        var plannedUnits = fields['planned_units'];
+        if (undefined == plannedUnits) { plannedUnits = 0; }
+
         // fix boolean vs. 't'/'f' checkbox for milestone_p
         switch (fields['milestone_p']) {
         case true: 
             fields['milestone_p'] = 't';						// use 't' and 'f', not true and false!
             fields['iconCls'] = 'icon-milestone';					// special icon for milestones
             fields['end_date'] = fields['start_date'];					// Milestones have end_date = start_date
+            fields['planned_units'] = "0";             			                // Milestones don't have planned_units
             break;
         default: 
             fields['milestone_p'] = 'f'; 
             fields['iconCls'] = 'icon-task';						// special icon for non-milestones
+            fields['planned_units'] = ""+plannedUnits;              			// Convert the numberfield integer to string used in model.
             break;	      								// '' is database "null" value in ]po[
         }
-        
-        var plannedUnits = fields['planned_units'];
-        if (undefined == plannedUnits) { plannedUnits = 0; }
-        fields['planned_units'] = ""+plannedUnits;              			// Convert the numberfield integer to string used in model.
 
         me.taskModel.set(fields); 							// write all fields into model
         
@@ -444,12 +445,13 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
 
         // fix boolean vs. 't'/'f' checkbox for milestone_p
+/*
         switch (task.get('milestone_p')) {
             case 't': task.set('milestone_p', true); break;
             case 'true': task.set('milestone_p', true); break;
             default: task.set('milestone_p', false); break;
         }
-        
+*/      
         // Load the data into the various forms
         me.taskPropertyFormGeneral.getForm().loadRecord(task);
         me.taskPropertyFormNotes.getForm().loadRecord(task);

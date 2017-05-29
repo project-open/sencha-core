@@ -37,13 +37,14 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'percent_completed',			// 0 - 100: Defines what has already been done.
 	// milestone_p gives a lot of trouble, because this field is stored as a char(1) on the server-side.
 	// A boolean "true" or "false" value breaks the database, so we make sure it's "t" or "f".
-	{name: 'milestone_p',			// 't' for Milestone, 'f' or '' for normal task
-	 convert: function(value, record) {	// fix boolean vs. 't'/'f' checkbox for milestone_p
-	     var result = record.get('milestone_p');
-	     if ("t" == result || "true" == result || true == result) return "t";
-	     return "f";
-	 }
-	},
+	'milestone_p',
+//	{name: 'milestone_p',			// 't' for Milestone, 'f' or '' for normal task
+//	 convert: function(value, record) {	// fix boolean vs. 't'/'f' checkbox for milestone_p
+//	     var result = record.get('milestone_p');
+//	     if ("t" == result || "true" == result || true == result) return "t";
+//	     return "f";
+//	 }
+//	},
 
         'description',				// Description of the task activity
         'note',					// Notes about the task activity
