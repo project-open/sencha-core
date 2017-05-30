@@ -31,6 +31,34 @@ Ext.define('PO.view.menu.ConfigMenu', {
         if (me.debug) console.log('PO.view.menu.ConfigMenu.initComponent: Starting')
         this.callParent(arguments);
 
+	this.initPreferenceStore();
+
+        // Create a "Reset Configuration" entry
+        var item = Ext.create('Ext.menu.Item', {
+            key: 'reset_configuration',
+            text: 'Reset Configuration',
+            handler: function() {
+                if (me.debug) console.log('configMenu.OnResetConfiguration');
+		me.items.each(function(item) {
+		    if ('checkedDefault' in item) {
+			me.senchaPreferenceStore.setPreference(item.key, item.checkedDefault);
+			item.setChecked(item.checkedDefault);
+			item.fireEvent('click', this);
+		    }
+		});
+            }
+        });
+        me.insert(0,item);
+        me.insert(1,'-');
+
+        if (me.debug) console.log('PO.view.menu.ConfigMenu.initComponent: Finished')
+    },
+
+
+    initPreferenceStore: function() {
+	var me = this;
+        if (me.debug) console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Starting')
+
         // Check if SenchaPreference entries exist for the menu items and create if needed
         me.items.each(function(item) {
             if (me.debug) console.log('PO.view.menu.ConfigMenu.initComponent:'+item.id);
@@ -40,6 +68,9 @@ Ext.define('PO.view.menu.ConfigMenu', {
                 alert('PO.view.menu.ConfigMenu.initComponent: item='+item.text+": No 'key' found for SenchaPreferenceStore"); 
                 return;
             };
+
+	    // Save the original (default) checked property
+	    item.checkedDefault = item.checked;
 
             // Initialize the DB state if not already set from using the page the last time
             var exists = me.senchaPreferenceStore.existsPreference(item.key);
@@ -58,25 +89,8 @@ Ext.define('PO.view.menu.ConfigMenu', {
                 }
             );
         });
+        if (me.debug) console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Finished')
 
-        // Create a "Reset Configuration" entry
-        var item = Ext.create('Ext.menu.Item', {
-            key: 'reset_configuration',
-            text: 'Reset Configuration',
-            handler: function() {
-                var me = this;
-                var menu = me.ownerCt;
-                if (menu.debug) console.log('configMenu.OnResetConfiguration');
-                me.senchaPreferenceStore.each(function(model) {
-                    model.destroy();
-                });
-            }
-        });
-        me.insert(0,item);
-        me.insert(1,'-');
-
-        
-        if (me.debug) console.log('PO.view.menu.ConfigMenu.initComponent: Finished')
     }
 });
 
