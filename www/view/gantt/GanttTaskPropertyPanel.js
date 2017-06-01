@@ -377,6 +377,7 @@ console.log('POTaskAssignment.pickerController.onAssigButtonDel');
         var newAssignees = [];
         me.taskAssignmentStore.each(function(assig) {
             var user_id = assig.get('user_id');
+	    if ("" == user_id) return;
             if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK: user_id='+user_id);
             var rel_id = parseInt(assig.get('rel_id'));
             if (!rel_id) { rel_id = null; }
