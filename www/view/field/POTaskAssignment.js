@@ -24,6 +24,8 @@ Ext.define('PO.view.field.POTaskAssignment', {
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
+	    // if ("" == value) return null;
+
             var names = value.split(";");
             for(var i = 0; i < names.length; i++) {
                 var name = names[i];						// BB[20%]
@@ -32,6 +34,8 @@ Ext.define('PO.view.field.POTaskAssignment', {
                     result.push(assigObject);
                 }
             }
+
+	    // if (0 == result.length) return null;
             return result;
         },
 
@@ -159,11 +163,13 @@ Ext.define('PO.view.field.POTaskAssignment', {
     },
 
     rawToValue: function(rawValue) {
-        return this.statics().parseAssignments(rawValue) || rawValue || null;
+	var val = this.statics().parseAssignments(rawValue) || rawValue || null;
+        return val;
     },
 
     valueToRaw: function(value) {
-        return this.statics().formatAssignments(value);
+        var raw = this.statics().formatAssignments(value);
+        return raw;
     },
 
     getSubmitValue: function() {
