@@ -122,15 +122,15 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }},
 */
         {text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
-         editor: true, renderer: function(v, context, model, d, e) {
+         editor: true, 
+	 renderer: function(v, context, model, d, e) {
             context.style = 'cursor: pointer;'; 
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }},
-        {text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', editor: {
-            xtype: 'numberfield',
-            minValue: 0
-        }, renderer: function(value, context, model) {
+        {text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', 
+	 editor: { xtype: 'numberfield', minValue: 0 }, 
+	 renderer: function(value, context, model) {
             // Calculate the UoM unit
             var planned_units = model.get('planned_units');
             if (0 == model.childNodes.length) {
@@ -154,11 +154,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+plannedUnits+"h</b>";
             }
         }},
-        {text: 'Done %', width: 50, align: 'right', dataIndex: 'percent_completed', editor: {
-            xtype: 'numberfield',
-            minValue: 0,
-            maxValue: 100
-        }, renderer: function(value, context, model) {
+        {text: 'Done %', width: 50, align: 'right', dataIndex: 'percent_completed', 
+	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
+	 renderer: function(value, context, model) {
             var percent_completed = model.get('percent_completed');
             var isLeaf = (0 == model.childNodes.length);
             if (0 == model.childNodes.length) {                                // A leaf task - just show the units
@@ -192,23 +190,23 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'Resources', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', renderer: function(value, context, model) {
+        {text: 'Resources', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', 
+	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             var result = PO.view.field.POTaskAssignment.formatAssignments(value);
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
-	
-        {text: '', flex: 1, hidden: true},
-
         {text: 'CostCenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: true,
-         editor: {xtype: 'combo', store: 'taskCostCenterStore', displayField: 'cost_center_name', valueField: 'cost_center_id'}, renderer: function(value) {
+         editor: {xtype: 'combo', store: 'taskCostCenterStore', displayField: 'cost_center_name', valueField: 'cost_center_id'}, 
+	 renderer: function(value) {
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
              return model.get('cost_center_name');
         }},
         {text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
         {text: 'Material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: true,
-         editor: {xtype: 'combo', store: 'taskMaterialStore', displayField: 'material_name', valueField: 'material_id'}, renderer: function(value) {
+         editor: {xtype: 'combo', store: 'taskMaterialStore', displayField: 'material_name', valueField: 'material_id'}, 
+	 renderer: function(value) {
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
              return model.get('material_name');
@@ -221,7 +219,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	    maxValue: 1000
         }},
         {text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
-         editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}, renderer: function(value) {
+         editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}, 
+	 renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
              return model.get('category');
