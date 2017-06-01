@@ -20,7 +20,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
          * Covert a comma separated list of initials into an 
          * array of user assignments
          */
-        parseAssignments: function(value) {
+        parseAssignments: function(me, value) {
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
@@ -29,7 +29,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
             var names = value.split(";");
             for(var i = 0; i < names.length; i++) {
                 var name = names[i];						// BB[20%]
-                var assigObject = this.parseAssignment(name);
+                var assigObject = this.parseAssignment(me, name);
                 if (!Ext.isString(assigObject) && null != assigObject) {
                     result.push(assigObject);
                 }
@@ -43,7 +43,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
          * Returns an assignment object if it can successfully parse a value like "BB[80%]".
          * Returns a string with an error message if it can't parse the value.
          */
-        parseAssignment: function(value) {
+        parseAssignment: function(me, value) {
             if (!Ext.isString(value)) { 
                 return "Value='"+value+"' is not a string but a "+typeof value; 
             }
@@ -61,7 +61,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
                 initials = initials + value.substr(0,1);
                 percentString = percentString.substring(1,value.length);
             }
-            var percent = this.parseAssignmentPercent(percentString.trim());	// Number indicating percent or an error
+            var percent = this.parseAssignmentPercent(me, percentString.trim());	// Number indicating percent or an error
             if (Ext.isString(percent)) { return percent; }	     		// Return an error string
 
             // ToDo: Sort the user store alphabetically in order to create
@@ -86,6 +86,10 @@ Ext.define('PO.view.field.POTaskAssignment', {
                 }
             });
 
+	    if (null == result) {
+		me.markInvalid('Unable to parse assignment "'+value+'"');
+	    }
+
             return result;
         },
 
@@ -93,7 +97,7 @@ Ext.define('PO.view.field.POTaskAssignment', {
          * Parse a string like "[80%]" into the number 80.
          * Returns 100 for an empty or invalid string.
          */
-        parseAssignmentPercent: function(percentString) {
+        parseAssignmentPercent: function(me, percentString) {
             if (!Ext.isString(percentString) || 0 == percentString.length) { return 100.0; }
 
             var str = percentString;
@@ -163,12 +167,20 @@ Ext.define('PO.view.field.POTaskAssignment', {
     },
 
     rawToValue: function(rawValue) {
-	var val = this.statics().parseAssignments(rawValue) || rawValue || null;
+	var me = this;
+	var val = this.statics().parseAssignments(me, rawValue) || rawValue || null;
+
+	// if (val.constructor === Array) { if (val.length == 0) { val = ""; } }
+
+	console.log('POTaskAssignment.rawToValue: '+rawValue+' -> '+val);
+	console.log(val);
+
         return val;
     },
 
     valueToRaw: function(value) {
         var raw = this.statics().formatAssignments(value);
+	console.log('POTaskAssignment.valueToRaw: '+value+' -> '+raw);
         return raw;
     },
 
