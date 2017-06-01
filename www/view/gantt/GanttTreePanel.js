@@ -114,14 +114,14 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             minValue: 0            
         }},
 */
-        {text: 'Task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
+        {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
          editor: true, 
 	 renderer: function(v, context, model, d, e) {
             context.style = 'cursor: pointer;'; 
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }},
-        {text: 'Work', width: 55, align: 'right', dataIndex: 'planned_units', 
+        {text: 'Work', stateId: 'treegrid-work', width: 55, align: 'right', dataIndex: 'planned_units', 
 	 editor: { xtype: 'numberfield', minValue: 0 }, 
 	 renderer: function(value, context, model) {
             // Calculate the UoM unit
@@ -147,7 +147,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+plannedUnits+"h</b>";
             }
         }},
-        {text: 'Done %', width: 50, align: 'right', dataIndex: 'percent_completed', 
+        {text: 'Done %', stateId: 'treegrid-done', width: 50, align: 'right', dataIndex: 'percent_completed', 
 	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
 	 renderer: function(value, context, model) {
             var percent_completed = model.get('percent_completed');
@@ -173,19 +173,19 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+done+"</b>";
             }
         }},
-        {text: 'Start', width: 80, hidden: false, dataIndex: 'start_date',
+        {text: 'Start', stateId: 'treegrid-start', width: 80, hidden: false, dataIndex: 'start_date',
          editor: 'podatefield', 
 	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'End', width: 80, hidden: false, dataIndex: 'end_date',
+        {text: 'End', stateId: 'treegrid-end', width: 80, hidden: false, dataIndex: 'end_date',
          editor: 'podatefield', 
 	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'Resources', flex: 1, hidden: false, dataIndex: 'assignees', 
+        {text: 'Resources', stateId: 'treegrid-resources', flex: 1, hidden: false, dataIndex: 'assignees', 
 	 editor: 'potaskassignment', 
 	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
@@ -193,43 +193,55 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
 	
-        {text: '', flex: 1, hidden: true},
+        {text: '', stateId: 'treegrid-empty', flex: 1, hidden: true},
 
-        {text: 'CostCenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: true,
-         editor: {xtype: 'combo', store: 'taskCostCenterStore', displayField: 'cost_center_name', valueField: 'cost_center_id'}, 
+        {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: true,
+         editor: {
+	     xtype: 'combobox',
+	     forceSelection: true,
+	     allowBlank: false,
+	     store: 'taskCostCenterStore',
+	     displayField: 'cost_center_name', 
+	     valueField: 'cost_center_id'
+	 },
 	 renderer: function(value) {
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
              return model.get('cost_center_name');
         }},
-        {text: 'Description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
-        {text: 'Material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: true,
-         editor: {xtype: 'combo', store: 'taskMaterialStore', displayField: 'material_name', valueField: 'material_id'}, 
+        {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
+        {text: 'Material', stateId: 'treegrid-material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: true,
+         editor: {
+	     xtype: 'combobox',
+	     forceSelection: true,
+	     allowBlank: false,
+	     store: 'taskMaterialStore',
+	     displayField: 'material_name', 
+	     valueField: 'id'
+	 },
 	 renderer: function(value) {
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
              return model.get('material_name');
         }},
-        {text: 'Nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
-        {text: 'Predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', renderer: ganttTreePanelPredecessorRenderer},
-        {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
+        {text: 'Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
+        {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
+	 renderer: ganttTreePanelPredecessorRenderer
+	},
+        {text: 'Prio', stateId: 'treegrid-prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
 	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
 	},
-        {text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
+        {text: 'Status', stateId: 'treegrid-status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
          editor: {
 	     xtype: 'combobox',
-	     // queryMode: 'local',
 	     forceSelection: true,
 	     allowBlank: false,
 	     store: Ext.create('Ext.data.Store', {
-		 fields: ['category_id', 'category'],
-		 data : [
-		     {category_id: "76", category: "Open"},
-		     {category_id: "81", category: "Closed"}
-		 ]
+		 fields: ['id', 'category'],
+		 data : [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
 	     }),
 	     displayField: 'category', 
-	     valueField: 'category_id'
+	     valueField: 'id'
 	 }, 
 	 renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
