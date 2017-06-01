@@ -331,6 +331,11 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 	    return; 
 	}
 
+	// Finish the editor of the TaskASsigments list in case the user didn't press "Update" yet.
+	var editing = me.taskPropertyAssignments.editingPlugin;
+	editing.completeEdit();
+
+
         // Write timestamp to make sure that data are modified and redrawn.
         me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
         
