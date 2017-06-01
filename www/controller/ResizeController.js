@@ -197,8 +197,21 @@ Ext.define('PO.controller.ResizeController', {
 });
 
 
-// Popup window before leaving the page
+// Popup window before leaving the page.
+// Show popup only if there are unsaved changes.
 window.onbeforeunload = function() {
-  return "Are you sure you want to navigate away?";
-}
+    console.log('onBeforeUnload: Starting');
 
+    var dirty = false;
+    var taskTreeStore = Ext.StoreManager.get('taskTreeStore');
+    taskTreeStore.tree.root.eachChild(function(model) { 
+	if (model.dirty) dirty = true;
+    });
+
+    console.log('onBeforeUnload: Finished');
+    if (dirty) {
+	return "Are you sure you want to navigate away?";
+    } else {
+	return;
+    }
+}
