@@ -195,3 +195,10 @@ Ext.define('PO.controller.ResizeController', {
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchBackFromFullScreen: Finished');
     }
 });
+
+
+// Popup window before leaving the page
+window.onbeforeunload = function() {
+  return "Are you sure you want to navigate away?";
+}
+
