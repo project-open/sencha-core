@@ -46,8 +46,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     title:				false,
     useArrows:				true,
 
-//    minHeight: 1000,
-
     // Scrolling
     overflowX: 'scroll',						// Allows for horizontal scrolling, but not vertical...
     scrollFlags: {x: true},						// ... vertical scrolling is handled by the GanttTree
@@ -90,11 +88,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             containerScroll: true
         }
     },
-
-/* Additional columns to add
-        'cost_center_id',			// Optional department/cost center of who executes this activity.
-        'deadline_date',			// MS-Project: Deadline for this activitiy
-*/
 
     // the 'columns' property is now 'headers'
     columns: [
@@ -181,21 +174,27 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             }
         }},
         {text: 'Start', width: 80, hidden: false, dataIndex: 'start_date',
-         editor: 'podatefield', renderer: function(value, context, model) {
+         editor: 'podatefield', 
+	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
         {text: 'End', width: 80, hidden: false, dataIndex: 'end_date',
-         editor: 'podatefield', renderer: function(value, context, model) {
+         editor: 'podatefield', 
+	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'Resources', flex: 1, hidden: false, dataIndex: 'assignees', editor: 'potaskassignment', 
+        {text: 'Resources', flex: 1, hidden: false, dataIndex: 'assignees', 
+	 editor: 'potaskassignment', 
 	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             var result = PO.view.field.POTaskAssignment.formatAssignments(value);
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
+	
+        {text: '', flex: 1, hidden: true},
+
         {text: 'CostCenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: true,
          editor: {xtype: 'combo', store: 'taskCostCenterStore', displayField: 'cost_center_name', valueField: 'cost_center_id'}, 
 	 renderer: function(value) {
@@ -213,18 +212,30 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }},
         {text: 'Nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
         {text: 'Predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', renderer: ganttTreePanelPredecessorRenderer},
-        {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, editor: {
-            xtype: 'numberfield',
-            minValue: 0,
-	    maxValue: 1000
-        }},
+        {text: 'Prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
+	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
+	},
         {text: 'Status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
-         editor: {xtype: 'combo', store: 'taskStatusStore', displayField: 'category', valueField: 'category_id'}, 
+         editor: {
+	     xtype: 'combobox',
+	     // queryMode: 'local',
+	     forceSelection: true,
+	     allowBlank: false,
+	     store: Ext.create('Ext.data.Store', {
+		 fields: ['category_id', 'category'],
+		 data : [
+		     {category_id: "76", category: "Open"},
+		     {category_id: "81", category: "Closed"}
+		 ]
+	     }),
+	     displayField: 'category', 
+	     valueField: 'category_id'
+	 }, 
 	 renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
              return model.get('category');
-        }},
+        }}
     ],
 
     listeners: {
