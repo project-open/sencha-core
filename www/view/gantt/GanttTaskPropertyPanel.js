@@ -131,7 +131,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             },
             onAssigButtonAdd: function(button, event) {
                 var me = this;
-                if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonAdd');
+                if (me.debug) console.log('GanttTaskPropertyPanel.taskPropertyAssignmentsController.onAssigButtonAdd');
                 var newRecord = me.taskAssignmentStore.add({percent:100})[0];
 
                 // Cancel editing
@@ -141,8 +141,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             },
             onAssigButtonDel: function(button, event) {
                 var me = this;
-                if (me.debug) console.log('POTaskAssignment.pickerController.onAssigButtonDel');
-console.log('POTaskAssignment.pickerController.onAssigButtonDel');
+                if (me.debug) console.log('GanttTaskPropertyPanel.taskPropertyAssignmentsController.onAssigButtonDel');
 
                 // Cancel editing
                 var editing = me.taskPropertyAssignments.editingPlugin;
