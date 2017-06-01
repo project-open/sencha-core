@@ -200,6 +200,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	     xtype: 'combobox',
 	     forceSelection: true,
 	     allowBlank: false,
+	     editable: false,
 	     store: 'taskCostCenterStore',
 	     displayField: 'cost_center_name', 
 	     valueField: 'cost_center_id'
@@ -215,6 +216,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	     xtype: 'combobox',
 	     forceSelection: true,
 	     allowBlank: false,
+	     editable: false,
 	     store: 'taskMaterialStore',
 	     displayField: 'material_name', 
 	     valueField: 'id'
@@ -236,6 +238,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	     xtype: 'combobox',
 	     forceSelection: true,
 	     allowBlank: false,
+	     editable: false,
 	     store: Ext.create('Ext.data.Store', {
 		 fields: ['id', 'category'],
 		 data : [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
