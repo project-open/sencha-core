@@ -603,7 +603,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         	}
             }
             var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#e1e2e1', stroke:'grey'}).show(true);
-            var axisText = me.surface.add({type: 'text', text:""+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
+            var axisText = me.surface.add({type: 'text', text:"W"+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
 
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished');
