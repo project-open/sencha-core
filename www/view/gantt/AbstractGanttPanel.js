@@ -602,8 +602,36 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         	    year = now.getYear();
         	}
             }
-            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#e1e2e1', stroke:'grey'}).show(true);
-            var axisText = me.surface.add({type: 'text', text:"W"+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
+
+	    // Show bar + text for the week
+            var axisBar = me.surface.add({
+		type:'rect', 
+		x:startX, y:h, 
+		width:w, height:me.axisHeight, 
+		fill:'#e1e2e1', 
+		stroke:'grey'
+	    }).show(true);
+            var axisText = me.surface.add({
+		type: 'text', 
+		text:"W"+week, 
+		x:startX+2, y:h+(me.axisHeight/2), 
+		fill: '#000', 
+		font:"9px Arial"
+	    }).show(true);
+
+	    // Show background bar for the weekend
+	    var surfaceHeight = me.surface.height;
+            var weekendBar = me.surface.add({
+		type:'rect', 
+		x:startX + w * 5.0 / 7.0,
+		y: me.axisHeight * 2, 
+		width:w * 2.0 / 7.0,
+		height: surfaceHeight - me.axisHeight * 2,
+		fill:'#e1e2e1', 
+		stroke:'#e1e2e1',
+		opacity: 0.4,
+		zIndex: -200						// really at the bottom of all
+	    }).show(true);
 
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished');
