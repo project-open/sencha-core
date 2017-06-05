@@ -25,7 +25,7 @@ Ext.define('PO.controller.ResizeController', {
 
     'renderDiv': null,								// We assume all app HTML drawn inside this DIV
     'outerContainer': null,							// Defined during initialization
-    'redrawPanel': null,							// Surface panel with a needsRedraw variable
+    'redrawPanel': null,							// The panel with a needsRedraw variable
 
     init: function() {
         var me = this;

@@ -35,7 +35,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     axisStartDate: null,				// Set during init
     axisEndDate: null,					// Set during init
     axisStartX: 0,					// Start of the X-axis. Should be 0 always.
-    axisEndX: 2000,					// Set during init
+    axisEndX: 0,					// Set during init
     axisHeight: 11,					// Height of each of the two axis levels
     axisScale: 'month',					// Default scale for the time axis
 
