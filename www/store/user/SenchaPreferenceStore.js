@@ -21,7 +21,7 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
     model: 		'PO.model.user.SenchaPreference',	// Uses standard User as model
     autoLoad:		false,
     remoteFilter:	true,					// Do not filter on the Sencha side
-    debug:              true,
+    debug:              false,
     pageSize:		100000,					// Load all projects, no matter what size(?)
     proxy: {
         type:		'rest',					// Standard ]po[ REST interface for loading
