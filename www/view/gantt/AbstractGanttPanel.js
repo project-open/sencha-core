@@ -494,6 +494,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 	    drawn = true;
 	}
 
+	// Show with a red line where we are today
+        me.drawAxisNow();
+
+
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Finished');
     },
 
@@ -722,6 +726,32 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             var axisText = me.surface.add({type: 'text', text:""+day, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Finished');
+    },
+
+
+
+    /**
+     * Draw a red vertical bar to indicate where we are today
+     */
+    drawAxisNow: function(h) {
+        var me = this;
+        if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisNow: Starting');
+
+        var surfaceHeight = me.surface.height;
+	now = new Date();                                            // Today
+        var x = me.date2x(now);
+
+        var nowBar = me.surface.add({
+            type:'rect',
+            x: x,
+            y: me.axisHeight * 2,
+            width: 0.5,
+            height: surfaceHeight - me.axisHeight * 2,
+            stroke:'#FF0000',
+	    zIndex: 200
+        }).show(true);
+
+        if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisNow: Finished');
     },
 
 
