@@ -149,7 +149,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         me.dndBasePoint = point;
         me.dndBaseSprite = baseSprite;
         me.dndShadowSprite = spriteShadow;
-	me.dndLinkSprite = spriteLink;
+        me.dndLinkSprite = spriteLink;
     },
 
     /**
@@ -250,19 +250,19 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      * Calculate the number of nodes in an arbitrary tree model
      */
     nodesInTree: function(node) {
-	var me = this;
-	var count = 1;
+        var me = this;
+        var count = 1;
         // if (me.debug) console.log('PO.view.gantt.GanttBarPanel.nodesInTree: Starting');
 
-	if (node.isExpanded() || node.isRoot()) {
-	    var children = node.childNodes;
-	    children.forEach(function(child) {
-		count = count + me.nodesInTree(child);
-	    });
-	}
+        if (node.isExpanded() || node.isRoot()) {
+            var children = node.childNodes;
+            children.forEach(function(child) {
+                count = count + me.nodesInTree(child);
+            });
+        }
 
         // if (me.debug) console.log('PO.view.gantt.GanttBarPanel.nodesInTree: Finished');
-	return count;
+        return count;
     },
 
 
@@ -426,9 +426,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var h = 0;
 
         var startDate = me.axisStartDate;
-	startDate.setHours(0,0,0,0);
+        startDate.setHours(0,0,0,0);
         var endDate = me.axisEndDate;
-	endDate.setHours(0,0,0,0);
+        endDate.setHours(0,0,0,0);
 
         switch (me.granularity) {
         case "day":
@@ -458,25 +458,42 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         var h = 0;
 
         var startDate = me.axisStartDate;
-	startDate.setHours(0,0,0,0);
+        startDate.setHours(0,0,0,0);
         var endDate = me.axisEndDate;
-	endDate.setHours(0,0,0,0);
-
+        endDate.setHours(0,0,0,0);
         var timespanDays = (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (1000 * 3600 * 24);
-        if (timespanDays > 365) {
-            me.drawAxisYear(h); h = h + me.axisHeight;
-        }
-        if (timespanDays > 30) {
-            me.drawAxisMonth(h); h = h + me.axisHeight;
-        }
+        var xPerDay = me.axisEndX / timespanDays;
+        var xPerYear = 365 * xPerDay;
+        var xPerQuarter = xPerYear / 3;
+        var xPerMonth = xPerDay * 30;
+        var xPerWeek = xPerDay * 7;
 
-        if (timespanDays > 7 && h < 2 * me.axisHeight) {
+	var min = 18;
+	var drawn = false;
+	if (!drawn && xPerDay > min) {
             me.drawAxisWeek(h); h = h + me.axisHeight;
-        }
+            me.drawAxisDay(h); h = h + me.axisHeight;
+	    drawn = true;
+	}
+	
+	if (!drawn && xPerWeek > min) {
+            me.drawAxisMonth(h); h = h + me.axisHeight;
+            me.drawAxisWeek(h); h = h + me.axisHeight;
+	    drawn = true;
+	}
 
-        if (timespanDays > 1 && h < 2 * me.axisHeight) {
-            me.drawAxisDay(h);
-        }
+	if (!drawn && xPerMonth > min) {
+            me.drawAxisQuarter(h); h = h + me.axisHeight;
+            me.drawAxisMonth(h); h = h + me.axisHeight;
+	    drawn = true;
+	}
+
+	if (!drawn) {
+            me.drawAxisYear(h); h = h + me.axisHeight;
+            me.drawAxisQuarter(h); h = h + me.axisHeight;
+	    drawn = true;
+	}
+
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Finished');
     },
 
@@ -516,6 +533,53 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisYear: Finished');
     },
+
+
+
+    /**
+     * Draw a date axis on the top of the diagram
+     */
+    drawAxisQuarter: function(h) {
+        var me = this;
+        if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisQuarter: Starting');
+
+        // Draw quarterly blocks
+        var startYear = me.axisStartDate.getFullYear();
+        var endYear = me.axisEndDate.getFullYear();
+        var startQuarter = Math.floor(me.axisStartDate.getMonth() / 3);
+        var endQuarter = Math.floor(me.axisEndDate.getMonth() / 3);
+        var yea = startYear;
+        var qua = startQuarter;
+
+        while (yea * 100 + qua <= endYear * 100 + endQuarter) {
+            var xEndQua = qua+1;
+            var xEndYea = yea;
+            if (xEndQua > 3) { xEndQua = 0; xEndYea = xEndYea + 1; }
+            var x = me.date2x(new Date(yea+"-"+  ("0"+(3*qua+1)).slice(-2)  +"-01"));
+            var xEnd = me.date2x(new Date(xEndYea+"-"+  ("0"+(3*xEndQua+1)).slice(-2)  +"-01"));
+            var w = xEnd - x;
+
+            // Calculate name of quarter, including year if possible
+            var text = "Q"+(qua+1);
+            if (w > 30) { text = text + " " + (""+yea).substring(0,4); }
+
+            var axisBar = me.surface.add(
+                {type: 'rect', x: x, y: h, width: w, height: me.axisHeight, fill: '#e1e2e1', stroke: 'grey'}).show(true);
+            var axisText = me.surface.add(
+                {type: 'text', text: text, x:x+2, y:h+(me.axisHeight/2), fill: '#000', font: "9px Arial"}).show(true);
+
+            qua = qua + 1;
+            if (qua > 3) {
+                qua = 0;
+                yea = yea + 1;
+            }
+        }
+
+        if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisQuarter: Finished');
+    },
+
+
+
 
     /**
      * Draw a date axis on the top of the diagram
@@ -586,6 +650,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         }
 
         // "now" points to the start of the first week (Monday 00:00 at night) within the data axis
+	now = new Date(now.getTime() - 1000 * 3600 * 24 * 7);                 // Go back one week, so we don't have an half empty first week
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
             now = new Date(now.getTime() + 1000 * 3600 * 24 * 7);
@@ -596,42 +661,42 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
             if (now.getYear() > year) {
                 // The end of the week is in the new year.
                 // We now need to change if the Thursday of this week is still in the new year
-        	var thu = new Date(now.getTime() - 1000 * 3600 * 24 * 4);
-        	if (thu.getYear() > year) {
-        	    week = 1;
-        	    year = now.getYear();
-        	}
+                var thu = new Date(now.getTime() - 1000 * 3600 * 24 * 4);
+                if (thu.getYear() > year) {
+                    week = 1;
+                    year = now.getYear();
+                }
             }
 
-	    // Show bar + text for the week
+            // Show bar + text for the week
             var axisBar = me.surface.add({
-		type:'rect', 
-		x:startX, y:h, 
-		width:w, height:me.axisHeight, 
-		fill:'#e1e2e1', 
-		stroke:'grey'
-	    }).show(true);
+                type:'rect', 
+                x:startX, y:h, 
+                width:w, height:me.axisHeight, 
+                fill:'#e1e2e1', 
+                stroke:'grey'
+            }).show(true);
             var axisText = me.surface.add({
-		type: 'text', 
-		text:"W"+week, 
-		x:startX+2, y:h+(me.axisHeight/2), 
-		fill: '#000', 
-		font:"9px Arial"
-	    }).show(true);
+                type: 'text', 
+                text:"W"+week, 
+                x:startX+2, y:h+(me.axisHeight/2), 
+                fill: '#000', 
+                font:"9px Arial"
+            }).show(true);
 
-	    // Show background bar for the weekend
-	    var surfaceHeight = me.surface.height;
+            // Show background bar for the weekend
+            var surfaceHeight = me.surface.height;
             var weekendBar = me.surface.add({
-		type:'rect', 
-		x:startX + w * 5.0 / 7.0,
-		y: me.axisHeight * 2, 
-		width:w * 2.0 / 7.0,
-		height: surfaceHeight - me.axisHeight * 2,
-		fill:'#e1e2e1', 
-		stroke:'#e1e2e1',
-		opacity: 0.4,
-		zIndex: -200						// really at the bottom of all
-	    }).show(true);
+                type:'rect', 
+                x:startX + w * 5.0 / 7.0,
+                y: me.axisHeight * 2, 
+                width:w * 2.0 / 7.0,
+                height: surfaceHeight - me.axisHeight * 2,
+                fill:'#e1e2e1', 
+                stroke:'#e1e2e1',
+                opacity: 0.4,
+                zIndex: -200						// really at the bottom of all
+            }).show(true);
 
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished');
