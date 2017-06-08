@@ -21,8 +21,9 @@
  */
 Ext.define('PO.controller.ResizeController', {
     extend: 'Ext.app.Controller',
+    id: 'resizeController',
     debug: false,
-
+    
     'renderDiv': null,								// We assume all app HTML drawn inside this DIV
     'outerContainer': null,							// Defined during initialization
     'redrawPanel': null,							// The panel with a needsRedraw variable
@@ -156,7 +157,6 @@ Ext.define('PO.controller.ResizeController', {
         // Disable the "resizable" properties of the outer panel
         me.outerContainer.resizer.resizeTracker.disable();
 
-
         // Disable scrolling in the browser and set vertical scroll to zero
         document.documentElement.style.overflow = 'hidden';			// firefox, chrome
         document.body.scroll = "no";	      					// ie only
@@ -164,6 +164,10 @@ Ext.define('PO.controller.ResizeController', {
         // Scroll to the top of the page
         document.body.scrollLeft = 0;
         document.body.scrollTop = 0;
+
+	// Check if the surface is smaller than the ganttPanel
+	// and resize and redraw the surface if necessary
+	me.ganttZoomController.onSwitchToFullScreen();
 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
