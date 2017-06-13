@@ -135,3 +135,77 @@ ad_proc -public im_sencha_sql_to_store {
 
 }
 
+
+
+
+# ----------------------------------------------------------------------
+# List of add-on dynfields
+# ---------------------------------------------------------------------
+
+ad_proc -public im_sencha_dynfields {
+    -object_type:required
+} {
+    Returns a cached list of DynFields for each object type
+} {
+    set dynfield_sql "
+    	select	aa.attribute_name,
+		aa.pretty_name,
+		dw.widget_name
+	from	acs_attributes aa,
+		im_dynfield_attributes da,
+		im_dynfield_widgets dw
+	where	aa.attribute_id = da.acs_attribute_id and
+		da.widget_name = dw.widget_name and
+		aa.object_type = '$object_type' and
+		aa.attribute_name not in (
+			'billable_units',
+			'company_id',
+			'cost_center_id',
+			'creation_date',
+			'creation_ip',
+			'creation_user',
+			'deadline_date',
+			'description',
+			'effort_driven_p',
+			'effort_driven_type_id',
+			'end_date',
+			'expanded',
+			'gantt_project_id',
+			'icon',
+			'invoice_id',
+			'last_modified',
+			'level',
+			'lock_date',
+			'lock_ip',
+			'lock_user',
+			'material_id',
+			'milestone_p',
+			'modifying_ip',
+			'modifying_user',
+			'note',
+			'object_type',
+			'on_track_status_id',
+			'parent_id',
+			'percent_completed',
+			'planned_units',
+			'predecessors',
+			'priority',
+			'project_lead_id',
+			'project_name',
+			'project_nr',
+			'project_status_id',
+			'project_type_id',
+			'scheduling_constraint_date',
+			'scheduling_constraint_id',
+			'sort_order',
+			'start_date',
+			'successors',
+			'task_id',
+			'tree_sortkey',
+			'uom_id'
+		)
+    "
+
+    set tuples [util_memoize [list db_list_of_lists dynfield $dynfield_sql] 1]
+    return $tuples
+}

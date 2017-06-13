@@ -251,6 +251,11 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              var model = statusStore.getById(value);
              return model.get('category');
         }}
+        // DynFields
+<multiple name=dynfields>
+        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: false @dynfields.editor;noquote@}
+</multiple>
+
     ],
 
     listeners: {

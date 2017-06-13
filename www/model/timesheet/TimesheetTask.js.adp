@@ -123,6 +123,11 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 
         'expanded',                             // true or false (without quotes), default state for tree
 
+        // Add dynfields
+<multiple name=dynfields>
+        '@dynfields.name@',</multiple>
+
+
         {   name: 'icon',			// A &nbsp; sequence representing the project indentation
             convert: function(value, record) {
                 var typeId = parseInt(record.get('project_type_id'));
