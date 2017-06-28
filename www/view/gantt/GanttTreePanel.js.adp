@@ -112,7 +112,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             minValue: 0            
         }},
 */
-        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: false, 
+        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, 
 	 editor: true}, 
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: false, dataIndex: 'project_name', 
          editor: true, 
