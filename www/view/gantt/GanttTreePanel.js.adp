@@ -69,12 +69,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 var model = context.record;
                 var field = context.field;
 
-                // Veto editing planned_units for objects of type "im_project":
-                if ("planned_units" == field && "im_project" == model.get('object_type')) { return false; }
-
-                // Veto editing properties of parent objects except for the name.
+                // Veto editing planned_units of parent objects except for the name.
                 if (model.childNodes.length > 0) {                    // If this is a parent object with children
-                    if ("project_name" != field) { return false; }    // ONLY the project_name is editable
+		    if ("planned_units" == field) { return false; }
+		    if ("percent_done" == field) { return false; }
                 }
                 return true;
             }
@@ -114,7 +112,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             minValue: 0            
         }},
 */
-        {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
+        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: false, 
+	 editor: true}, 
+        {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: false, dataIndex: 'project_name', 
          editor: true, 
 	 renderer: function(v, context, model, d, e) {
             context.style = 'cursor: pointer;'; 
@@ -195,7 +195,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	
         {text: '', stateId: 'treegrid-empty', flex: 1, hidden: true},
 
-        {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: true,
+        {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: false,
          editor: {
 	     xtype: 'combobox',
 	     forceSelection: true,
@@ -211,7 +211,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              return model.get('cost_center_name');
         }},
         {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
-        {text: 'Material', stateId: 'treegrid-material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: true,
+        {text: 'Material', stateId: 'treegrid-material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: false,
          editor: {
 	     xtype: 'combobox',
 	     forceSelection: true,
@@ -226,14 +226,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              var model = materialStore.getById(value);
              return model.get('material_name');
         }},
-        {text: 'Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true}, 
         {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
 	 renderer: ganttTreePanelPredecessorRenderer
 	},
         {text: 'Prio', stateId: 'treegrid-prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
 	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
 	},
-        {text: 'Status', stateId: 'treegrid-status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: true,
+        {text: 'Status', stateId: 'treegrid-status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: false,
          editor: {
 	     xtype: 'combobox',
 	     forceSelection: true,
