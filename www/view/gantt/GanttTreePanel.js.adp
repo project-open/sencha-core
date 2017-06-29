@@ -112,8 +112,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             minValue: 0            
         }},
 */
-        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, 
-	 editor: true}, 
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: false, dataIndex: 'project_name', 
          editor: true, 
 	 renderer: function(v, context, model, d, e) {
@@ -249,10 +247,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
              return model.get('category');
-        }}
+        }},
+        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true}
+
+
         // DynFields
 <multiple name=dynfields>
-        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: false @dynfields.editor;noquote@}
+        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: false, sortable: false @dynfields.editor;noquote@}
 </multiple>
 
     ],
