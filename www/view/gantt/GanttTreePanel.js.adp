@@ -183,7 +183,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'Resources', stateId: 'treegrid-resources', flex: 1, hidden: false, dataIndex: 'assignees', 
+        {text: 'Resources', stateId: 'treegrid-resources', flex: 1, hidden: true, dataIndex: 'assignees', 
 	 editor: 'potaskassignment', 
 	 renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
@@ -248,12 +248,12 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              var model = statusStore.getById(value);
              return model.get('category');
         }},
-        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true}
+        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: false, sortable: false, editor: true}
 
 
         // DynFields
 <multiple name=dynfields>
-        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: false, sortable: false @dynfields.editor;noquote@}
+        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: true, sortable: false @dynfields.editor;noquote@}
 </multiple>
 
     ],
@@ -268,6 +268,36 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             taskPropertyPanel.setActiveTab('taskPropertyFormGeneral');
             taskPropertyPanel.show();
 	    return false;                                            // Cancel default action
+	}, 
+
+	// Workaround a bug in Sencha ExtJS 4.2, where columns don't get an editor
+	// when being shown after the initial setup. Sencha forgets to add editors
+	// after enabling the columns...
+	columnshow: function(ct, column, eOpts) {
+            var me = this;
+            if (me.debug) console.log('PO.view.gantt.GanttTreePanel.columnshow: Starting');
+
+	    var cellEditor = me.findPlugin('cellediting');
+
+            if (!column.getEditor) {
+                column.getEditor = function(record, defaultField) { 
+		    return cellEditor.getColumnField(this, defaultField); 
+		};
+            }
+
+            if (!column.hasEditor) {
+                column.hasEditor = function() { 
+		    return cellEditor.hasColumnField(this); 
+		};
+            }
+
+            if (!column.setEditor) {
+                column.setEditor = function(field) { 
+		    cellEditor.setColumnField(this, field); 
+		};
+            }
+
+            if (me.debug) console.log('PO.view.gantt.GanttTreePanel.columnshow: Finished');
 	}
     },
 
