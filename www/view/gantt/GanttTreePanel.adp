@@ -191,8 +191,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
 	
-        {text: '', stateId: 'treegrid-empty', flex: 1, hidden: true},
-
         {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: false,
          editor: {
 	     xtype: 'combobox',
@@ -248,7 +246,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              var model = statusStore.getById(value);
              return model.get('category');
         }},
-        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: false, sortable: false, editor: true}
+        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true}
 
 
         // DynFields
