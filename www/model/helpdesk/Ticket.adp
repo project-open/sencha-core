@@ -75,10 +75,13 @@ Ext.define('PO.model.helpdesk.Ticket', {
 	'ticket_type_id',			// 
 	'ticket_url',				// 
 
+        // Add dynfields
+<multiple name=dynfields>
+        '@dynfields.name@',</multiple>
+
 	// Important dereferenced field
 	'ticket_status_id_deref',		// 76=open, 81=closed, ...
-	'ticket_type_id_deref',			// 100=Task, 101=Ticket, 2501=Gantt Ticket, ...
-
+	'ticket_type_id_deref'			// 100=Task, 101=Ticket, 2501=Gantt Ticket, ...
     ],
 
     proxy: {

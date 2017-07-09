@@ -144,9 +144,11 @@ ad_proc -public im_sencha_sql_to_store {
 
 ad_proc -public im_sencha_dynfields {
     -object_type:required
+    {-exclude_fields {} }
 } {
     Returns a cached list of DynFields for each object type
 } {
+    lappend exclude_fields "ttt"
     set dynfield_sql "
     	select	aa.attribute_name,
 		aa.pretty_name,
@@ -157,6 +159,7 @@ ad_proc -public im_sencha_dynfields {
 	where	aa.attribute_id = da.acs_attribute_id and
 		da.widget_name = dw.widget_name and
 		aa.object_type = '$object_type' and
+		aa.attribute_name not in ('[join $exclude_fields "', '"]') and
 		aa.attribute_name not in (
 			'billable_units',
 			'company_id',
