@@ -106,6 +106,11 @@ Ext.define('PO.model.project.Project', {
 	'hours_for_user',			// may not be set depending on query
 	'hours_for_user_date',			// may not be set depending on query
 
+        // Add dynfields
+<multiple name=dynfields>
+        '@dynfields.name@',</multiple>
+
+
 	{ name: 'indent',			// A &nbsp; sequence representing the project indentation
 	  convert: function(value, record) {
 	      var level = record.get('level');
