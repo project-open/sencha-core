@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message_catalog package_key="sencha-core" locale="en_US" charset="ISO-8859-1">
+
+  <msg key="REST_Inter_Project_Task_Dependencies">REST Inter Project Task Dependencies</msg>
+  <msg key="REST_Intra_Project_Task_Dependencies">REST Intra-Project Task Dependencies</msg>
+</message_catalog>
