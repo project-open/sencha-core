@@ -214,7 +214,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	     allowBlank: false,
 	     editable: false,
 	     store: 'taskMaterialStore',
-	     displayField: 'material_name', 
+	     displayField: 'material_nr', 
 	     valueField: 'id'
 	 },
 	 renderer: function(value) {
