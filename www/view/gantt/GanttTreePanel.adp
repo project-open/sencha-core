@@ -220,7 +220,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	 renderer: function(value) {
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
-             return model.get('material_name');
+             return model.get('material_nr');
         }},
         {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
 	 renderer: ganttTreePanelPredecessorRenderer
