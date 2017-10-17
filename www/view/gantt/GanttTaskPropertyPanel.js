@@ -261,7 +261,19 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     name: 'milestone_p',
                     uncheckedValue: 'f',
                     inputValue: 't'
-                }]
+                }, {
+		    xtype: 'combobox',
+                    fieldLabel: 'Material',
+                    name: 'material_id',
+                    displayField: 'material_nr',
+                    valueField: 'material_id',
+                    queryMode: 'local',
+                    emptyText: 'Material',
+                    width: 300,
+                    store: Ext.StoreManager.get('taskMaterialStore'),
+                    allowBlank: false,
+                    forceSelection: true
+		}]
             }, {
                 xtype: 'fieldset',
                 title: 'Dates',
