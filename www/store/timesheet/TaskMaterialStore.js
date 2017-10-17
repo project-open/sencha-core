@@ -9,6 +9,7 @@ Ext.define('PO.store.timesheet.TaskMaterialStore', {
     extend:         'Ext.data.Store',
     model: 	    'PO.model.timesheet.Material',
     storeId:	    'taskMaterialStore',
+    pageSize:       100000,
     proxy: {
 	type:       'rest',
 	url:        '/intranet-rest/im_material',
