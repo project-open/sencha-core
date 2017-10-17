@@ -269,7 +269,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     valueField: 'material_id',
                     queryMode: 'local',
                     emptyText: 'Material',
-                    width: 300,
+                    width: 450,
                     store: Ext.StoreManager.get('taskMaterialStore'),
                     allowBlank: false,
                     forceSelection: true
