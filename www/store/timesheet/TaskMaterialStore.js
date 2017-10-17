@@ -10,6 +10,12 @@ Ext.define('PO.store.timesheet.TaskMaterialStore', {
     model: 	    'PO.model.timesheet.Material',
     storeId:	    'taskMaterialStore',
     pageSize:       100000,
+
+    sorters: [{
+        property: 'material_name',
+        direction: 'DESC'
+    }],
+
     proxy: {
 	type:       'rest',
 	url:        '/intranet-rest/im_material',
