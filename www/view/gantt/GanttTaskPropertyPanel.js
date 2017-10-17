@@ -265,7 +265,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 		    xtype: 'combobox',
                     fieldLabel: 'Material',
                     name: 'material_id',
-                    displayField: 'material_nr',
+                    displayField: 'material_name',
                     valueField: 'material_id',
                     queryMode: 'local',
                     emptyText: 'Material',
