@@ -71,9 +71,21 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
                 // Veto editing planned_units of parent objects except for the name.
                 if (model.childNodes.length > 0) {                    // If this is a parent object with children
-		    if ("planned_units" == field) { return false; }
-		    if ("percent_done" == field) { return false; }
+                    if ("planned_units" == field) { return false; }
+                    if ("percent_completed" == field) { return false; }
                 }
+                return true;
+            },
+            validateedit: function(editor, context, eOpts) {
+                var me = this;
+                if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit');
+                var model = context.record;
+                var field = context.field;
+
+                // Check that planned_units and percent_completed are not null
+                if (context.value != null) { return true; }
+                if ("planned_units" == field) { return false; }
+                if ("percent_completed" == field) { return false; }
                 return true;
             }
         }
@@ -114,14 +126,14 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 */
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: false, dataIndex: 'project_name', 
          editor: true, 
-	 renderer: function(v, context, model, d, e) {
+         renderer: function(v, context, model, d, e) {
             context.style = 'cursor: pointer;'; 
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }},
         {text: 'Work', stateId: 'treegrid-work', width: 55, align: 'right', dataIndex: 'planned_units', 
-	 editor: { xtype: 'numberfield', minValue: 0 }, 
-	 renderer: function(value, context, model) {
+         editor: { xtype: 'numberfield', minValue: 0 }, 
+         renderer: function(value, context, model) {
             // Calculate the UoM unit
             var planned_units = model.get('planned_units');
             if (0 == model.childNodes.length) {
@@ -137,8 +149,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                         if ("" != puString) {
                             var pu = parseFloat(puString);
                             if ("number" == typeof pu) { 
-				plannedUnits = plannedUnits + pu; 
-			    }
+                                plannedUnits = plannedUnits + pu; 
+                            }
                         }
                     }
                 });
@@ -146,8 +158,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             }
         }},
         {text: 'Done %', stateId: 'treegrid-done', width: 50, align: 'right', dataIndex: 'percent_completed', 
-	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
-	 renderer: function(value, context, model) {
+         editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
+         renderer: function(value, context, model) {
             var percent_completed = model.get('percent_completed');
             var isLeaf = (0 == model.childNodes.length);
             if (0 == model.childNodes.length) {                                // A leaf task - just show the units
@@ -173,35 +185,35 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }},
         {text: 'Start', stateId: 'treegrid-start', width: 80, hidden: false, dataIndex: 'start_date',
          editor: 'podatefield', 
-	 renderer: function(value, context, model) {
+         renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
         {text: 'End', stateId: 'treegrid-end', width: 80, hidden: false, dataIndex: 'end_date',
          editor: 'podatefield', 
-	 renderer: function(value, context, model) {
+         renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
         {text: 'Resources', stateId: 'treegrid-resources', flex: 1, hidden: true, dataIndex: 'assignees', 
-	 editor: 'potaskassignment', 
-	 renderer: function(value, context, model) {
+         editor: 'potaskassignment', 
+         renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             var result = PO.view.field.POTaskAssignment.formatAssignments(value);
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
-	
+        
         {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: false,
          editor: {
-	     xtype: 'combobox',
-	     forceSelection: true,
-	     allowBlank: false,
-	     editable: false,
-	     store: 'taskCostCenterStore',
-	     displayField: 'cost_center_name', 
-	     valueField: 'cost_center_id'
-	 },
-	 renderer: function(value) {
+             xtype: 'combobox',
+             forceSelection: true,
+             allowBlank: false,
+             editable: false,
+             store: 'taskCostCenterStore',
+             displayField: 'cost_center_name', 
+             valueField: 'cost_center_id'
+         },
+         renderer: function(value) {
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
              return model.get('cost_center_name');
@@ -209,41 +221,41 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
         {text: 'Material', stateId: 'treegrid-material', flex: 1, hidden: true, dataIndex: 'material_id', sortable: false,
          editor: {
-	     xtype: 'combobox',
-	     forceSelection: true,
-	     allowBlank: false,
-	     editable: false,
-	     store: 'taskMaterialStore',
-	     displayField: 'material_name', 
-	     valueField: 'id',
-	     typeAhead: true,
-	     matchFieldWidth: false
-	 },
-	 renderer: function(value) {
+             xtype: 'combobox',
+             forceSelection: true,
+             allowBlank: false,
+             editable: false,
+             store: 'taskMaterialStore',
+             displayField: 'material_name', 
+             valueField: 'id',
+             typeAhead: true,
+             matchFieldWidth: false
+         },
+         renderer: function(value) {
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
              return model.get('material_name');
         }},
         {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
-	 renderer: ganttTreePanelPredecessorRenderer
-	},
+         renderer: ganttTreePanelPredecessorRenderer
+        },
         {text: 'Prio', stateId: 'treegrid-prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
-	 editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
-	},
+         editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
+        },
         {text: 'Status', stateId: 'treegrid-status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: false,
          editor: {
-	     xtype: 'combobox',
-	     forceSelection: true,
-	     allowBlank: false,
-	     editable: false,
-	     store: Ext.create('Ext.data.Store', {
-		 fields: ['id', 'category'],
-		 data : [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
-	     }),
-	     displayField: 'category', 
-	     valueField: 'id'
-	 }, 
-	 renderer: function(value) {
+             xtype: 'combobox',
+             forceSelection: true,
+             allowBlank: false,
+             editable: false,
+             store: Ext.create('Ext.data.Store', {
+                 fields: ['id', 'category'],
+                 data : [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
+             }),
+             displayField: 'category', 
+             valueField: 'id'
+         }, 
+         renderer: function(value) {
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
              return model.get('category');
@@ -259,7 +271,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     ],
 
     listeners: {
-	// Open up 
+        // Open up 
         beforeitemdblclick: function(view, record, item, index, e, eOpts) { 
             var me = this;
             if (me.debug) console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick');
@@ -267,38 +279,38 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             taskPropertyPanel.setValue(record);
             taskPropertyPanel.setActiveTab('taskPropertyFormGeneral');
             taskPropertyPanel.show();
-	    return false;                                            // Cancel default action
-	}, 
+            return false;                                            // Cancel default action
+        }, 
 
-	// Workaround a bug in Sencha ExtJS 4.2, where columns don't get an editor
-	// when being shown after the initial setup. Sencha forgets to add editors
-	// after enabling the columns...
-	columnshow: function(ct, column, eOpts) {
+        // Workaround a bug in Sencha ExtJS 4.2, where columns don't get an editor
+        // when being shown after the initial setup. Sencha forgets to add editors
+        // after enabling the columns...
+        columnshow: function(ct, column, eOpts) {
             var me = this;
             if (me.debug) console.log('PO.view.gantt.GanttTreePanel.columnshow: Starting');
 
-	    var cellEditor = me.findPlugin('cellediting');
+            var cellEditor = me.findPlugin('cellediting');
 
             if (!column.getEditor) {
                 column.getEditor = function(record, defaultField) { 
-		    return cellEditor.getColumnField(this, defaultField); 
-		};
+                    return cellEditor.getColumnField(this, defaultField); 
+                };
             }
 
             if (!column.hasEditor) {
                 column.hasEditor = function() { 
-		    return cellEditor.hasColumnField(this); 
-		};
+                    return cellEditor.hasColumnField(this); 
+                };
             }
 
             if (!column.setEditor) {
                 column.setEditor = function(field) { 
-		    cellEditor.setColumnField(this, field); 
-		};
+                    cellEditor.setColumnField(this, field); 
+                };
             }
 
             if (me.debug) console.log('PO.view.gantt.GanttTreePanel.columnshow: Finished');
-	}
+        }
     },
 
     initComponent: function() {
