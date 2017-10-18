@@ -76,16 +76,18 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 }
                 return true;
             },
+	    // Invalid values values from the editor may cause "save" operations to fail.
             validateedit: function(editor, context, eOpts) {
                 var me = this;
                 if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit');
-                var model = context.record;
                 var field = context.field;
+		var value = context.value;
 
-                // Check that planned_units and percent_completed are not null
-                if (context.value != null) { return true; }
-                if ("planned_units" == field) { return false; }
-                if ("percent_completed" == field) { return false; }
+                // Veto any null values.
+                if (value == null) { return false; }
+
+		// project_name should not be an empty string.
+		if ("project_name" == field && "" == value.trim()) { return false; }
                 return true;
             }
         }
