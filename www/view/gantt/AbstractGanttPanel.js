@@ -425,10 +425,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxis: Starting: granularity='+me.granularity);
         var h = 0;
 
-        var startDate = me.axisStartDate;
-        startDate.setHours(0,0,0,0);
-        var endDate = me.axisEndDate;
-        endDate.setHours(0,0,0,0);
+        var startDate = new Date(me.axisStartDate.getTime()).setHours(0,0,0,0);
+        var endDate = new Date(me.axisEndDate.getTime()).setHours(0,0,0,0);
 
         switch (me.granularity) {
         case "day":
@@ -457,10 +455,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisAuto: Starting');
         var h = 0;
 
-        var startDate = me.axisStartDate;
-        startDate.setHours(0,0,0,0);
-        var endDate = me.axisEndDate;
-        endDate.setHours(0,0,0,0);
+        var startDate = new Date(me.axisStartDate.getTime()).setHours(0,0,0,0);
+        var endDate = new Date(me.axisEndDate.getTime()).setHours(0,0,0,0);
         var timespanDays = (me.axisEndDate.getTime() - me.axisStartDate.getTime()) / (1000 * 3600 * 24);
         var xPerDay = me.axisEndX / timespanDays;
         var xPerYear = 365 * xPerDay;
@@ -713,8 +709,7 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     drawAxisDay: function(h) {
         var me = this;
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Starting');
-        var now = new Date(me.axisStartDate.getTime());
-        now.setHours(0,0,0,0);                                   		// Reset hour and minute to 0
+        var now = new Date(me.axisStartDate.getTime()).setHours(0,0,0,0);    // Reset hour and minute to 0
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
             var day = now.getDate(now);
