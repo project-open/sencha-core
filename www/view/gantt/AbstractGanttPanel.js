@@ -709,7 +709,8 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
     drawAxisDay: function(h) {
         var me = this;
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisDay: Starting');
-        var now = new Date(me.axisStartDate.getTime()).setHours(0,0,0,0);    // Reset hour and minute to 0
+        var now = new Date(me.axisStartDate.getTime());                         // Reset hour and minute to 0
+        now.setHours(0,0,0,0);                                                  // Reset hour and minute to 0
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
             var day = now.getDate(now);
