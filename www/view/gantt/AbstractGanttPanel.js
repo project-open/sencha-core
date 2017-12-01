@@ -831,9 +831,10 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
      * Advance a date to the 1st of the prev month
      */
     prevMonth: function(date) {
+	alert('AbstractGanttPanel.prevMonth: Called. So this procedure is actually used...');
         var result;
-        if (date.getMonth() == 1) {
-            result = new Date(date.getFullYear() - 1, 12, 1);
+        if (date.getMonth() == 0) {
+            result = new Date(date.getFullYear() - 1, 11, 1);
         } else {
             result = new Date(date.getFullYear(), date.getMonth() - 1, 1);
         }
