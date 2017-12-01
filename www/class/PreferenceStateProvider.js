@@ -24,18 +24,18 @@ Ext.define('PO.class.PreferenceStateProvider', {
      * Create a new PreferenceStateProvider
      * @param {Object} [config] Config object.
      */
-    constructor : function(config){
+    constructor: function(config){
         var me = this;
         me.userId = PO.Utilities.userId();
         me.currentUrl = config.url;
-	if (typeof me.currentUrl == "undefined" || me.currentUrl === null) {
-	    me.currenturl = window.location.pathname;
-	}
+        if (typeof me.currentUrl == "undefined" || me.currentUrl === null) {
+            me.currenturl = window.location.pathname;
+        }
         me.callParent(arguments);
         me.state = me.readPreferences();
     },
 
-    set : function(name, value){
+    set: function(name, value){
         var me = this;
         if (typeof value == "undefined" || value === null) {
             me.clear(name);
@@ -45,7 +45,20 @@ Ext.define('PO.class.PreferenceStateProvider', {
         me.callParent(arguments);
     },
 
-    clear : function(name){
+    get: function(name, defaultValue) { 
+	var me = this;
+	var pref = me.getPreference(name); // !!!
+        var pos, row; 
+        if ((pos = this.store.find('name', name)) > -1) { 
+            row = this.store.getAt(pos); 
+            return this.decodeValue(row.get('value')); 
+        } else { 
+            return defaultValue; 
+        } 
+    }, 
+
+
+    clear: function(name){
         this.clearPreference(name);
         this.callParent(arguments);
     },
@@ -53,7 +66,7 @@ Ext.define('PO.class.PreferenceStateProvider', {
     /**
      * Retreive all available preferences for this user and this URL from the server
      */
-    readPreferences : function(){
+    readPreferences: function(){
         var me = this;
         // We need to create and load the store during initialization of the application.
         // It should contain all keys for the current userId and url.
@@ -62,7 +75,9 @@ Ext.define('PO.class.PreferenceStateProvider', {
 
         // Loop through the store and add elements to object
         senchaPreferenceStore.each(function(pref) {
-            preferences[pref.get('preference_key')] = me.decodeValue(pref.get('preference_value'));
+	    var prefValue = pref.get('preference_value');
+	    var decPrefValue = me.decodeValue(prefValue);
+            preferences[pref.get('preference_key')] = decPrefValue;
         });
         return preferences;
     },
@@ -70,11 +85,11 @@ Ext.define('PO.class.PreferenceStateProvider', {
     /**
      * Store a specific name-value pair into the preference store
      */
-    setPreference : function(name, value){
+    setPreference: function(name, value){
         var me = this;
         var senchaPreferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
         var pref, 
-	    prefIndex = senchaPreferenceStore.findExact('preference_key',name);
+            prefIndex = senchaPreferenceStore.findExact('preference_key',name);
 
         if (prefIndex < 0) {
             // We need to create a new preference
@@ -87,13 +102,13 @@ Ext.define('PO.class.PreferenceStateProvider', {
             pref.save();	    // Asynchroneously save the value, but don't wait for the confirmation - not necessary.
         } else {
             // The preference is already there - update the value
-	    pref = senchaPreferenceStore.getAt(prefIndex);
+            pref = senchaPreferenceStore.getAt(prefIndex);
             pref.set('preference_value',  me.encodeValue(value));
             pref.save();	    // Asynchroneously save the value, but don't wait for the confirmation - not necessary.	    
         }
     },
 
-    clearPreference : function(name){
+    clearPreference: function(name){
         var me = this;
         var senchaPreferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
         var pref = senchaPreferenceStore.findExact('preference_key',name);
