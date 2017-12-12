@@ -20,98 +20,124 @@ Ext.define('PO.class.PreferenceStateProvider', {
         'PO.store.user.SenchaPreferenceStore'
     ],
 
+    currentUrl: null,                                    // set during init
+    debug: false,
+    preferenceStore: null,                               // set during init
+
     /**
      * Create a new PreferenceStateProvider
      * @param {Object} [config] Config object.
      */
     constructor: function(config){
         var me = this;
-        me.userId = PO.Utilities.userId();
+
+        me.preferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
         me.currentUrl = config.url;
         if (typeof me.currentUrl == "undefined" || me.currentUrl === null) {
             me.currenturl = window.location.pathname;
         }
+
+        if (typeof config.debug != "undefined") { 
+            me.debug = config.debug; 
+        }
+
         me.callParent(arguments);
-        me.state = me.readPreferences();
     },
 
-    set: function(name, value){
+    /**
+     * Custom encode function
+     */
+    encode: function(string) {
         var me = this;
-        if (typeof value == "undefined" || value === null) {
-            me.clear(name);
-            return;
-        }
-        me.setPreference(name, value);
-        me.callParent(arguments);
+//        var result = me.encodeValue(string); 
+        var result = JSON.stringify(string);
+        if (me.debug) console.log('PreferenceStateProvider.encode: '+string+' -> '+result);
+        return result;
+    },
+
+    /**
+     * Custom decode function
+     */
+    decode: function(string) {
+        var me = this;
+//        var result = me.decodeValue(string); 
+	var result = JSON.parse(string);
+        if (me.debug) console.log('PreferenceStateProvider.decode: '+string+' -> '+result);
+        return result;
     },
 
     get: function(name, defaultValue) { 
-	var me = this;
-	var pref = me.getPreference(name); // !!!
-        var pos, row; 
-        if ((pos = this.store.find('name', name)) > -1) { 
-            row = this.store.getAt(pos); 
-            return this.decodeValue(row.get('value')); 
+        var me = this;
+        if (me.debug) console.log('PreferenceStateProvider: get('+name+','+defaultValue+')');
+
+	if ("ganttTreePanel" == name) {
+	    var v;
+	    // v = '{"columns":[{"id":"treegrid-task"},{"id":"treegrid-work"},{"id":"treegrid-start"},{"id":"treegrid-done"},{"id":"treegrid-end"},{"id":"treegrid-resources"},{"id":"treegrid-costcenter"},{"id":"treegrid-description"},{"id":"treegrid-material","hidden":false},{"id":"treegrid-predecessors"},{"id":"treegrid-prio"},{"id":"treegrid-status"},{"id":"treegrid-nr"},{"id":"treegrid-cosine_deliverable"},{"id":"treegrid-cosine_task_value"}]}';
+
+	    // v = '{"columns":[{"id":"treegrid-task"},{"id":"treegrid-work"},{"id":"treegrid-start"},{"id":"treegrid-done"},{"id":"treegrid-end"},{"id":"treegrid-resources"},{"id":"treegrid-costcenter"},{"id":"treegrid-description"},{"id":"treegrid-material"},{"id":"treegrid-predecessors"},{"id":"treegrid-prio"},{"id":"treegrid-status"},{"id":"treegrid-nr"},{"id":"treegrid-cosine_deliverable"},{"id":"treegrid-cosine_task_value"}]}';
+
+	    v = '{"columns":[{"id":"treegrid-task"},{"id":"treegrid-work"},{"id":"treegrid-start"},{"id":"treegrid-done"},{"id":"treegrid-end"},{"id":"treegrid-resources"},{"id":"treegrid-costcenter"},{"id":"treegrid-description"},{"id":"treegrid-material","hidden":false},{"id":"treegrid-predecessors"},{"id":"treegrid-prio"},{"id":"treegrid-status"},{"id":"treegrid-nr"},{"id":"treegrid-cosine_deliverable"},{"id":"treegrid-cosine_task_value"}]}';
+
+	    return me.decode(v);
+	}
+
+
+
+
+        var pos = me.preferenceStore.find('preference_key', name);
+        if (pos > -1) { 
+            var row = me.preferenceStore.getAt(pos); 
+            var value = row.get('preference_value');
+            var result = me.decode(value); 
+            if (me.debug) console.log('PreferenceStateProvider: get('+name+','+defaultValue+') -> '+result);
+            return result;
         } else { 
+            if (me.debug) console.log('PreferenceStateProvider: get('+name+','+defaultValue+') -> defaultValue='+defaultValue);
             return defaultValue; 
         } 
     }, 
 
+    set: function(name, value){
+        var me = this;
+        if (me.debug) console.log('PreferenceStateProvider: set('+name+','+value+')');
+        if (typeof value == "undefined" || value === null) {
+            me.clear(name);
+            return;
+        }
+
+        var encodedValue = me.encode(value);
+        var prefIndex = me.preferenceStore.findExact('preference_key',name);
+        if (prefIndex < 0) {
+            // We need to create a new preference
+            var pref = Ext.create('PO.model.user.SenchaPreference', {
+                preference_url: me.currentUrl,
+                preference_key: name,
+                preference_value: encodedValue
+            });
+            me.preferenceStore.add(pref);
+            pref.save();	    // Asynchroneously save the value, but don't wait for the confirmation - not necessary.
+        } else {
+            // The preference is already there - update the value
+            pref = me.preferenceStore.getAt(prefIndex);
+            pref.set('preference_value', encodedValue);
+            pref.save();	    // Asynchroneously save the value, but don't wait for the confirmation - not necessary.	    
+        }
+
+        me.callParent(arguments);
+    },
 
     clear: function(name){
+        var me = this;
+        if (me.debug) console.log('PreferenceStateProvider: clear('+name+')');
         this.clearPreference(name);
         this.callParent(arguments);
     },
 
-    /**
-     * Retreive all available preferences for this user and this URL from the server
-     */
-    readPreferences: function(){
-        var me = this;
-        // We need to create and load the store during initialization of the application.
-        // It should contain all keys for the current userId and url.
-        var senchaPreferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
-        var preferences = {};
-
-        // Loop through the store and add elements to object
-        senchaPreferenceStore.each(function(pref) {
-	    var prefValue = pref.get('preference_value');
-	    var decPrefValue = me.decodeValue(prefValue);
-            preferences[pref.get('preference_key')] = decPrefValue;
-        });
-        return preferences;
-    },
-
-    /**
-     * Store a specific name-value pair into the preference store
-     */
-    setPreference: function(name, value){
-        var me = this;
-        var senchaPreferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
-        var pref, 
-            prefIndex = senchaPreferenceStore.findExact('preference_key',name);
-
-        if (prefIndex < 0) {
-            // We need to create a new preference
-            pref = Ext.create('PO.model.user.SenchaPreference', {
-                preference_url: me.currentUrl,
-                preference_key: name,
-                preference_value: me.encodeValue(value)
-            });
-            senchaPreferenceStore.add(pref);
-            pref.save();	    // Asynchroneously save the value, but don't wait for the confirmation - not necessary.
-        } else {
-            // The preference is already there - update the value
-            pref = senchaPreferenceStore.getAt(prefIndex);
-            pref.set('preference_value',  me.encodeValue(value));
-            pref.save();	    // Asynchroneously save the value, but don't wait for the confirmation - not necessary.	    
-        }
-    },
 
     clearPreference: function(name){
         var me = this;
-        var senchaPreferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
-        var pref = senchaPreferenceStore.findExact('preference_key',name);
+        if (me.debug) console.log('PreferenceStateProvider: clearPreference('+name+')');
+        var pref = me.preferenceStore.findExact('preference_key',name);
 
         if (typeof pref == "undefined" || pref === null) {
             // No preference found - so there is no need to clear the value
