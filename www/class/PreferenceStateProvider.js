@@ -70,19 +70,6 @@ Ext.define('PO.class.PreferenceStateProvider', {
         var me = this;
         if (me.debug) console.log('PreferenceStateProvider: get('+name+','+defaultValue+')');
 
-        if (0 && "ganttTreePanel" == name) {
-            var v;
-            // v = '{"columns":[{"id":"treegrid-task"},{"id":"treegrid-work"},{"id":"treegrid-start"},{"id":"treegrid-done"},{"id":"treegrid-end"},{"id":"treegrid-resources"},{"id":"treegrid-costcenter"},{"id":"treegrid-description"},{"id":"treegrid-material","hidden":false},{"id":"treegrid-predecessors"},{"id":"treegrid-prio"},{"id":"treegrid-status"},{"id":"treegrid-nr"},{"id":"treegrid-cosine_deliverable"},{"id":"treegrid-cosine_task_value"}]}';
-
-            // v = '{"columns":[{"id":"treegrid-task"},{"id":"treegrid-work"},{"id":"treegrid-start"},{"id":"treegrid-done"},{"id":"treegrid-end"},{"id":"treegrid-resources"},{"id":"treegrid-costcenter"},{"id":"treegrid-description"},{"id":"treegrid-material"},{"id":"treegrid-predecessors"},{"id":"treegrid-prio"},{"id":"treegrid-status"},{"id":"treegrid-nr"},{"id":"treegrid-cosine_deliverable"},{"id":"treegrid-cosine_task_value"}]}';
-
-            v = '{"columns":[{"id":"treegrid-task"},{"id":"treegrid-work"},{"id":"treegrid-start"},{"id":"treegrid-done"},{"id":"treegrid-end"},{"id":"treegrid-resources"},{"id":"treegrid-costcenter"},{"id":"treegrid-description"},{"id":"treegrid-material","hidden":false},{"id":"treegrid-predecessors"},{"id":"treegrid-prio"},{"id":"treegrid-status"},{"id":"treegrid-nr"},{"id":"treegrid-cosine_deliverable"},{"id":"treegrid-cosine_task_value"}]}';
-
-            return me.decode(v);
-        }
-
-
-
         var pos = me.preferenceStore.find('preference_key', name);
         if (pos > -1) { 
             var row = me.preferenceStore.getAt(pos); 
