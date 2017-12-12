@@ -79,18 +79,31 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 }
                 return true;
             },
-	    // Invalid values values from the editor may cause "save" operations to fail.
+            // Invalid values values from the editor may cause "save" operations to fail.
             validateedit: function(editor, context, eOpts) {
                 var me = this;
                 if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.validateedit');
                 var field = context.field;
-		var value = context.value;
+                var value = context.value;
 
                 // Veto any null values.
                 if (value == null) { return false; }
 
-		// project_name should not be an empty string.
-		if ("project_name" == field && "" == value.trim()) { return false; }
+                // project_name should not be an empty string.
+                if ("project_name" == field && "" == value.trim()) { return false; }
+
+		// Check date fields. JS converts funky input into invalid dates...
+                if ("start_date" == field || "end_date" == field) {
+                    var d = value.split('-');
+                    var year = parseInt(d[0]), month = parseInt(d[1])-1, day = parseInt(d[2]);
+                    var date = new Date(year, month, day, 0, 0, 0, 0);
+                    
+                    if (!date) return false;
+                    if (date.getFullYear() != year) return false;
+                    if (date.getMonth() != month) return false;
+                    if (date.getDate() != day) return false;
+                }
+
                 return true;
             }
         }
