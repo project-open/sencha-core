@@ -8,6 +8,9 @@
  */
 
 
+/**
+ * Auxillary function to render the "predecessors" field of a Gantt Task
+ */
 var ganttTreePanelPredecessorRenderer =	function(value) {
     console.log('PO.view.gantt.GantTreePanel.predecessors.renderer: value='+value);
     if (!value instanceof Array) return;
