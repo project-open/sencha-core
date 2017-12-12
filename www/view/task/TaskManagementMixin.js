@@ -1,5 +1,16 @@
+/*
+ * TaskManagementMixin.js
+ *
+ * Copyright (c) 2011 - 2014 ]project-open[ Business Solutions, S.L.
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 or alternatively unter the terms of the ]po[
+ * FL or CL license as specified in www.project-open.com/en/license.
+ */
 
-
+/**
+ * This "mixin" contains the functions to actually render a task
+ * in both the project-tasks.adp and user-tasks.adp portlets.
+*/
 Ext.define('PO.view.task.TaskManagementMixin', {
 
     /**
@@ -13,18 +24,26 @@ Ext.define('PO.view.task.TaskManagementMixin', {
      */
     drawTaskBox: function(surface, fillColor, model, x, y, w, h) {
 	var colorCode = model.get('color_code');
-	var nameL10n = "Name", startL10n = "Start", endL10n = "End", doneL10n = "Done";
+	var nameL10n = "Name", startL10n = "Start", endL10n = "End", doneL10n = "Done", plannedL10n = "Planned";
 
 	// Build a HTML table with information about the task/ticket/project
         var html = "<table cellpadding=0 cellspacing=2>";
 	html = html + "<tr><td>" + nameL10n + ":</td><td><nobr>" + model.get('project_name') + "</nobr></td></tr>";
+
 	var startDate = model.get('start_date'); 
 	if (startDate) html = html + "<tr><td>" + startL10n + ":</td><td>" + startDate.substring(0,10) + "</td></tr>";
+
 	var endDate = model.get('end_date');
 	if (endDate) html = html + "<tr><td>" + endL10n + ":</td><td>" + endDate.substring(0,10) + "</td></tr>";
+
+	var plannedUnits = model.get('planned_units');
+	var plannedUoM = model.get('uom');
+	if (plannedUnits && plannedUoM) html = html + "<tr><td>" + plannedL10n + ":</td><td>" + plannedUnits + " " + plannedUoM + "</td></tr>";
+
 	var percentCompleted = model.get('percent_completed');
 	if (100 == model.get('type_id') && ("" == percentCompleted || !percentCompleted)) { percentCompleted = 0 };
 	if (null != percentCompleted) html = html + "<tr><td>" + doneL10n + ":</td><td>" + percentCompleted + "%</td></tr>";
+
 	html = html + "</table>";
 
         var box = surface.add({
