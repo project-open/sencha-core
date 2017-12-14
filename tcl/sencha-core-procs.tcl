@@ -86,9 +86,11 @@ ad_proc -public im_sencha_column_config_nuke {
 
 
 ad_proc -public im_sencha_sql_to_store {
+    {-include_empty_p 0}
     -sql:required
 } {
-    Takes a SQL and returns the JSON code for an inline store.
+    Takes a SQL and returns the JSON code for an inline store
+    plus the list of column names.
     This code comes in handy for small Sencha indicators etc.
     Empty values from the DB are stored in the JSON as "NULL",
     because this function doesn't know how to interpret them
@@ -101,10 +103,16 @@ ad_proc -public im_sencha_sql_to_store {
 	# Execute SQL and get the list of rows returned
 	set selection [db_exec select $db query $sql 1]
 	set col_names [ad_ns_set_keys $selection]
-	
+
+	# Set the value for all variables to the empty string
+	if {$include_empty_p} {
+	    set json_entry [list]
+	    foreach col $col_names { lappend json_entry "$col: ''" }
+	    lappend json_list [join $json_entry ", "]
+	}
+
 	# Loop through the list of rows returned
 	while { [db_getrow $db $selection] } {
-	    
 	    set json_entry {}
 	    for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
 		set var [lindex $col_names $i]
@@ -125,14 +133,16 @@ ad_proc -public im_sencha_sql_to_store {
     set cols_json "'[join $col_names "', '"]'"
     set data_json [join $json_list "\},\n\t\t\{"]
 
-    return "Ext.create('Ext.data.Store', {
+    set store_json "Ext.create('Ext.data.Store', {
 	fields: \[$cols_json\],
         data: \[
 		\{$data_json\}
 	]
-	});
+	})
     "
 
+    # Return two values: 1. the store JSON, 2. the list of columns used
+    return [list $store_json $col_names]
 }
 
 
