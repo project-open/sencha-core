@@ -25,6 +25,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'task_id',				// The primary key or object_id of the project (-> im_timesheet_tasks)
         'project_name',				// The name of the task (inherited from Project)
         'project_nr',				// The short name of the task (inherited from Project)
+        'project_wbs',				// WBS code
         'company_id',				// Customer for whom the task has been created (-> im_companies)
         'parent_id',				// The parent of the task or NULL for a main project (-> im_projects)
         'tree_sortkey',				// A strange "bit string" that determines the hierarchical position of the task.

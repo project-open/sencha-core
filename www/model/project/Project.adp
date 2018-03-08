@@ -25,6 +25,7 @@ Ext.define('PO.model.project.Project', {
 	'creation_user',			// User_id of the guy creating the project
 	'project_nr',				// The short name of the project.
 	'project_path',				// The short name of the project.
+	'project_wbs',				// WBS code
 	'parent_id',				// The parent of the project or NULL for a main project
 	'tree_sortkey',				// A strange bitstring that determines the hierarchical position
 	'company_id',				// Company for whom the project has been created

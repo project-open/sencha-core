@@ -206,6 +206,7 @@ ad_proc -public im_sencha_dynfields {
 			'project_lead_id',
 			'project_name',
 			'project_nr',
+			'project_wbs',
 			'project_status_id',
 			'project_type_id',
 			'scheduling_constraint_date',

@@ -12,6 +12,7 @@ set names [im_sencha_dynfields -object_type "im_ticket" -exclude_fields {
 	"project_name"				
 	"project_nr"				
 	"project_path"				
+	"project_wbs"				
 	"release_item_p"			
 	"sort_order"				
 	"ticket_alarm_action"			

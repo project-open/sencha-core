@@ -23,6 +23,7 @@ Ext.define('PO.model.helpdesk.Ticket', {
 	'project_name',				// The name of the ticket
 	'project_nr',				// The short name of the ticket.
 	'project_path',				// The short name of the ticket.
+	'project_wbs',				// The short name of the ticket.
 	'parent_id',				// The parent of the ticket or NULL for a main ticket
 	'company_id',				// Company for whom the ticket has been created
 	'ticket_status_id',			// 76=open, 81=closed, ...

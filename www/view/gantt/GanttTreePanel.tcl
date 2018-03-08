@@ -74,7 +74,7 @@ set attributes_sql "
 			  'planned_units', 'billable_units',
 			  'predecessors',
 			  'priority',
-			  'parent_id', 'project_lead_id', 'project_name', 'project_nr', 'project_status_id', 'project_type_id',
+			  'parent_id', 'project_lead_id', 'project_name', 'project_nr', 'project_wbs', 'project_status_id', 'project_type_id',
 			  'scheduling_constraint_date', 'scheduling_constraint_id',
 			  'sort_order',
 			  'start_date',

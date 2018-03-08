@@ -278,8 +278,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              var model = statusStore.getById(value);
              return model.get('category');
         }},
-        {text: 'WBS Code', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true}
-
+        {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
+        {text: 'WBS', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true}
 
         // DynFields
 <multiple name=dynfields>
