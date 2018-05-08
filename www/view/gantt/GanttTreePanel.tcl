@@ -86,6 +86,7 @@ set attributes_sql "
 "
 # ad_return_complaint 1 [im_ad_hoc_query -format html $attributes_sql]
 
+set errors {}
 multirow create dynfields name pretty_name widget editor
 db_foreach attributes $attributes_sql {
     set editor "undefined"
@@ -126,13 +127,13 @@ db_foreach attributes $attributes_sql {
 					set editor [im_gantt_editor_generic_sql_editor $generic_sql_value]
 				    }
 				    default {
-					ad_return_complaint 1 "GanttTreePanel.tcl: generic_sql: unknown param='$generic_sql_token', expecting 'sql'."
+					lappend errors "GanttTreePanel.tcl: generic_sql: unknown param='$generic_sql_token', expecting 'sql'."
 				    }
 				}
 			    }
 			}
 			default {
-			    ad_return_complaint 1 "GanttTreePanel.tcl: generic_sql with unknown parameter='$token'" }
+			    lappend errors "GanttTreePanel.tcl: generic_sql with unknown parameter='$token'"
 		    }
 		}
 	    }
@@ -141,16 +142,25 @@ db_foreach attributes $attributes_sql {
 
     # Still undefined - Return an error
     if {"undefined" eq $editor} {
-	ad_return_complaint 1 "<b>GanttTreePanel.tcl: Unknown widget</b><br>
-                               <ul>
-                               <li>attribute_name='$attribute_name'
-                               <li>widget='$widget_name'
-                               <li>tcl_widget='$tcl_widget'
-                               <li>parameters='$parameters'
-                               </ul><br>
-                               Tell your SysAdmin to remove attribute='$attribute_name'"
-	set editor "" 
+	lappend errors "<b>GanttTreePanel.tcl: Unknown widget</b><br> \
+                               <ul> \
+                               <li>attribute_name=$attribute_name \
+                               <li>widget=$widget_name \
+                               <li>tcl_widget=$tcl_widget \
+                               <li>parameters=$parameters \
+                               </ul><br> \
+                               Tell your SysAdmin to remove attribute=$attribute_name"
     }
+    set editor "" 
 
     multirow append dynfields $attribute_name $pretty_name $widget_name $editor
 }
+
+
+set error_tbar ""
+if {"" ne $errors} {
+    set error_tbar "tbar: \[\{ xtype: 'panel', html: '<font color=red>Errors:<br>[join $errors "<br>"]</font>' \}\],"
+
+}
+
+

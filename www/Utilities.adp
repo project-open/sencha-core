@@ -83,6 +83,25 @@ Ext.define('PO.Utilities', {
 	},
 
 	/**
+	 * Handle errors while trying to load a store
+	 */
+	reportStoreError : function(storeName, operation) {
+            var me = this;
+
+	    var errorObject = operation.getError();
+	    var errorMsg = typeof errorObject;
+	    if ("object" == typeof errorObject) { 
+		errorMsg = errorObject.statusText; 
+	    } else { 
+		errorMsg = errorObject; 
+	    }
+
+	    if (!errorMsg) { errorMsg = 'Unable to find error message'; }
+
+	    PO.Utilities.reportError("Error loading "+storeName, errorMsg)
+	},
+
+	/**
 	 * Extract the current userId from the OpenACS session cookie
 	 */
 	userId : function() { return parseInt('@user_id@'); },

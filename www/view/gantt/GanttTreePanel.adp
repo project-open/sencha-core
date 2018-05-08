@@ -29,6 +29,8 @@ var ganttTreePanelPredecessorRenderer =	function(value) {
     return result;
 };
 
+var gifPath = "/intranet/images/navbar_default/";
+
 
 /**
  * TreePanel with the list of tasks of a specific project.
@@ -60,6 +62,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     stateful : true,
     stateId : 'ganttTreePanel',
     saveDelay: 0,							// Workaround: Delayed saving doesn't work on Ext.tree.Panel
+
+    @error_tbar;noquote@						// Show error messages from TCL: Is there a better way??
 
     // Enable in-line row editing.
     plugins: [Ext.create('Ext.grid.plugin.CellEditing', {
