@@ -84,6 +84,9 @@ ad_proc -public im_sencha_column_config_nuke {
 
 
 
+# ----------------------------------------------------------------------
+# 
+# ---------------------------------------------------------------------
 
 ad_proc -public im_sencha_sql_to_store {
     {-include_empty_p 0}
@@ -130,6 +133,63 @@ ad_proc -public im_sencha_sql_to_store {
 	}
     }
     db_release_unused_handles
+    set cols_json "'[join $col_names "', '"]'"
+    set data_json [join $json_list "\},\n\t\t\{"]
+
+    set store_json "Ext.create('Ext.data.Store', {
+	fields: \[$cols_json\],
+        data: \[
+		\{$data_json\}
+	]
+	})
+    "
+
+    # Return two values: 1. the store JSON, 2. the list of columns used
+    return [list $store_json $col_names]
+}
+
+
+
+
+# ----------------------------------------------------------------------
+# 
+# ---------------------------------------------------------------------
+
+
+ad_proc -public im_sencha_category_type_to_store {
+    {-include_empty_p 0}
+    {-package_key "intranet-core" }
+    {-locale "" }
+    -category_type:required
+} {
+    Takes a category type and returns the JSON code for an inline 
+    store plus the list of column names.
+    This code comes in handy for small Sencha indicators etc.
+} {
+    # Execute the sql and create inline store code.
+    set col_names [list "category_id" "category"]
+    set json_list [list]
+
+    # Set the value for all variables to the empty string
+    if {$include_empty_p} {
+	set json_entry [list]
+	lappend json_list "category_id: '', category: ''"
+    }
+
+    db_foreach cat "
+	select	category_id,
+		category
+	from	im_categories
+	where	category_type = :category_type and
+		(enabled_p is null or enabled_p = 't')
+	order by
+		coalesce(sort_order, category_id)
+    " {
+	set category_key "$package_key.[lang::util::suggest_key $category]"
+	set category_l10n [lang::message::lookup $locale $category_key $category]
+	lappend json_list "category_id: '$category_id', category: '$category_l10n'"
+    }
+
     set cols_json "'[join $col_names "', '"]'"
     set data_json [join $json_list "\},\n\t\t\{"]
 
@@ -222,4 +282,75 @@ ad_proc -public im_sencha_dynfields {
 
     set tuples [util_memoize [list db_list_of_lists dynfield $dynfield_sql] 1]
     return $tuples
+}
+
+
+
+
+ad_proc im_gantt_editor_generic_sql_editor {
+    sql
+} {
+    Creates an ExtJS editor plus renderer for a DynField 
+    defined using a generic_sql TCL widget.
+} {
+    set store_tuple [im_sencha_sql_to_store -include_empty_p 1 -sql $sql]
+    set json_store [lindex $store_tuple 0]
+    set col_names [lindex $store_tuple 1]
+    set editor "{
+             xtype: 'combobox',
+             forceSelection: true,
+             allowBlank: true,
+             editable: false,
+             store: $json_store,
+             valueField: '[lindex $col_names 0]',
+             displayField: '[lindex $col_names 1]'
+    }"
+
+    set renderer "function(value, metaData, record, rowIndex, colIndex, nodeStore, treeView) {
+    	if ('' == value || !value) return value;
+        var col = metaData.column; if (!col) return value;
+        var ed = col.getEditor(); if (!ed) return value;
+        var store = ed.store; if (!store) return value;
+	var pos = store.find('[lindex $col_names 0]', value);
+	var model = store.getAt(pos); if (!model) return value;
+	var result = model.get('[lindex $col_names 1]'); if (!result) return value;
+	return result;
+    }"
+
+    return ",\n\teditor: $editor,\n\trenderer: $renderer"
+}
+
+
+
+ad_proc im_gantt_editor_im_category_tree_editor {
+    category_type
+} {
+    Creates an ExtJS editor plus renderer for a DynField 
+    defined using a im_category_tree TCL widget.
+} {
+    set store_tuple [im_sencha_category_type_to_store -include_empty_p 1 -category_type $category_type]
+    set json_store [lindex $store_tuple 0]
+    set col_names [lindex $store_tuple 1]
+    set editor "{
+             xtype: 'combobox',
+             forceSelection: true,
+             allowBlank: true,
+             editable: false,
+             store: $json_store,
+             valueField: '[lindex $col_names 0]',
+             displayField: '[lindex $col_names 1]'
+    }"
+
+    set renderer "function(value, metaData, record, rowIndex, colIndex, nodeStore, treeView) {
+    	if ('' == value || !value) return value;
+        var col = metaData.column; if (!col) return value;
+        var ed = col.getEditor(); if (!ed) return value;
+        var store = ed.store; if (!store) return value;
+	var pos = store.find('[lindex $col_names 0]', value);
+	var model = store.getAt(pos); if (!model) return value;
+	var result = model.get('[lindex $col_names 1]'); if (!result) return value;
+	return result;
+    }"
+
+    return ",\n\teditor: $editor,\n\trenderer: $renderer"
 }

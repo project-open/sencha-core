@@ -29,9 +29,6 @@ var ganttTreePanelPredecessorRenderer =	function(value) {
     return result;
 };
 
-var gifPath = "/intranet/images/navbar_default/";
-
-
 /**
  * TreePanel with the list of tasks of a specific project.
  * This panel can be use stand alone for task editing or as

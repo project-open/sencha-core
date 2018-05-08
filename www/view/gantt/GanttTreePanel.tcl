@@ -1,39 +1,6 @@
 # Get DynFields for Timesheet Task
 
 
-ad_proc im_gantt_editor_generic_sql_editor {
-    sql
-} {
-    Creates an ExtJS editor plus renderer for a DynField 
-    defined using a generic_sql TCL widget.
-} {
-    set store_tuple [im_sencha_sql_to_store -include_empty_p 1 -sql $sql]
-    set json_store [lindex $store_tuple 0]
-    set col_names [lindex $store_tuple 1]
-    set editor "{
-             xtype: 'combobox',
-             forceSelection: true,
-             allowBlank: true,
-             editable: false,
-             store: $json_store,
-             valueField: '[lindex $col_names 0]',
-             displayField: '[lindex $col_names 1]'
-    }"
-
-    set renderer "function(value, metaData, record, rowIndex, colIndex, nodeStore, treeView) {
-    	if ('' == value || !value) return value;
-        var col = metaData.column; if (!col) return value;
-        var ed = col.getEditor(); if (!ed) return value;
-        var store = ed.store; if (!store) return value;
-	var pos = store.find('[lindex $col_names 0]', value);
-	var model = store.getAt(pos); if (!model) return value;
-	var result = model.get('[lindex $col_names 1]'); if (!result) return value;
-	return result;
-    }"
-
-    return ",\n\teditor: $editor,\n\trenderer: $renderer"
-}
-
 
 # Extract all task attributes, except for a few ones that are
 # already handled hard-coded by the GanttTreePanel.
@@ -88,6 +55,7 @@ set attributes_sql "
 
 set errors {}
 multirow create dynfields name pretty_name widget editor
+
 db_foreach attributes $attributes_sql {
     set editor "undefined"
 
@@ -107,6 +75,7 @@ db_foreach attributes $attributes_sql {
     if {"undefined" eq $editor} {
 
 	switch $tcl_widget {
+
 	    generic_sql {
 		set parameters [lindex $parameters 0]
 		# ad_return_complaint 1 "GanttTreePanel.tcl: generic_sql: parameters=$parameters"
@@ -127,16 +96,49 @@ db_foreach attributes $attributes_sql {
 					set editor [im_gantt_editor_generic_sql_editor $generic_sql_value]
 				    }
 				    default {
-					lappend errors "GanttTreePanel.tcl: generic_sql: unknown param='$generic_sql_token', expecting 'sql'."
+					lappend errors "GanttTreePanel.tcl: generic_sql: unknown param=$generic_sql_token, expecting sql."
 				    }
 				}
 			    }
 			}
 			default {
-			    lappend errors "GanttTreePanel.tcl: generic_sql with unknown parameter='$token'"
+			    lappend errors "GanttTreePanel.tcl: generic_sql with unknown parameter=$token"
+			}
 		    }
 		}
 	    }
+	    im_category_tree {
+		set parameters [lindex $parameters 0]
+		# {custom {category_type "Intranet Project Type" translate_p 1}}
+		array unset parameter_hash
+		array set parameter_hash $parameters
+		foreach token [array names parameter_hash] {
+		    set value $parameter_hash($token)
+		    switch $token {
+			custom {
+			    array set im_category_tree_hash $value
+			    foreach im_category_tree_token [array names im_category_tree_hash] {
+				set im_category_tree_value $im_category_tree_hash($im_category_tree_token)
+				switch $im_category_tree_token {
+				    category_type {
+					set editor [im_gantt_editor_im_category_tree_editor $im_category_tree_value]
+				    }
+				    translate_p {
+					set translate_p $im_category_tree_value]
+				    }
+				    default {
+					lappend errors "GanttTreePanel.tcl: im_category_tree: unknown param=$im_category_tree_token, expecting category_type or translate_p."
+				    }
+				}
+			    }
+			}
+			default {
+			    lappend errors "GanttTreePanel.tcl: im_category_tree with unknown parameter=$token"
+			}
+		    }
+		}
+	    }
+	    # Add additional TCL widgets here
 	}
     }
 
@@ -151,7 +153,6 @@ db_foreach attributes $attributes_sql {
                                </ul><br> \
                                Tell your SysAdmin to remove attribute=$attribute_name"
     }
-    set editor "" 
 
     multirow append dynfields $attribute_name $pretty_name $widget_name $editor
 }
@@ -162,5 +163,4 @@ if {"" ne $errors} {
     set error_tbar "tbar: \[\{ xtype: 'panel', html: '<font color=red>Errors:<br>[join $errors "<br>"]</font>' \}\],"
 
 }
-
 
