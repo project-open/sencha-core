@@ -101,6 +101,9 @@ db_foreach attributes $attributes_sql {
 				}
 			    }
 			}
+			after_html {
+			    # Ignore
+			}
 			default {
 			    lappend errors "GanttTreePanel.tcl: generic_sql with unknown parameter=$token"
 			}
