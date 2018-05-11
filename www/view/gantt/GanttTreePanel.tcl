@@ -102,7 +102,7 @@ db_foreach attributes $attributes_sql {
 			    }
 			}
 			after_html {
-			    # Ignore
+			    # Ignore: after_html is for "classic" screens
 			}
 			default {
 			    lappend errors "GanttTreePanel.tcl: generic_sql with unknown parameter=$token"
@@ -134,6 +134,9 @@ db_foreach attributes $attributes_sql {
 				    }
 				}
 			    }
+			}
+			after_html {
+			    # Ignore: after_html is for "classic" screens
 			}
 			default {
 			    lappend errors "GanttTreePanel.tcl: im_category_tree with unknown parameter=$token"
