@@ -90,6 +90,7 @@ ad_proc -public im_sencha_column_config_nuke {
 
 ad_proc -public im_sencha_sql_to_store {
     {-include_empty_p 0}
+    {-data_source_p 0}
     -sql:required
 } {
     Takes a SQL and returns the JSON code for an inline store
@@ -144,8 +145,16 @@ ad_proc -public im_sencha_sql_to_store {
 	})
     "
 
-    # Return two values: 1. the store JSON, 2. the list of columns used
-    return [list $store_json $col_names]
+    if {$data_source_p} {
+	# Return the JSON structure suitable as a data-source
+	return "{'success': true, 'message': 'Data loaded', 'data': \[ {$data_json } \]}"
+
+    } else {
+	# Return two values: 1. the store JSON, 2. the list of columns used
+	return [list $store_json $col_names]
+    }
+
+
 }
 
 
