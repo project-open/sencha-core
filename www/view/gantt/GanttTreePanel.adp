@@ -233,8 +233,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              valueField: 'cost_center_id'
          },
          renderer: function(value) {
+	     if ("" == value) return "";
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
+	     if (!model) return "undefined";
              return model.get('cost_center_name');
         }},
         {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
@@ -251,8 +253,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              matchFieldWidth: false
          },
          renderer: function(value) {
+	     if ("" == value) return "";
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
+	     if (!model) return "undefined";
              return model.get('material_name');
         }},
         {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
@@ -275,8 +279,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              valueField: 'id'
          }, 
          renderer: function(value) {
+	     if ("" == value) return "";
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
+	     if (!model) return "undefined";
              return model.get('category');
         }},
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
