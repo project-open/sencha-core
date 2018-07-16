@@ -143,6 +143,9 @@ Ext.define('PO.controller.ResizeController', {
         me.fullScreenP = true; 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Starting');
 
+	// make sure the main Browser window is not scrolled down
+	window.scrollTo(0,0);
+
         me.outerContainer.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
 
         me.renderDiv.setWidth('100%');
