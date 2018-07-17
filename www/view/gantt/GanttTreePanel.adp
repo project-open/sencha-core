@@ -285,8 +285,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 	     if (!model) return "undefined";
              return model.get('category');
         }},
+        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, dataIndex: 'logged_hours', hidden: true, sortable: false},
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
-        {text: 'WBS', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true}
+        {text: 'WBS', stateId: 'treegrid-wbs', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true}
 
         // DynFields
 <multiple name=dynfields>

@@ -123,6 +123,8 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'assignees',				// List of users assigned to the task with {id,user_id,percent}
         'invoices',				// List of financial documents related to task with {id,cost_id,cost_type_id, ...}
 
+	'logged_hours',				// Sum of hours logged on task, sub-project or project (from cache)
+
         'expanded',                             // true or false (without quotes), default state for tree
 
         // Add dynfields
