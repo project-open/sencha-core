@@ -126,7 +126,7 @@ ad_proc -public im_sencha_sql_to_store {
 		} elseif {[string is integer $val]} {
 		    lappend json_entry "$var: $val"
 		} else {
-		    regsub -all "'" $val "\\'" val_quoted
+		    set val_quoted [im_quotejson $val]
 		    lappend json_entry "$var: '$val_quoted'"
 		}
 	    }
