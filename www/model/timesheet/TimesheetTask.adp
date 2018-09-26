@@ -58,7 +58,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'cost_center_id',			// Optional department/cost center of who executes this activity.
                                                 // Only used in specific ]po[ installations (-> im_cost_centers)
         'priority',				// Priority of the task (-> im_categories)
-        'sort_order',				// Order of the task, with respect to other tasks on the same level
+        {name: 'sort_order', type: 'string', sortType: 'asInt'}, // Order of the task, with respect to other tasks on the same level
 
         // MS-Project: These fields are used to contain information imported from MS-Project
         // This information determines how tasks are scheduled by the task scheduler.
@@ -126,6 +126,8 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
 	'logged_hours',				// Sum of hours logged on task, sub-project or project (from cache)
 
         'expanded',                             // true or false (without quotes), default state for tree
+
+	'day_20', 'day_21', 'day_22', 'day_23', 'day_24', 'day_25', 'day_26',
 
         // Add dynfields
 <multiple name=dynfields>
