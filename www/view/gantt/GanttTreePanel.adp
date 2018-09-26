@@ -145,14 +145,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 */
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
          editor: true, 
-	 doSort: function(state) {		// custom sorter in order to sort by 'sort_order'
-             var tablePanel = this.up('tablepanel'),
-             store = tablePanel.store;
-             store.sort({
-		 property: 'sort_order',
-		 direction: state
-             });
-	 },
+	 getSortParam: function() {
+             return 'sort_order';
+         },
          renderer: function(v, context, model, d, e) {
             context.style = 'cursor: pointer;'; 
             var children = model.childNodes;
