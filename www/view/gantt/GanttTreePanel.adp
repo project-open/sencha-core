@@ -70,6 +70,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             beforeedit: function(editor, context, eOpts) {
                 var me = this;
                 if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit');
+
+		// switch all columns to read-only mode if the user doesn't have to right to edit the project...
+		if (!write_project_p) return false;
+
                 var model = context.record;
                 var field = context.field;
 
