@@ -24,7 +24,8 @@ Ext.define('PO.view.task.TaskManagementMixin', {
      */
     drawTaskBox: function(surface, fillColor, model, x, y, w, h) {
 	var colorCode = model.get('color_code');
-	var nameL10n = "Name", startL10n = "Start", endL10n = "End", doneL10n = "Done", plannedL10n = "Planned";
+	var nameL10n = "Name", startL10n = "Start", endL10n = "End", doneL10n = "Done", plannedL10n = "Planned", loggedL10n = "Logged";
+	var byYourselfL10n = "by yourself";
 
 	// Build a HTML table with information about the task/ticket/project
         var html = "<table cellpadding=0 cellspacing=2>";
@@ -34,11 +35,15 @@ Ext.define('PO.view.task.TaskManagementMixin', {
 	if (startDate) html = html + "<tr><td>" + startL10n + ":</td><td>" + startDate.substring(0,10) + "</td></tr>";
 
 	var endDate = model.get('end_date');
-	if (endDate) html = html + "<tr><td>" + endL10n + ":</td><td>" + endDate.substring(0,10) + "</td></tr>";
+	if (endDate) html = html + "<tr><td>" + endL10n + ":</td><td><nobr>" + endDate.substring(0,10) + "</nobr></td></tr>";
 
 	var plannedUnits = model.get('planned_units');
 	var plannedUoM = model.get('uom');
 	if (plannedUnits && plannedUoM) html = html + "<tr><td>" + plannedL10n + ":</td><td>" + plannedUnits + " " + plannedUoM + "</td></tr>";
+
+	var loggedHours = model.get('logged_hours');
+	var loggedUoM = model.get('uom');
+	if ("number" == typeof(loggedHours) && loggedUoM) html = html + "<tr><td>" + loggedL10n + ":</td><td>" + loggedHours + " " + loggedUoM + " ("+byYourselfL10n+")</td></tr>";
 
 	var percentCompleted = model.get('percent_completed');
 	if (100 == model.get('type_id') && ("" == percentCompleted || !percentCompleted)) { percentCompleted = 0 };
