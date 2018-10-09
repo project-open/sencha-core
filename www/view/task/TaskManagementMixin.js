@@ -25,7 +25,7 @@ Ext.define('PO.view.task.TaskManagementMixin', {
     drawTaskBox: function(surface, fillColor, model, x, y, w, h) {
 	var colorCode = model.get('color_code');
 	var nameL10n = "Name", startL10n = "Start", endL10n = "End", doneL10n = "Done", plannedL10n = "Planned", loggedL10n = "Logged";
-	var byYourselfL10n = "by yourself";
+	var byYourselfL10n = "by you";
 
 	// Build a HTML table with information about the task/ticket/project
         var html = "<table cellpadding=0 cellspacing=2>";
