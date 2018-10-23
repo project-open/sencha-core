@@ -115,9 +115,9 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                 return true;
             }
             var mouseSprites = me.getSpritesForPoint(point, true);	// Get _all_sprites for the point
-            if (mouseSprites.length > 0) {
-                me.fireEvent('spriterightclick', e, mouseSprites[0]);
-                return true;
+	    for (var i = 0; i < mouseSprites.length; i++) {
+		var mouseSprite = mouseSprites[i];
+                me.fireEvent('spriterightclick', e, mouseSprite);
             }
             return true;							// Don't continue with Drag-and-Drop stuff
         }
