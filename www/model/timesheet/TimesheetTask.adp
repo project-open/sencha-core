@@ -103,6 +103,23 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'modifying_user',			// Who modified the task?
         'modifying_ip',				// IP address of the last modification
 
+
+	// Financial cache
+	'cost_cache_dirty',			// Set to NULL (empty) if dirty.
+	'cost_bills_cache',			// 
+	'cost_bills_planned',			// 
+	'cost_expense_logged_cache',		// 
+	'cost_expense_planned_cache',		// 
+	'cost_expenses_planned',		// 
+	'cost_delivery_notes_cache',		// 
+	'cost_invoices_cache',			// 
+	'cost_purchase_orders_cache',		// 
+	'cost_quotes_cache',			// 
+	'cost_timesheet_logged_cache',		// 
+	'cost_timesheet_planned_cache',		// 
+	'reported_hours_cache',			// 
+
+
         // Dereferenced fields contain pretty names (English) for the corresponding *_id fields.
         // These fields only have a value if you have specified the parameter deref_p=1 in
         // the REST interface URL
