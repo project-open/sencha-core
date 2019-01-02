@@ -22,7 +22,7 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
 
     debug: false,
     width: 500,
-    height: 400,
+    height: 420,
 
     closable: true,
     closeAction: 'hide',
@@ -191,6 +191,12 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     name: 'project_name',
                     width: 450,
                     allowBlank: false
+                }, {
+                    xtype: 'checkbox',
+                    fieldLabel: 'Milestone',
+                    name: 'milestone_p',
+                    uncheckedValue: 'f',
+                    inputValue: 't'
 /*
                 }, {
                     xtype: 'fieldcontainer',
@@ -257,10 +263,31 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     allowBlank: false
                 }, {
                     xtype: 'checkbox',
-                    fieldLabel: 'Milestone',
-                    name: 'milestone_p',
+                    fieldLabel: 'Effort Driven?',
+                    name: 'effort_driven_p',
                     uncheckedValue: 'f',
                     inputValue: 't'
+                }, {
+		    xtype: 'combobox',
+                    fieldLabel: 'Scheduling Type',
+                    name: 'effort_driven_type_id',
+                    displayField: 'category',
+                    valueField: 'id',
+                    queryMode: 'local',
+		    typeAhead: true,
+                    emptyText: 'Scheduling Type',
+                    width: 250,
+ 		    matchFieldWidth: false,
+		    store: Ext.create('Ext.data.Store', {
+			fields: ['id', 'category'],
+			data : [
+			    {id: "9720", category: "Fixed Units"},
+			    {id: "9721", category: "Fixed Duration"},
+			    {id: "9722", category: "Fixed Work"}
+			]
+		    }),
+                    allowBlank: false,
+                    forceSelection: true
                 }, {
 		    xtype: 'combobox',
                     fieldLabel: 'Material',
@@ -270,12 +297,13 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
                     queryMode: 'local',
 		    typeAhead: true,
                     emptyText: 'Material',
-                    width: 450,
+                    width: 400,
  		    matchFieldWidth: false,
                     store: Ext.StoreManager.get('taskMaterialStore'),
                     allowBlank: false,
                     forceSelection: true
-		}]
+		}
+	    ]
             }, {
                 xtype: 'fieldset',
                 title: 'Dates',
@@ -382,6 +410,16 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
             break;	      								// '' is database "null" value in ]po[
         }
 
+        // fix boolean vs. 't'/'f' checkbox for effort_driven_p
+        switch (fields['effort_driven_p']) {
+        case true: 
+            fields['effort_driven_p'] = 't';						// use 't' and 'f', not true and false!
+            break;
+        default: 
+            fields['effort_driven_p'] = 'f'; 
+            break;
+        }
+
         me.taskModel.set(fields); 							// write all fields into model
         
         // ---------------------------------------------------------------
@@ -463,14 +501,6 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
         if ("" == task.get('percent_completed')) { task.set('percent_completed', '0'); }
 
-        // fix boolean vs. 't'/'f' checkbox for milestone_p
-/*
-        switch (task.get('milestone_p')) {
-            case 't': task.set('milestone_p', true); break;
-            case 'true': task.set('milestone_p', true); break;
-            default: task.set('milestone_p', false); break;
-        }
-*/      
         // Load the data into the various forms
         me.taskPropertyFormGeneral.getForm().loadRecord(task);
         me.taskPropertyFormNotes.getForm().loadRecord(task);

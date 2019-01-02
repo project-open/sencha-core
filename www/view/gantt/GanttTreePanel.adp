@@ -228,7 +228,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var result = PO.view.field.POTaskAssignment.formatAssignments(value);
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
-        
         {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: false,
          editor: {
              xtype: 'combobox',
@@ -280,7 +279,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              editable: false,
              store: Ext.create('Ext.data.Store', {
                  fields: ['id', 'category'],
-                 data : [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
+                 data: [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
              }),
              displayField: 'category', 
              valueField: 'id'
@@ -294,7 +293,33 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }},
         {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, dataIndex: 'logged_hours', hidden: true, sortable: false},
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
-        {text: 'WBS', stateId: 'treegrid-wbs', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true}
+        {text: 'WBS', stateId: 'treegrid-wbs', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true},
+        {header: 'Effort Driven?', stateId: 'treegrid-effort-driven-p', flex: 0, width: 40, 
+	 dataIndex: 'effort_driven_p', 
+	 hidden: true, sortable: false
+//	 ,editor: { xtype: 'checkbox', uncheckedValue: 'f', inputValue: 't'}
+	},
+        {text: 'Scheduling Type', stateId: 'treegrid-effort-driven-type', flex: 1, hidden: true, dataIndex: 'effort_driven_type_id', sortable: false,
+         editor: {
+             xtype: 'combobox',
+             forceSelection: true,
+             allowBlank: false,
+             editable: false,
+	     store: Ext.create('Ext.data.Store', {
+		 fields: ['id', 'category'],
+		 data: [{id: "9720", category: "Fixed Units"}, {id: "9721", category: "Fixed Duration"}, {id: "9722", category: "Fixed Work"}]
+	     }),
+             displayField: 'category', 
+             valueField: 'id'
+         }, 
+         renderer: function(value) {
+	     switch (value) {
+		 case '9720': return "Fixed Units";
+		 case '9721': return "Fixed Duration";
+		 case '9722': return "Fixed Work";
+		 default: return value;
+	     }
+        }}
 
         // DynFields
 <multiple name=dynfields>
