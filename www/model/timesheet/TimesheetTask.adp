@@ -57,7 +57,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'scheduling_constraint_id',		// MS-Project: Type of scheduling constraint (-> im_cost_centers)
         'scheduling_constraint_date',		// MS-Project: Field for "should not start before" constraint or similar
         'effort_driven_p',      		// MS-Project: Effort driven?
-        'effort_driven_type_id',		// MS-Project: Specific way to to determine effort driven
+        'effort_driven_type_id',		// MS-Project: Specific way to determine effort driven
         'deadline_date',			// MS-Project: Deadline for this activitiy
 
         // Gantt-Project: This is an open-source clone of MS-Project
