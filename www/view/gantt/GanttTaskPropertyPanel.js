@@ -364,16 +364,6 @@ Ext.define('PO.view.gantt.GanttTaskPropertyPanel', {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.GanttTaskPropertyPanel.onButtonOK');
 
-	// Check if read-only
-	var readOnly = me.senchaPreferenceStore.getPreferenceBoolean('read_only',true);
-	var dirty = me.taskModel.dirty;
-/*
-	if (readOnly && dirty) { 
-	    me.ganttTreePanelController.readOnlyWarning(); 
-	    me.hide();
-	    return; 
-	}
-*/
 	// Finish the editor of the TaskASsigments list in case the user didn't press "Update" yet.
 	var editing = me.taskPropertyAssignments.editingPlugin;
 	editing.completeEdit();
