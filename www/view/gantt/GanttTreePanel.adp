@@ -42,7 +42,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     animate:				false,				// Animation messes up bars on the right side
     collapsible:			false,
     multiSelect:			true,
-    rootVisible:			false,
+    rootVisible:			true,
     singleExpand:			false,
     shrinkWrap:				false,
     title:				false,
@@ -71,8 +71,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 var me = this;
                 if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit');
 
-		// switch all columns to read-only mode if the user doesn't have to right to edit the project...
-		if (!write_project_p) return false;
+                // switch all columns to read-only mode if the user doesn't have to right to edit the project...
+                if (!write_project_p) return false;
 
                 var model = context.record;
                 var field = context.field;
@@ -97,7 +97,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 // project_name should not be an empty string.
                 if ("project_name" == field && "" == value.trim()) { return false; }
 
-		// Check date fields. JS converts funky input into invalid dates...
+                // Check date fields. JS converts funky input into invalid dates...
                 if ("start_date" == field || "end_date" == field) {
                     var d = value.split('-');
                     var year = parseInt(d[0]), month = parseInt(d[1])-1, day = parseInt(d[2]);
@@ -124,6 +124,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
     // the 'columns' property is now 'headers'
     columns: [
+
 /*
         {text: 'I', xtype: 'actioncolumn', dataIndex: 'project_id', width: 30, items: [{
             icon: '/intranet/images/navbar_default/information.png',
@@ -138,18 +139,21 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 taskPropertyPanel.show();
             }
         }]},
-        {text: 'Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true, editor: {
-            xtype: 'numberfield',
-            minValue: 0            
-        }}, 
-        {text: 'Sort Order', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
-            xtype: 'numberfield',
-            minValue: 0            
-        }},
 */
+
+/*
+        {text: 'System Id', flex: 0, width: 40, dataIndex: 'id', hidden: true }, 
+        {text: 'System Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true},
+*/
+
+        {text: 'Id', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
+            xtype: 'numberfield',
+            minValue: 0
+        }},
+
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
          editor: true, 
-	 getSortParam: function() {
+         getSortParam: function() {
              return 'sort_order';
          },
          renderer: function(v, context, model, d, e) {
@@ -228,6 +232,26 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var result = PO.view.field.POTaskAssignment.formatAssignments(value);
             if (isLeaf) { return result; } else { return "<b>"+result+"</b>"; }
         }},
+
+        {text: 'Predecessors', dataIndex: 'predecessors', width: 60, hidden: true, editor: false,
+         renderer: function(v, context, model, d, e) {
+             var preds = "";
+             var rootNode = model.store.tree.root;
+             var predecessors = model.get('predecessors');
+             if (!predecessors instanceof Array) return "invalid";
+
+             for (var i = 0, len = predecessors.length; i < len; i++) {
+                 var dependencyModel = predecessors[i];
+                 var predId = ''+dependencyModel.pred_id;		// a string!
+		 var predModel = rootNode.findChild('id', predId, true);
+		 if (!predModel) return "invalid predMode for id="+predId;
+		 if (predModel) predId = predModel.get('sort_order');
+                 if (i > 0) preds = preds+';';
+                 preds = preds+predId;
+             }
+             return preds;
+        }},
+
         {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: false,
          editor: {
              xtype: 'combobox',
@@ -239,10 +263,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              valueField: 'cost_center_id'
          },
          renderer: function(value) {
-	     if ("" == value) return "";
+             if ("" == value) return "";
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
-	     if (!model) return "undefined";
+             if (!model) return "undefined";
              return model.get('cost_center_name');
         }},
         {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
@@ -259,10 +283,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              matchFieldWidth: false
          },
          renderer: function(value) {
-	     if ("" == value) return "";
+             if ("" == value) return "";
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
-	     if (!model) return "undefined";
+             if (!model) return "undefined";
              return model.get('material_name');
         }},
         {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
@@ -285,40 +309,40 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              valueField: 'id'
          }, 
          renderer: function(value) {
-	     if ("" == value) return "";
+             if ("" == value) return "";
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
-	     if (!model) return "undefined";
+             if (!model) return "undefined";
              return model.get('category');
         }},
-        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, dataIndex: 'logged_hours', hidden: true, sortable: false},
+        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, width: 40, dataIndex: 'logged_hours', hidden: true, sortable: false},
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
         {text: 'WBS', stateId: 'treegrid-wbs', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true},
         {header: 'Effort Driven?', stateId: 'treegrid-effort-driven-p', flex: 0, width: 40, 
-	 dataIndex: 'effort_driven_p', 
-	 hidden: true, sortable: false
-//	 ,editor: { xtype: 'checkbox', uncheckedValue: 'f', inputValue: 't'}
-	},
+         dataIndex: 'effort_driven_p', 
+         hidden: true, sortable: false
+//         ,editor: { xtype: 'checkbox', uncheckedValue: 'f', inputValue: 't'}
+        },
         {text: 'Scheduling Type', stateId: 'treegrid-effort-driven-type', flex: 1, hidden: true, dataIndex: 'effort_driven_type_id', sortable: false,
          editor: {
              xtype: 'combobox',
              forceSelection: true,
              allowBlank: false,
              editable: false,
-	     store: Ext.create('Ext.data.Store', {
-		 fields: ['id', 'category'],
-		 data: [{id: "9720", category: "Fixed Units"}, {id: "9721", category: "Fixed Duration"}, {id: "9722", category: "Fixed Work"}]
-	     }),
+             store: Ext.create('Ext.data.Store', {
+                 fields: ['id', 'category'],
+                 data: [{id: "9720", category: "Fixed Units"}, {id: "9721", category: "Fixed Duration"}, {id: "9722", category: "Fixed Work"}]
+             }),
              displayField: 'category', 
              valueField: 'id'
          }, 
          renderer: function(value) {
-	     switch (value) {
-		 case '9720': return "Fixed Units";
-		 case '9721': return "Fixed Duration";
-		 case '9722': return "Fixed Work";
-		 default: return value;
-	     }
+             switch (value) {
+                 case '9720': return "Fixed Units";
+                 case '9721': return "Fixed Duration";
+                 case '9722': return "Fixed Work";
+                 default: return value;
+             }
         }}
 
         // DynFields
