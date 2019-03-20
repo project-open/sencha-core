@@ -144,13 +144,43 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 /*
         {text: 'System Id', flex: 0, width: 40, dataIndex: 'id', hidden: true }, 
         {text: 'System Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true},
-*/
-
-        {text: 'Id', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
+        {text: 'SortOrder', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
             xtype: 'numberfield',
             minValue: 0
         }},
-
+        {text: 'tPreds', dataIndex: 'transPreds', width: 60, hidden: true, editor: false,
+         renderer: function(v, context, model, d, e) {
+             var preds = "";
+	     for (var predId in model.transPreds) {
+		 var predModel = model.transPreds[predId];
+		 var predSortOrder = predModel.get('sort_order');
+		 if ("" != preds) preds = preds+";";
+                 preds = preds+(predSortOrder || predId);
+	     }
+             return preds;
+        }},
+        {text: 'tSuccs', dataIndex: 'transSuccs', width: 60, hidden: true, editor: false,
+         renderer: function(v, context, model, d, e) {
+             var succs = "";
+	     for (var succId in model.transSuccs) {
+		 var succModel = model.transSuccs[succId];
+		 var succSortOrder = succModel.get('sort_order');
+		 if ("" != succs) succs = succs+";";
+                 succs = succs+(succSortOrder || succId);
+	     }
+             return succs;
+        }},
+        {text: 'tParents', dataIndex: 'transParents', width: 60, hidden: true, editor: false,
+         renderer: function(v, context, model, d, e) {
+             var parents = "";
+	     for (var parentId in model.transParents) {
+		 var parentModel = model.transParents[parentId];
+		 if ("" != parents) parents = parents+";";
+                 parents = parents+(parentModel.get('sort_order') || parentId);
+	     }
+             return parents;
+        }},
+*/
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
          editor: true, 
          getSortParam: function() {
@@ -252,6 +282,12 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              return preds;
         }},
 
+
+/*
+        {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
+         renderer: ganttTreePanelPredecessorRenderer
+        },
+*/
         {text: 'CostCenter', stateId: 'treegrid-costcenter', flex: 1, hidden: true, dataIndex: 'cost_center_id', sortable: false,
          editor: {
              xtype: 'combobox',
@@ -289,9 +325,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              if (!model) return "undefined";
              return model.get('material_name');
         }},
-        {text: 'Predecessors', stateId: 'treegrid-predecessors', flex: 1, hidden: true, dataIndex: 'predecessors', 
-         renderer: ganttTreePanelPredecessorRenderer
-        },
         {text: 'Prio', stateId: 'treegrid-prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
          editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
         },
