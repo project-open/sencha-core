@@ -141,13 +141,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }]},
 */
 
-/*
-        {text: 'System Id', flex: 0, width: 40, dataIndex: 'id', hidden: true }, 
-        {text: 'System Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true},
+
+        {text: 'System Id', flex: 0, width: 40, dataIndex: 'id', hidden: true, debug: true }, 
+        {text: 'System Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true, debug: true},
         {text: 'SortOrder', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
             xtype: 'numberfield',
             minValue: 0
-        }},
+        }, debug: true},
         {text: 'tPreds', dataIndex: 'transPreds', width: 60, hidden: true, editor: false,
          renderer: function(v, context, model, d, e) {
              var preds = "";
@@ -158,7 +158,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                  preds = preds+(predSortOrder || predId);
 	     }
              return preds;
-        }},
+        }, debug: true},
         {text: 'tSuccs', dataIndex: 'transSuccs', width: 60, hidden: true, editor: false,
          renderer: function(v, context, model, d, e) {
              var succs = "";
@@ -169,7 +169,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                  succs = succs+(succSortOrder || succId);
 	     }
              return succs;
-        }},
+        }, debug: true},
         {text: 'tParents', dataIndex: 'transParents', width: 60, hidden: true, editor: false,
          renderer: function(v, context, model, d, e) {
              var parents = "";
@@ -179,8 +179,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                  parents = parents+(parentModel.get('sort_order') || parentId);
 	     }
              return parents;
-        }},
-*/
+        }, debug: true},
+
         {text: 'Task', stateId: 'treegrid-task', xtype: 'treecolumn', flex: 2, sortable: true, dataIndex: 'project_name', 
          editor: true, 
          getSortParam: function() {
@@ -431,7 +431,14 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     initComponent: function() {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
+
+	// Remove columns marked with debug=true, unless in debug mode.
+	if (!me.debug) {
+	    for (var i = me.columns.length-1; i > 0; i--) { if ( me.columns[i].debug) me.columns.splice(i,1); }
+	}
+
         this.callParent(arguments);
+	    
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
     }
 
