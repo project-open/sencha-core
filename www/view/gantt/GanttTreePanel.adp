@@ -141,7 +141,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }]},
 */
 
-
         {text: 'System Id', flex: 0, width: 40, dataIndex: 'id', hidden: true, debug: true }, 
         {text: 'System Parent', flex: 0, width: 40, dataIndex: 'parent_id', hidden: true, debug: true},
         {text: 'SortOrder', flex: 0, width: 40, dataIndex: 'sort_order', hidden: true, editor: {
@@ -191,7 +190,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var children = model.childNodes;
             if (0 == children.length) { return model.get('project_name'); } else { return "<b>"+model.get('project_name')+"</b>"; }
         }},
-        {text: 'Work', stateId: 'treegrid-work', width: 55, align: 'right', dataIndex: 'planned_units', 
+        {text: 'Work', stateId: 'treegrid-work', width: 55, align: 'right', dataIndex: 'planned_units', hidden: true,
          editor: { xtype: 'numberfield', minValue: 0 }, 
          renderer: function(value, context, model) {
             // Calculate the UoM unit
@@ -217,7 +216,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+plannedUnits+"h</b>";
             }
         }},
-        {text: 'Done %', stateId: 'treegrid-done', width: 50, align: 'right', dataIndex: 'percent_completed', 
+        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, width: 40, dataIndex: 'logged_hours', hidden: true, sortable: false},
+        {text: 'Done %', stateId: 'treegrid-done', width: 50, align: 'right', dataIndex: 'percent_completed', hidden: true,
          editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
          renderer: function(value, context, model) {
             var percent_completed = model.get('percent_completed');
@@ -243,13 +243,13 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+done+"</b>";
             }
         }},
-        {text: 'Start', stateId: 'treegrid-start', width: 80, hidden: false, dataIndex: 'start_date',
+        {text: 'Start', stateId: 'treegrid-start', width: 80, hidden: true, dataIndex: 'start_date',
          editor: 'podatefield', 
          renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
             if (isLeaf) { return value.substring(0,10); } else { return "<b>"+value.substring(0,10)+"</b>"; }
         }},
-        {text: 'End', stateId: 'treegrid-end', width: 80, hidden: false, dataIndex: 'end_date',
+        {text: 'End', stateId: 'treegrid-end', width: 80, hidden: true, dataIndex: 'end_date',
          editor: 'podatefield', 
          renderer: function(value, context, model) {
             var isLeaf = (0 == model.childNodes.length);
@@ -348,7 +348,6 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              if (!model) return "undefined";
              return model.get('category');
         }},
-        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, width: 40, dataIndex: 'logged_hours', hidden: true, sortable: false},
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
         {text: 'WBS', stateId: 'treegrid-wbs', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true},
         {header: 'Effort Driven?', stateId: 'treegrid-effort-driven-p', flex: 0, width: 40, 
@@ -432,9 +431,16 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
 
-	// Remove columns marked with debug=true, unless in debug mode.
+	// Completely remove columns marked with debug=true, unless in debug mode.
 	if (!me.debug) {
-	    for (var i = me.columns.length-1; i > 0; i--) { if ( me.columns[i].debug) me.columns.splice(i,1); }
+	    for (var i = me.columns.length-1; i >= 0; i--) { if ( me.columns[i].debug) me.columns.splice(i,1); }
+	}
+
+	// un-hide those columns that are enabled by system parameter
+	var defaultColumns = @default_columns_json;noquote@;
+	for (var i = me.columns.length-1; i >= 0; i--) { 
+	    var dataIndex = me.columns[i].dataIndex;
+	    if (defaultColumns[dataIndex]) me.columns[i].hidden = false;
 	}
 
         this.callParent(arguments);

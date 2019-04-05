@@ -1,5 +1,14 @@
 # Get DynFields for Timesheet Task
 
+# Build a JavaScript array with the list of all colums enabled by default
+set default_columns "planned_units logged_hours percent_completed assignees"
+set default_columns [parameter::get_from_package_key -package_key "intranet-gantt-editor" -parameter DefaultEnabledColumns -default $default_columns]
+set default_columns_list {}
+foreach col $default_columns {
+    lappend default_columns_list "'$col': true"
+}
+
+set default_columns_json "{[join $default_columns_list ", "]}"
 
 
 # Extract all task attributes, except for a few ones that are
