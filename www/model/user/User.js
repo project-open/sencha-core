@@ -59,6 +59,7 @@ Ext.define('PO.model.user.User', {
 	'employee_status_id',			// 
 	'availability',				// 
 	'hourly_cost',				// 
+	'currency',
 	'birthdate',				// 
 	'vacation_balance',			// 
 	'vacation_days_per_year',		// 
