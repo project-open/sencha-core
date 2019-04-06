@@ -242,7 +242,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+billableUnits+"h</b>";
             }
         }},
-        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, width: 40, dataIndex: 'logged_hours', hidden: true, sortable: false},
+        {text: 'Logged Hours', stateId: 'treegrid-logged-hours', width: 55, dataIndex: 'logged_hours', hidden: true, sortable: false},
         {text: 'Done %', stateId: 'treegrid-done', width: 50, align: 'right', dataIndex: 'percent_completed', hidden: true,
          editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
          renderer: function(value, context, model) {
