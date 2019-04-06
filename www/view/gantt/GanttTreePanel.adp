@@ -216,6 +216,32 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 return "<b>"+plannedUnits+"h</b>";
             }
         }},
+        {text: 'Billable Hours', stateId: 'treegrid-work', width: 55, align: 'right', dataIndex: 'billable_units', hidden: true,
+         editor: { xtype: 'numberfield', minValue: 0 }, 
+         renderer: function(value, context, model) {
+            // Calculate the UoM unit
+            var billable_units = model.get('billable_units');
+            if (0 == model.childNodes.length) {
+                // A leaf task - just show the units
+                if ("" != billable_units) { billable_units = billable_units + "h"; }
+                return billable_units;
+            } else {
+                // A parent node - sum up the billable units of all leafs.
+                var billableUnits = 0.0;
+                model.cascadeBy(function(child) {
+                    if (0 == child.childNodes.length) {                 // Only consider leaf tasks
+                        var puString = child.get('billable_units');
+                        if ("" != puString) {
+                            var pu = parseFloat(puString);
+                            if ("number" == typeof pu) { 
+                                billableUnits = billableUnits + pu; 
+                            }
+                        }
+                    }
+                });
+                return "<b>"+billableUnits+"h</b>";
+            }
+        }},
         {text: 'Logged Hours', stateId: 'treegrid-logged-hours', flex: 1, width: 40, dataIndex: 'logged_hours', hidden: true, sortable: false},
         {text: 'Done %', stateId: 'treegrid-done', width: 50, align: 'right', dataIndex: 'percent_completed', hidden: true,
          editor: { xtype: 'numberfield', minValue: 0, maxValue: 100 }, 
@@ -302,7 +328,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              if ("" == value) return "";
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
-             if (!model) return "undefined";
+             if (!model) return "Cost Center #"+value";
              return model.get('cost_center_name');
         }},
         {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
@@ -322,7 +348,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              if ("" == value) return "";
              var materialStore = Ext.StoreManager.get('taskMaterialStore');
              var model = materialStore.getById(value);
-             if (!model) return "undefined";
+             if (!model) return "Material #"+value;
              return model.get('material_name');
         }},
         {text: 'Prio', stateId: 'treegrid-prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
@@ -345,7 +371,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              if ("" == value) return "";
              var statusStore = Ext.StoreManager.get('taskStatusStore');
              var model = statusStore.getById(value);
-             if (!model) return "undefined";
+             if (!model) return "Status #"+value;
              return model.get('category');
         }},
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
