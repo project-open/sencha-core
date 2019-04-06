@@ -150,33 +150,33 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         {text: 'tPreds', dataIndex: 'transPreds', width: 60, hidden: true, editor: false,
          renderer: function(v, context, model, d, e) {
              var preds = "";
-	     for (var predId in model.transPreds) {
-		 var predModel = model.transPreds[predId];
-		 var predSortOrder = predModel.get('sort_order');
-		 if ("" != preds) preds = preds+";";
-                 preds = preds+(predSortOrder || predId);
-	     }
+             for (var predId in model.transPreds) {
+                var predModel = model.transPreds[predId];
+                var predSortOrder = predModel.get('sort_order');
+                if ("" != preds) preds = preds+";";
+                preds = preds+(predSortOrder || predId);
+             }
              return preds;
         }, debug: true},
         {text: 'tSuccs', dataIndex: 'transSuccs', width: 60, hidden: true, editor: false,
          renderer: function(v, context, model, d, e) {
              var succs = "";
-	     for (var succId in model.transSuccs) {
-		 var succModel = model.transSuccs[succId];
-		 var succSortOrder = succModel.get('sort_order');
-		 if ("" != succs) succs = succs+";";
+             for (var succId in model.transSuccs) {
+                 var succModel = model.transSuccs[succId];
+                 var succSortOrder = succModel.get('sort_order');
+                 if ("" != succs) succs = succs+";";
                  succs = succs+(succSortOrder || succId);
-	     }
+             }
              return succs;
         }, debug: true},
         {text: 'tParents', dataIndex: 'transParents', width: 60, hidden: true, editor: false,
          renderer: function(v, context, model, d, e) {
              var parents = "";
-	     for (var parentId in model.transParents) {
-		 var parentModel = model.transParents[parentId];
-		 if ("" != parents) parents = parents+";";
+             for (var parentId in model.transParents) {
+                 var parentModel = model.transParents[parentId];
+                 if ("" != parents) parents = parents+";";
                  parents = parents+(parentModel.get('sort_order') || parentId);
-	     }
+             }
              return parents;
         }, debug: true},
 
@@ -299,9 +299,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              for (var i = 0, len = predecessors.length; i < len; i++) {
                  var dependencyModel = predecessors[i];
                  var predId = ''+dependencyModel.pred_id;		// a string!
-		 var predModel = rootNode.findChild('id', predId, true);
-		 if (!predModel) return "invalid predMode for id="+predId;
-		 if (predModel) predId = predModel.get('sort_order');
+                 var predModel = rootNode.findChild('id', predId, true);
+                 if (!predModel) return "invalid predMode for id="+predId;
+                 if (predModel) predId = predModel.get('sort_order');
                  if (i > 0) preds = preds+';';
                  preds = preds+predId;
              }
@@ -457,20 +457,21 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         var me = this;
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Starting');
 
-	// Completely remove columns marked with debug=true, unless in debug mode.
-	if (!me.debug) {
-	    for (var i = me.columns.length-1; i >= 0; i--) { if ( me.columns[i].debug) me.columns.splice(i,1); }
-	}
+        // Completely remove columns marked with debug=true, unless in debug mode.
+        if (!me.debug) {
+            for (var i = me.columns.length-1; i >= 0; i--) { if ( me.columns[i].debug) me.columns.splice(i,1); }
+        }
 
-	// un-hide those columns that are enabled by system parameter
-	var defaultColumns = @default_columns_json;noquote@;
-	for (var i = me.columns.length-1; i >= 0; i--) { 
-	    var dataIndex = me.columns[i].dataIndex;
-	    if (defaultColumns[dataIndex]) me.columns[i].hidden = false;
-	}
+        // un-hide those columns that are enabled by system parameter
+        var defaultColumns = @default_columns_json;noquote@;
+        for (var i = me.columns.length-1; i >= 0; i--) { 
+            var dataIndex = me.columns[i].dataIndex;
+            if (defaultColumns[dataIndex]) 
+                me.columns[i].hidden = false;
+        }
 
         this.callParent(arguments);
-	    
+
         if (me.debug) console.log('PO.view.gantt.GantTreePanel.initComponent: Finished');
     }
 
