@@ -328,7 +328,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              if ("" == value) return "";
              var ccStore = Ext.StoreManager.get('taskCostCenterStore');
              var model = ccStore.getById(value);
-             if (!model) return "Cost Center #"+value";
+             if (!model) return "Cost Center #"+value;
              return model.get('cost_center_name');
         }},
         {text: 'Description', stateId: 'treegrid-description', flex: 1, hidden: true, dataIndex: 'description', editor: {allowBlank: true}},
