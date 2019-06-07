@@ -147,7 +147,7 @@ ad_proc -public im_sencha_sql_to_store {
 
     if {$data_source_p} {
 	# Return the JSON structure suitable as a data-source
-	return "{'success': true, 'message': 'Data loaded', 'data': \[ {$data_json } \]}"
+	return "{\"success\": true, \"message\": \"Data loaded\", \"data\": \[ {$data_json } \]}"
 
     } else {
 	# Return two values: 1. the store JSON, 2. the list of columns used
