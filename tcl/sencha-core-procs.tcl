@@ -50,7 +50,9 @@ ad_proc -public im_sencha_preference_permissions {user_id preference_id view_var
     set admin_p [im_is_user_site_wide_or_intranet_admin $user_id]
     set preference_object_id [util_memoize [list db_string pref_oid "select preference_object_id from im_sencha_preferences where preference_id = $preference_id" -default 0]]
 
-    if {$user_id == $preference_object_id || $admin_p} {
+    # Fraber 2019-10-21: Granting all permissions on a non-existing preference.
+    # This should be harmless, but may eliminate strange error messages
+    if {0 == $preference_object_id || $user_id == $preference_object_id || $admin_p} {
 	set view 1
 	set read 1
 	set write 1
