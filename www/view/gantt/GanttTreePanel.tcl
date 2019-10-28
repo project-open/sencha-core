@@ -4,6 +4,9 @@
 set default_columns "planned_units logged_hours percent_completed assignees"
 set default_columns [parameter::get_from_package_key -package_key "intranet-gantt-editor" -parameter DefaultEnabledColumns -default $default_columns]
 
+# Should we show a Gantt bar for the main project itself?
+set project_root_visible_truefalse [parameter::get_from_package_key -package_key "intranet-gantt-editor" -parameter ProjectVisibleAsRoot -default "false"]
+
 set default_columns_list {}
 foreach col $default_columns {
     lappend default_columns_list "'$col': true"

@@ -42,7 +42,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     animate:				false,				// Animation messes up bars on the right side
     collapsible:			false,
     multiSelect:			true,
-    rootVisible:			true,
+    rootVisible:			@project_root_visible_truefalse@,
     singleExpand:			false,
     shrinkWrap:				false,
     title:				false,
