@@ -118,18 +118,18 @@ ad_proc -public im_sencha_sql_to_store {
 	}
 
 	# Loop through the list of rows returned
-	while { [db_getrow $db $selection] } {
+	while {[db_getrow $db $selection]} {
 	    set json_entry {}
-	    for { set i 0 } { $i < [ns_set size $selection] } { incr i } {
+	    for {set i 0 } { $i < [ns_set size $selection] } { incr i } {
 		set var [lindex $col_names $i]
 		set val [ns_set value $selection $i]
 		if {"" eq $val} {
-		    lappend json_entry "$var: null"
-		} elseif {[string is integer $val]} {
-		    lappend json_entry "$var: $val"
+		    lappend json_entry "'$var': null"
+		} elseif {[string is double $val]} {
+		    lappend json_entry "'$var': $val"
 		} else {
 		    set val_quoted [im_quotejson $val]
-		    lappend json_entry "$var: '$val_quoted'"
+		    lappend json_entry "'$var': '$val_quoted'"
 		}
 	    }
 	    lappend json_list [join $json_entry ", "]
@@ -149,7 +149,7 @@ ad_proc -public im_sencha_sql_to_store {
 
     if {$data_source_p} {
 	# Return the JSON structure suitable as a data-source
-	return "{\"success\": true, \"message\": \"Data loaded\", \"data\": \[ {$data_json } \]}"
+	return "{\"success\": true, \"message\": \"Data loaded\", \"data\": \[\n\t\t{$data_json } \]}"
 
     } else {
 	# Return two values: 1. the store JSON, 2. the list of columns used
