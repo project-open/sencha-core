@@ -28,6 +28,7 @@ Ext.define('PO.store.timesheet.TaskStatusStore', {
 	appendId:   true,
 	extraParams: {
 	    format: 'json',
+	    include_disabled_p: '1', // Make sure to include "Open" and "Closed" even if disabled
 	    category_type: '\'Intranet Project Status\''
 	},
 	reader: { type: 'json', root: 'data' }
