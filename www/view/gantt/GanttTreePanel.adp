@@ -411,7 +411,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
     ],
 
     listeners: {
-        // Open up 
+        // Open task property panel on double-click
         beforeitemdblclick: function(view, record, item, index, e, eOpts) { 
             var me = this;
             if (me.debug) console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick');
