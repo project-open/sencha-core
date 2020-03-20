@@ -322,7 +322,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              editable: false,
              store: 'taskCostCenterStore',
              displayField: 'cost_center_name', 
-             valueField: 'cost_center_id'
+             valueField: 'cost_center_id',
+	     matchFieldWidth: false
          },
          renderer: function(value) {
              if ("" == value) return "";
