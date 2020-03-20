@@ -17,14 +17,8 @@
  *     store: Ext.data.StoreManager.lookup('taskStatusStore'),
  *     queryMode: 'local',
  *     matchFieldWidth: false,                   // Allow the picker to be larger than the field width
- *     displayField: 'category',
- *     valueField: 'category_id',
- *     listConfig: {
- *         columns: [
- *             {header: 'ID', dataIndex: 'category_id'},
- *             {header: 'Category', dataIndex: 'category'}
- *                     ]
- *     }
+ *     displayField: 'project_name',
+ *     valueField: 'id'
  * }
  */
 Ext.define('PO.view.field.POComboTree', {
@@ -40,7 +34,10 @@ Ext.define('PO.view.field.POComboTree', {
             floating: true,
             ownerCt: me.ownerCt,
             cls: me.el.up('.' + menuCls) ? menuCls : '',
-            store: me.store
+            store: me.store,
+	    columns: [
+		{xtype: 'treecolumn', flex: 1, dataIndex: me.displayField}
+	    ]
         }, me.columnConfig);
 
 	// NOTE: we simply use a tree panel
