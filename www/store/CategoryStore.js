@@ -19,7 +19,7 @@ Ext.define('PO.store.CategoryStore', {
     extend:         'Ext.data.Store',
     model: 	    'PO.model.category.Category',
     storeId:	    'categoryStore',
-    pageSize:       100000,
+    pageSize:       100000,				// Get all available categories
     proxy: {
         type:       'rest',
         url:        '/intranet-rest/im_category',
@@ -27,11 +27,14 @@ Ext.define('PO.store.CategoryStore', {
         extraParams: {
             format: 'json',
             include_disabled_p: '1', // Make sure to include "Open" and "Closed" even if disabled
-	    //            category_type: '\'Intranet Cost Status\''
+	    // don't specify category_type here, we want to get all categories
         },
         reader: { type: 'json', root: 'data' }
     },
 
+    /**
+     * Standard lookup function
+     */
     category_from_id: function(category_id) {
         if (null == category_id || '' == category_id) { return ''; }
         var result = 'Category #' + category_id;
@@ -39,7 +42,8 @@ Ext.define('PO.store.CategoryStore', {
         if (rec == null || typeof rec == "undefined") { return result; }
         return rec.get('category_translated'); 
     },
-    fill_tree_category_translated:         function(store) { // Concat the tree category names. It is useful to order by name and level
+    cat: function(category_id) { return this.category_from_id(category_id); },
+    fill_tree_category_translated: function(store) {	// Concat the tree category names. It is useful to order by name and level
         store.each(function(record){
             var tree_sortkey = record.get('tree_sortkey');
             var lon = record.get('tree_sortkey').length;
@@ -51,7 +55,7 @@ Ext.define('PO.store.CategoryStore', {
             record.set('tree_category_translated', tree_category);                                        
         });
     },
-    validateLevel: function(value,nullvalid) { //Validate the combo value. No level with sublevel is permitted. 
+    validateLevel: function(value,nullvalid) {		//Validate the combo value. No level with sublevel is permitted. 
         if (nullvalid && Ext.isEmpty(value)) {
             return true;
         }
@@ -78,12 +82,12 @@ Ext.define('PO.store.CategoryStore', {
             return 'Obligatorio'; 
         }
     },
-    addBlank:  function() { // Add blank value to the store. It is used to white selecction in comboboxes
+    addBlank:  function() {				// Add blank value to the store. It is used to white selecction in comboboxes
         var categoryVars = {category_id: '', category_translated: null, sort_order: '0'};
         var category = Ext.ModelManager.create(categoryVars, 'TicketBrowser.Category');
         this.add(category);        
     },
-    getParent: function(value) {//Get category parent ID
+    getParent: function(value) {			// Get category parent ID
         if (!Ext.isEmpty(value)) {
             var record = this.getById(value);
             if (!Ext.isEmpty(record)) {
