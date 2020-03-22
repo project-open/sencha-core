@@ -7,7 +7,7 @@
 
 Ext.define('PO.store.timesheet.TaskCostCenterStore', {
     extend:         'Ext.data.Store',
-    model: 	    'PO.model.timesheet.CostCenter',
+    model: 	    'PO.model.finance.CostCenter',
     storeId:	    'taskCostCenterStore',
     proxy: {
 	type:       'rest',
