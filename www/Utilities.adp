@@ -82,6 +82,41 @@ Ext.define('PO.Utilities', {
             msgBox.setOverflowXY('auto', 'auto');
         },
 
+
+
+
+        /**
+         * Write out a message
+         */
+        reportMessage : function(title, msg) {
+            var me = this;
+
+            // Split lines with length > maxLen into multiple lines
+            var maxLen = 75;
+            var msgLimited = "";
+            var msgLines = msg.split("\n");
+            for (var i = 0; i < msgLines.length; i++) {
+                var line = msgLines[i];
+                while (line.length > maxLen) {
+                    msgLimited = msgLimited + line.substr(0,maxLen) + "\n";
+                    line = line.substr(maxLen);
+                    
+                }
+                msgLimited = msgLimited + line + "\n";
+            }
+
+            var msgBox = Ext.create('Ext.window.MessageBox', {  });
+            msgBox.show({
+                title: title,
+                msg: msgLimited,
+                minWidth: 600,
+                buttonText: { yes: "OK" },
+                icon: Ext.Msg.OK,
+                fn: function(text) { }
+            });
+            msgBox.setOverflowXY('auto', 'auto');
+        },
+
         /**
          * Handle errors while trying to load a store
          */
