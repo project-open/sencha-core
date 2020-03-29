@@ -197,6 +197,9 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var planned_units = model.get('planned_units');
             if (0 == model.childNodes.length) {
                 // A leaf task - just show the units
+                if ("" == planned_units) return "";
+                var pu = parseFloat(planned_units);
+                if ("number" == typeof pu) { planned_units = Math.round(100.0 * pu) / 100.0 }
                 if ("" != planned_units) { planned_units = planned_units + "h"; }
                 return planned_units;
             } else {
@@ -213,6 +216,8 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                         }
                     }
                 });
+                var pu = parseFloat(plannedUnits);
+                if ("number" == typeof pu) { plannedUnits = Math.round(100.0 * pu) / 100.0 }
                 return "<b>"+plannedUnits+"h</b>";
             }
         }},
@@ -323,7 +328,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
              store: 'taskCostCenterStore',
              displayField: 'cost_center_name', 
              valueField: 'cost_center_id',
-	     matchFieldWidth: false
+             matchFieldWidth: false
          },
          renderer: function(value) {
              if ("" == value) return "";
