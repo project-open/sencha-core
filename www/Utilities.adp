@@ -184,11 +184,19 @@ Ext.define('PO.Utilities', {
             hh = (h = d.getHours()) < 10 ? ('0'+h) : h;
             mm = (m = d.getMinutes()) < 10 ? ('0'+m) : m;
             ss = (s = d.getSeconds()) < 10 ? ('0'+s) : s;
-            
+
+	    // Handle time zone. Time zones with fractions of an hour need to be added with ':30'
             tzSign = (tzo = d.getTimezoneOffset()/-60) < 0 ? '-' : '+';
-            tz = (tzAbs = Math.abs(tzo)) < 10 ? ('0'+tzAbs) : ''+tzAbs;
-            
-            return YYYY+'-'+MM+'-'+DD+' '+hh+':'+mm+':'+ss+tzSign+tz;
+            tzAbs = Math.abs(tzo);
+            if (Math.floor(tzAbs) != tzAbs) {
+               tzAbsFrac = ':30';
+               tzAbs = Math.floor(tzAbs);
+            } else {
+               tzAbsFrac = '';
+            }
+            tz = tzAbs < 10 ? ('0'+tzAbs) : ''+tzAbs;
+
+            return YYYY+'-'+MM+'-'+DD+' '+hh+':'+mm+':'+ss+tzSign+tz+tzAbsFrac;
         },
 
         /**
