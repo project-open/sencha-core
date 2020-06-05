@@ -79,8 +79,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
                 // Veto editing planned_units of parent objects except for the name.
                 if (model.childNodes.length > 0) {                    // If this is a parent object with children
-                    if ("planned_units" == field) { return false; }
-                    if ("percent_completed" == field) { return false; }
+		    if (@non_editable_summary_activities_json;noquote@.includes(field)) { return false; }
                 }
                 return true;
             },
@@ -192,28 +191,22 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         }},
         {text: 'Work', stateId: 'treegrid-work', width: 55, align: 'right', dataIndex: 'planned_units', hidden: true,
          editor: { xtype: 'numberfield', minValue: 0 }, 
-         renderer: function(value, context, model) {
-            // Calculate the UoM unit
+         renderer: function(value, context, model) {			// Calculate the UoM unit
             var planned_units = model.get('planned_units');
-            if (0 == model.childNodes.length) {
-                // A leaf task - just show the units
+            if (0 == model.childNodes.length) {				// A leaf task - just show the units
                 if ("" == planned_units) return "";
                 var pu = parseFloat(planned_units);
                 if ("number" == typeof pu) { planned_units = Math.round(100.0 * pu) / 100.0 }
                 if ("" != planned_units) { planned_units = planned_units + "h"; }
                 return planned_units;
-            } else {
-                // A parent node - sum up the planned units of all leafs.
+            } else {							// A parent node - sum up the planned units of all leafs.
                 var plannedUnits = 0.0;
                 model.cascadeBy(function(child) {
                     if (0 == child.childNodes.length) {                 // Only consider leaf tasks
                         var puString = child.get('planned_units');
-                        if ("" != puString) {
-                            var pu = parseFloat(puString);
-                            if ("number" == typeof pu) { 
-                                plannedUnits = plannedUnits + pu; 
-                            }
-                        }
+                        if ("" == puString) return;
+                        var pu = parseFloat(puString);
+                        if ("number" == typeof pu) plannedUnits = plannedUnits + pu;
                     }
                 });
                 var pu = parseFloat(plannedUnits);
@@ -226,22 +219,17 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
          renderer: function(value, context, model) {
             // Calculate the UoM unit
             var billable_units = model.get('billable_units');
-            if (0 == model.childNodes.length) {
-                // A leaf task - just show the units
+            if (0 == model.childNodes.length) {                         // A leaf task - just show the units
                 if ("" != billable_units) { billable_units = billable_units + "h"; }
                 return billable_units;
-            } else {
-                // A parent node - sum up the billable units of all leafs.
+            } else {                                                    // A parent node - sum up the billable units of all leafs.
                 var billableUnits = 0.0;
                 model.cascadeBy(function(child) {
                     if (0 == child.childNodes.length) {                 // Only consider leaf tasks
                         var puString = child.get('billable_units');
-                        if ("" != puString) {
-                            var pu = parseFloat(puString);
-                            if ("number" == typeof pu) { 
-                                billableUnits = billableUnits + pu; 
-                            }
-                        }
+                        if ("" == puString) return;
+                        var pu = parseFloat(puString);
+                        if ("number" == typeof pu) billableUnits = billableUnits + pu; 
                     }
                 });
                 return "<b>"+billableUnits+"h</b>";
@@ -411,7 +399,7 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
         // DynFields
 <multiple name=dynfields>
-        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: true, sortable: false @dynfields.editor;noquote@}
+        ,{text: '@dynfields.pretty_name@', stateId: 'treegrid-@dynfields.name@', flex: 1, dataIndex: '@dynfields.name@', hidden: true, sortable: false @dynfields.editor;noquote@ @dynfields.renderer;noquote@}
 </multiple>
 
     ],

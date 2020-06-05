@@ -67,10 +67,12 @@ set attributes_sql "
 # ad_return_complaint 1 [im_ad_hoc_query -format html $attributes_sql]
 
 set errors {}
-multirow create dynfields name pretty_name widget editor
+multirow create dynfields name pretty_name widget editor renderer
 
+set non_editable_summary_activities [list "planned_units" "billable_units" "percent_completed"]
 db_foreach attributes $attributes_sql {
     set editor "undefined"
+    set renderer ""
 
     # Handle specific ]po[ widgets.
     # For example, both "numeric" and textarea_small are of TCL widget "text",
@@ -79,7 +81,37 @@ db_foreach attributes $attributes_sql {
 	checkbox  { set editor "" }
 	date - timestamp { set editor ", editor: 'podatefield'" }
 	integer  { set editor ", editor: 'numberfield'" }
-	numeric  { set editor ", editor: 'numberfield'" }
+	numeric  { 
+	    set editor ", editor: 'numberfield'"
+	}
+	numeric_roll_up  { 
+	    lappend non_editable_summary_activities $attribute_name
+	    set editor ", editor: 'numberfield'"
+	    set renderer "
+		, renderer: function(orgValue, context, model) {
+			// Calculate the UoM unit
+			var value = model.get('$attribute_name');
+			if (0 == model.childNodes.length) {				// A leaf task - just show the value
+				if ('' == value) return '';
+				var valueFloat = parseFloat(value);
+				if ('number' == typeof valueFloat) { value = Math.round(100.0 * valueFloat) / 100.0 }
+				return value;
+			} else {							// A parent node - sum up the leaf values
+				var valueSum = 0.0;
+				model.cascadeBy(function(child) {
+					if (0 == child.childNodes.length) {		 // Only consider leaf tasks
+						var valueString = child.get('$attribute_name');
+						if ('' == valueString) return;
+						var value = parseFloat(valueString);
+						if ('number' == typeof value) valueSum = valueSum + value; 
+					}
+				});
+				valueSum = Math.round(100.0 * valueSum) / 100.0;
+				return '<b>'+valueSum+'</b>';
+			}
+		},\n"
+
+	}
 	richtext  { set editor ", editor: true" }
 	textarea_small - textarea_small_nospell - textbox_large - textbox_medium - textbox_small { set editor ", editor: true" }
     }
@@ -164,17 +196,20 @@ db_foreach attributes $attributes_sql {
     # Still undefined - Return an error
     if {"undefined" eq $editor} {
 	lappend errors "<b>GanttTreePanel.tcl: Unknown widget</b><br> \
-                               <ul> \
-                               <li>attribute_name=$attribute_name \
-                               <li>widget=$widget_name \
-                               <li>tcl_widget=$tcl_widget \
-                               <li>parameters=$parameters \
-                               </ul><br> \
-                               Tell your SysAdmin to remove attribute=$attribute_name"
+			       <ul> \
+			       <li>attribute_name=$attribute_name \
+			       <li>widget=$widget_name \
+			       <li>tcl_widget=$tcl_widget \
+			       <li>parameters=$parameters \
+			       </ul><br> \
+			       Tell your SysAdmin to remove attribute=$attribute_name"
     }
 
-    multirow append dynfields $attribute_name $pretty_name $widget_name $editor
+    multirow append dynfields $attribute_name $pretty_name $widget_name $editor $renderer
 }
+
+
+set non_editable_summary_activities_json "\['[join $non_editable_summary_activities "', '"]'\]"
 
 
 set error_tbar ""
