@@ -196,7 +196,8 @@ Ext.define('PO.Utilities', {
             }
             tz = tzAbs < 10 ? ('0'+tzAbs) : ''+tzAbs;
 
-            return YYYY+'-'+MM+'-'+DD+' '+hh+':'+mm+':'+ss+tzSign+tz+tzAbsFrac;
+            return YYYY+'-'+MM+'-'+DD+' '+hh+':'+mm+':'+ss;
+            // return YYYY+'-'+MM+'-'+DD+' '+hh+':'+mm+':'+ss+tzSign+tz+tzAbsFrac;
         },
 
         /**
