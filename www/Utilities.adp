@@ -179,7 +179,7 @@ Ext.define('PO.Utilities', {
             YY = ((YYYY = d.getFullYear())+"").substr(2,2);
             MM = (M = d.getMonth()+1) < 10 ? ('0'+M) : M;
             DD = (D = d.getDate()) < 10 ? ('0'+D) : D;
-            th = (D >= 10&&D <= 20) ? 'th' : ((dMod = D%10) == 1) ? 'st' : (dMod == 2) ? 'nd' : (dMod == 3) ? 'rd' : 'th';
+            // th = (D >= 10 && D <= 20) ? 'th' : ((dMod = D % 10) == 1) ? 'st' : (dMod == 2) ? 'nd' : (dMod == 3) ? 'rd' : 'th';
             
             hh = (h = d.getHours()) < 10 ? ('0'+h) : h;
             mm = (m = d.getMinutes()) < 10 ? ('0'+m) : m;
