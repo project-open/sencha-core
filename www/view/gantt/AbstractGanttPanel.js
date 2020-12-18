@@ -623,6 +623,22 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisMonth: Finished');
     },
 
+
+    getWeekNumber: function(d) {
+	// Copy date so don't modify original
+	d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+	// Set to nearest Thursday: current date + 4 - current day number
+	// Make Sunday's day number 7
+	d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+	// Get first day of year
+	var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+	// Calculate full weeks to nearest Thursday
+	var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+	// Return array of year and week number
+	return [d.getUTCFullYear(), weekNo];
+    },
+
+    
     /**
      * Draw a date axis on the top of the diagram
      */
@@ -632,31 +648,24 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
 
         // Calculate the start of the first week of the year
         var axisStartTime = me.axisStartDate.getTime();
-        var firstThu = new Date(axisStartTime);
+
+	var firstThu = new Date(axisStartTime);
         firstThu.setMonth(0,1);                                       		// First Thursday of that year
         firstThu.setHours(0,0,0,0);                                   		// Reset hour and minute to 0
         if (firstThu.getDay() != 4) {
             firstThu.setMonth(0, 1 + ((7 + 4 - firstThu.getDay())) % 7);      	// First Thursday of the year.
         }
-        var startOfFirstWeek = new Date(firstThu.getTime() - 1000 * 3600 * 24 * 3);   // Monday of this first week
-        var year = firstThu.getYear();
+        var now = new Date(firstThu.getTime() - 1000 * 3600 * 24 * 3);		// Monday of this first week
+	now = new Date(now.getTime() - 1000 * 3600 * 24 * 7); 	   		// Go back one week, so we don't have an half empty first week
 
-        // Search the start of the first week within the data axis
-        var week = 0;
-        var now = new Date(startOfFirstWeek.getTime());
-        while (now.getTime() < axisStartTime) {
-            now = new Date(now.getTime() + 1000 * 3600 * 24 * 7);     		// advance by one week
-            week = week + 1;
-        }
-
-        // "now" points to the start of the first week (Monday 00:00 at night) within the data axis
-	now = new Date(now.getTime() - 1000 * 3600 * 24 * 7);                 // Go back one week, so we don't have an half empty first week
         while (now.getTime() < me.axisEndDate.getTime()) {
             var startX = me.date2x(now);
+	    week = me.getWeekNumber(now)[1];
             now = new Date(now.getTime() + 1000 * 3600 * 24 * 7);
             var endX = me.date2x(now);
             var w = endX - startX;
 
+/*
             week = week + 1;
             if (now.getYear() > year) {
                 // The end of the week is in the new year.
@@ -667,36 +676,16 @@ Ext.define('PO.view.gantt.AbstractGanttPanel', {
                     year = now.getYear();
                 }
             }
-
+*/
+	    
             // Show bar + text for the week
-            var axisBar = me.surface.add({
-                type:'rect', 
-                x:startX, y:h, 
-                width:w, height:me.axisHeight, 
-                fill:'#e1e2e1', 
-                stroke:'grey'
-            }).show(true);
-            var axisText = me.surface.add({
-                type: 'text', 
-                text:"W"+week, 
-                x:startX+2, y:h+(me.axisHeight/2), 
-                fill: '#000', 
-                font:"9px Arial"
-            }).show(true);
+            var axisBar = me.surface.add({type:'rect', x:startX, y:h, width:w, height:me.axisHeight, fill:'#e1e2e1', stroke:'grey'}).show(true);
+            var axisText = me.surface.add({type: 'text', text:"W"+week, x:startX+2, y:h+(me.axisHeight/2), fill: '#000', font:"9px Arial"}).show(true);
 
             // Show background bar for the weekend
             var surfaceHeight = me.surface.height;
-            var weekendBar = me.surface.add({
-                type:'rect', 
-                x:startX + w * 5.0 / 7.0,
-                y: me.axisHeight * 2, 
-                width:w * 2.0 / 7.0,
-                height: surfaceHeight - me.axisHeight * 2,
-                fill:'#e1e2e1', 
-                stroke:'#e1e2e1',
-                opacity: 0.4,
-                zIndex: -200						// really at the bottom of all
-            }).show(true);
+            var weekendBar = me.surface.add({type:'rect', x:startX + w * 5.0 / 7.0, y: me.axisHeight * 2, width:w * 2.0 / 7.0, height: surfaceHeight - me.axisHeight * 2,
+                fill:'#e1e2e1', stroke:'#e1e2e1', opacity: 0.4, zIndex: -200}).show(true);		// really at the bottom of all
 
         }
         if (me.debugAxis) console.log('PO.view.gantt.AbstractGanttPanel.drawAxisWeek: Finished');
