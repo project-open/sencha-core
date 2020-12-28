@@ -1,6 +1,6 @@
 # Get DynFields for Timesheet Task
 
-# Build a JavaScript array with the list of all colums enabled by default
+# Build a JS array with the list of all colums enabled by default
 set default_columns "planned_units logged_hours percent_completed assignees"
 set default_columns [parameter::get_from_package_key -package_key "intranet-gantt-editor" -parameter DefaultEnabledColumns -default $default_columns]
 
@@ -76,7 +76,7 @@ db_foreach attributes $attributes_sql {
 
     # Handle specific ]po[ widgets.
     # For example, both "numeric" and textarea_small are of TCL widget "text",
-    # but we want to choose different JavaScript editors ("numberfield" vs. generic)
+    # but we want to choose different JS editors ("numberfield" vs. generic)
     switch $widget_name {
 	checkbox  { set editor "" }
 	date - timestamp { set editor ", editor: 'podatefield'" }
