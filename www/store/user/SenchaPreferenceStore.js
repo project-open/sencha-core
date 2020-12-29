@@ -15,37 +15,37 @@
  */
 
 Ext.define('PO.store.user.SenchaPreferenceStore', {
-    storeId:		'senchaPreferenceStore',
-    extend:		'Ext.data.Store',
-    requires:		['PO.model.user.SenchaPreference'],
-    model: 		'PO.model.user.SenchaPreference',	// Uses standard User as model
-    autoLoad:		false,
-    remoteFilter:	true,					// Do not filter on the Sencha side
-    debug:              false,
-    pageSize:		100000,					// Load all projects, no matter what size(?)
+    storeId:			'senchaPreferenceStore',
+    extend:			'Ext.data.Store',
+    requires:			['PO.model.user.SenchaPreference'],
+    model:			'PO.model.user.SenchaPreference',	// Uses standard User as model
+    autoLoad:			false,
+    remoteFilter:		true,					// Do not filter on the Sencha side
+    debug:			true,
+    pageSize:			100000,					// Load all projects, no matter what size(?)
     proxy: {
-        type:		'rest',					// Standard ]po[ REST interface for loading
-        url:		'/intranet-rest/im_sencha_preference',
-        appendId:	true,
-        timeout:	300000,
-        extraParams: {format: 'json'},				// Overwritten during load()
+        type:			'rest',					// Standard ]po[ REST interface for loading
+        url:			'/intranet-rest/im_sencha_preference',
+        appendId:		true,
+        timeout:		300000,
+        extraParams:		{format: 'json'},			// Overwritten during load()
         reader: {
-            type:		'json',				// Tell the Proxy Reader to parse JSON
-            root:		'data',				// Where do the data start in the JSON file?
-            totalProperty:	'total'				// Total number of tickets for pagination
+            type:		'json',					// Tell the Proxy Reader to parse JSON
+            root:		'data',					// Where do the data start in the JSON file?
+            totalProperty:	'total'					// Total number of tickets for pagination
         },
         writer: {
-            type:		'json'				// Allow Sencha to write ticket changes
+            type:		'json'					// Allow Sencha to write ticket changes
         }
     },
-    deferredSync: null,
+    deferredSync: null,							// Function to sync in 200ms
 
     constructor: function(config) {
         var me = this;
         if (me.debug) console.log('SenchaPreferenceStore.constructor: Started');
         me.callParent([config]);
         // POST the object to the REST API, performing an update
-        me.deferredSync = Ext.Function.createBuffered(me.sync, 1000, me);
+        me.deferredSync = Ext.Function.createBuffered(me.sync, 200, me);
         if (me.debug) console.log('SenchaPreferenceStore.constructor: Finished');
     },
 
@@ -58,15 +58,15 @@ Ext.define('PO.store.user.SenchaPreferenceStore', {
         if (me.debug) console.log('SenchaPreferenceStore.load: Started');
         
         var preferenceUrl = "'" + me.myUrl() + "'";
-	var myUserId = PO.Utilities.userId();
-	var authToken = PO.Utilities.authToken();
+        var myUserId = PO.Utilities.userId();
+        var authToken = PO.Utilities.authToken();
 
         me.getProxy().extraParams = {
             format: 'json',
             preference_url: preferenceUrl,
-	    preference_object_id: myUserId,
-	    user_id: myUserId,
-	    auth_token: authToken
+            preference_object_id: myUserId,
+            user_id: myUserId,
+            auth_token: authToken
         };
         me.callParent([options]);
         if (me.debug) console.log('SenchaPreferenceStore.load: Finished');
