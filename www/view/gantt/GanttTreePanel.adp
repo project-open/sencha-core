@@ -348,26 +348,33 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
         {text: 'Prio', stateId: 'treegrid-prio', flex: 0, width: 40, dataIndex: 'priority', hidden: true, 
          editor: { xtype: 'numberfield', minValue: 0, maxValue: 1000 }
         },
-        {text: 'Status', stateId: 'treegrid-status', flex: 1, hidden: true, dataIndex: 'project_status_id', sortable: false,
-         editor: {
-             xtype: 'combobox',
-             forceSelection: true,
-             allowBlank: false,
-             editable: false,
-             store: Ext.create('Ext.data.Store', {
-                 fields: ['id', 'category'],
-                 data: [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
-             }),
-             displayField: 'category', 
-             valueField: 'id'
-         }, 
-         renderer: function(value) {
-             if ("" == value) return "";
-             var statusStore = Ext.StoreManager.get('taskStatusStore');
-             var model = statusStore.getById(value);
-             if (!model) return "Status #"+value;
-             return model.get('category');
-        }},
+        {
+            text: 'Status',
+            stateId: 'treegrid-status',
+            flex: 1,
+            hidden: true,
+            dataIndex: 'project_status_id',
+            sortable: false,
+            editor: {
+                xtype: 'combobox',
+                forceSelection: true,
+                allowBlank: false,
+                editable: false,
+                store: Ext.create('Ext.data.Store', {
+                    fields: ['id', 'category'],
+                    data: [{id: "76", category: "Open"},{id: "81", category: "Closed"}]
+                }),
+                displayField: 'category', 
+                valueField: 'id'
+            }, 
+            renderer: function(value) {
+                if ("" == value) return "";
+                var statusStore = Ext.StoreManager.get('taskStatusStore');
+                var model = statusStore.getById(value);
+                if (!model) return "Status #"+value;
+                return model.get('category');
+            }
+        },
         {text: 'Project Nr', stateId: 'treegrid-nr', flex: 1, dataIndex: 'project_nr', hidden: true, sortable: false, editor: true},
         {text: 'WBS', stateId: 'treegrid-wbs', flex: 1, dataIndex: 'project_wbs', hidden: true, sortable: false, editor: true},
         {header: 'Effort Driven?', stateId: 'treegrid-effort-driven-p', flex: 0, width: 40, 
