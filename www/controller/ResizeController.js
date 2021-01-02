@@ -143,8 +143,8 @@ Ext.define('PO.controller.ResizeController', {
         me.fullScreenP = true; 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Starting');
 
-	// make sure the main Browser window is not scrolled down
-	window.scrollTo(0,0);
+        // make sure the main Browser window is not scrolled down
+        window.scrollTo(0,0);
 
         me.outerContainer.setSize(Ext.getBody().getViewSize().width, Ext.getBody().getViewSize().height);
 
@@ -168,9 +168,10 @@ Ext.define('PO.controller.ResizeController', {
         document.body.scrollLeft = 0;
         document.body.scrollTop = 0;
 
-	// Check if the surface is smaller than the ganttPanel
-	// and resize and redraw the surface if necessary
-	me.ganttZoomController.onSwitchToFullScreen();
+        // Check if the surface is smaller than the ganttPanel
+        // and resize and redraw the surface if necessary
+	if (me.ganttZoomController)
+            me.ganttZoomController.onSwitchToFullScreen();
 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
     },
@@ -212,13 +213,13 @@ window.onbeforeunload = function() {
     var dirty = false;
     var taskTreeStore = Ext.StoreManager.get('taskTreeStore');
     taskTreeStore.tree.root.eachChild(function(model) { 
-	if (model.dirty) dirty = true;
+        if (model.dirty) dirty = true;
     });
 
     console.log('onBeforeUnload: Finished');
     if (dirty) {
-	return "Are you sure you want to navigate away?";
+        return "Are you sure you want to navigate away?";
     } else {
-	return;
+        return;
     }
 }
