@@ -94,7 +94,7 @@ Ext.define('PO.view.field.POObjectMembers', {
                     // {id:123456, user_id:8864, role:1300}
                     var user_id = parseInt(user.get('user_id'));
                     var rel_id = Math.floor((Math.random() * 10000000000000.0));
-                    result = {id:rel_id, user_id:user_id, role:role};
+                    result = {id:rel_id, user_id:user_id, role_id:role};
                 }
             });
 
