@@ -18,6 +18,7 @@ Ext.define('PO.view.field.POObjectMembers', {
     requires: ['Ext.grid.Panel'],
     alias: 'widget.poobjectmembers',
 
+    debug: true,
     memberStore: null,							// Config: Store with users as candidates for members
     groupStore: null,
     
@@ -27,7 +28,7 @@ Ext.define('PO.view.field.POObjectMembers', {
          * array of members
          */
         parseMembers: function(me, value) {
-            console.log('POObjectMembers.parseMembers: Starting: value='+value);
+            if (me.debug) console.log('POObjectMembers.parseMembers: Starting: value='+value);
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
@@ -43,7 +44,7 @@ Ext.define('PO.view.field.POObjectMembers', {
             }
 
             // if (0 == result.length) return null;
-            console.log('POObjectMembers.parseMembers: Finished');
+            if (me.debug) console.log('POObjectMembers.parseMembers: Finished');
             return result;
         },
 
@@ -52,7 +53,7 @@ Ext.define('PO.view.field.POObjectMembers', {
          * Returns a string with an error message if it can't parse the value.
          */
         parseMembers: function(me, value) {
-            console.log('POObjectMembers.parseMembers: Starting: value='+value);
+            if (me.debug) console.log('POObjectMembers.parseMembers: Starting: value='+value);
 
             if (!Ext.isString(value)) { 
                 return "Value='"+value+"' is not a string but a "+typeof value; 
@@ -94,7 +95,7 @@ Ext.define('PO.view.field.POObjectMembers', {
                     // {id:123456, user_id:8864, percent:0.0}
                     var user_id = parseInt(user.get('user_id'));
                     var rel_id = Math.floor((Math.random() * 10000000000000.0));
-                    result = {id:rel_id, user_id:user_id, percent:percent};
+                    result = [{id:rel_id, user_id:user_id, percent:percent}];
                 }
             });
 
@@ -110,7 +111,7 @@ Ext.define('PO.view.field.POObjectMembers', {
          * Returns 100 for an empty or invalid string.
          */
         parseMembersPercent: function(me, percentString) {
-            console.log('POObjectMembers.parseMembersPercent: Starting: str='+percentString);
+            if (me.debug) console.log('POObjectMembers.parseMembersPercent: Starting: str='+percentString);
             if (!Ext.isString(percentString) || 0 == percentString.length) { return 100.0; }
 
             var str = percentString;
@@ -134,9 +135,9 @@ Ext.define('PO.view.field.POObjectMembers', {
          * Format membership list to a String
          */
         formatMembers: function(me, memberExpr) {
-            console.log('POObjectMembers.formatMembers: Starting: memberExpr='+memberExpr);
-	    console.log(me);
-	    console.log(memberExpr);
+            if (me.debug) console.log('POObjectMembers.formatMembers: Starting: memberExpr='+memberExpr);
+	    if (me.debug) console.log(me);
+	    if (me.debug) console.log(memberExpr);
             if (Ext.isString(memberExpr)) { return memberExpr; }
 
             var projectMemberStore = me.memberStore;
@@ -171,7 +172,7 @@ Ext.define('PO.view.field.POObjectMembers', {
     
     initValue: function() {
         var me = this;
-        console.log('POObjectMembers.initValue: Starting');
+        if (me.debug) console.log('POObjectMembers.initValue: Starting');
         var value = me.value;
         if (Ext.isString(value)) {
             me.value = me.rawToValue(value);					// If a String value was supplied, try to convert it to a proper Date
@@ -181,35 +182,35 @@ Ext.define('PO.view.field.POObjectMembers', {
 
     getErrors: function(value) {
         var me = this;
-        console.log('POObjectMembers.getErrors: Starting');
+        if (me.debug) console.log('POObjectMembers.getErrors: Starting');
         return [];								// Empty list of errors at the moment
     },
 
     rawToValue: function(rawValue) {
         var me = this;
-        console.log('POObjectMembers.rawToValue: Starting');
+        if (me.debug) console.log('POObjectMembers.rawToValue: Starting');
         var val = this.statics().parseMembers(me, rawValue) || rawValue || null;
 
         // if (val.constructor === Array) { if (val.length == 0) { val = ""; } }
 
-        console.log('POObjectMembers.rawToValue: '+rawValue+' -> '+val);
-        console.log(val);
+        if (me.debug) console.log('POObjectMembers.rawToValue: '+rawValue+' -> '+val);
+        if (me.debug) console.log(val);
 
         return val;
     },
 
     valueToRaw: function(value) {
         var me = this;
-        console.log('POObjectMembers.valueToRaw: Starting, value='+value);
+        if (me.debug) console.log('POObjectMembers.valueToRaw: Starting, value='+value);
 	if (!value) return "";
         var raw = this.statics().formatMembers(me, value);
-        console.log('POObjectMembers.valueToRaw: '+value+' -> '+raw);
+        if (me.debug) console.log('POObjectMembers.valueToRaw: '+value+' -> '+raw);
         return raw;
     },
 
     getSubmitValue: function() {
         var me = this;
-        console.log('POObjectMembers.getSubmitValue: Starting');
+        if (me.debug) console.log('POObjectMembers.getSubmitValue: Starting');
         var value = this.getValue();
         return value;
     },
@@ -221,7 +222,7 @@ Ext.define('PO.view.field.POObjectMembers', {
      */
     onTriggerClick: function(a, b, c, d) {
         var me = this;
-        console.log('POObjectMembers.onTriggerClick: Starting');
+        if (me.debug) console.log('POObjectMembers.onTriggerClick: Starting');
 
         alert('ToDo');
         
