@@ -8,7 +8,7 @@
  */
 
 /**
- * A special editor field used to assign members to any business object.
+ * A special editor field used to edit members of a business object.
  * There are normal members and administrative members.
  * This field started off as a copy of the POTaskAssingment field,
  * but there are too many differences to unify the two.
@@ -18,35 +18,42 @@ Ext.define('PO.view.field.POObjectMembers', {
     requires: ['Ext.grid.Panel'],
     alias: 'widget.poobjectmembers',
 
+    memberStore: null,							// Config: Store with users as candidates for members
+    groupStore: null,
+    
     statics: {
         /**
          * Covert a comma separated list of initials into an 
-         * array of user assignments
+         * array of members
          */
         parseMembers: function(me, value) {
+            console.log('POObjectMembers.parseMembers: Starting: value='+value);
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
-	    // if ("" == value) return null;
+            // if ("" == value) return null;
 
             var names = value.split(";");
             for(var i = 0; i < names.length; i++) {
                 var name = names[i];						// BB[20%]
-                var assigObject = this.parseAssignment(me, name);
-                if (!Ext.isString(assigObject) && null != assigObject) {
-                    result.push(assigObject);
+                var memberObject = this.parseMembers(me, name);
+                if (!Ext.isString(memberObject) && null != memberObject) {
+                    result.push(memberObject);
                 }
             }
 
-	    // if (0 == result.length) return null;
+            // if (0 == result.length) return null;
+            console.log('POObjectMembers.parseMembers: Finished');
             return result;
         },
 
         /**
-         * Returns an assignment object if it can successfully parse a value like "BB[80%]".
+         * Returns a member object if it can successfully parse a value like "BB[PM]".
          * Returns a string with an error message if it can't parse the value.
          */
-        parseAssignment: function(me, value) {
+        parseMembers: function(me, value) {
+            console.log('POObjectMembers.parseMembers: Starting: value='+value);
+
             if (!Ext.isString(value)) { 
                 return "Value='"+value+"' is not a string but a "+typeof value; 
             }
@@ -64,16 +71,15 @@ Ext.define('PO.view.field.POObjectMembers', {
                 initials = initials + value.substr(0,1);
                 percentString = percentString.substring(1,value.length);
             }
-            var percent = this.parseAssignmentPercent(me, percentString.trim());	// Number indicating percent or an error
+            var percent = this.parseMembersPercent(me, percentString.trim());	// Number indicating percent or an error
             if (Ext.isString(percent)) { return percent; }	     		// Return an error string
 
             // ToDo: Sort the user store alphabetically in order to create
             // deterministic results
             var result = null;
 
-	    alert('Looking for project member store');
-
-	    var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
+            // var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
+            var projectMemberStore = me.memberStore;
             var letters = value.toUpperCase().split("");
             projectMemberStore.each(function(user) {
                 if (null != result) { return; }
@@ -92,9 +98,9 @@ Ext.define('PO.view.field.POObjectMembers', {
                 }
             });
 
-	    if (null == result) {
-		me.markInvalid('Unable to parse assignment "'+value+'"');
-	    }
+            if (null == result) {
+                me.markInvalid('Unable to parse member expression "'+value+'"');
+            }
 
             return result;
         },
@@ -103,7 +109,8 @@ Ext.define('PO.view.field.POObjectMembers', {
          * Parse a string like "[80%]" into the number 80.
          * Returns 100 for an empty or invalid string.
          */
-        parseAssignmentPercent: function(me, percentString) {
+        parseMembersPercent: function(me, percentString) {
+            console.log('POObjectMembers.parseMembersPercent: Starting: str='+percentString);
             if (!Ext.isString(percentString) || 0 == percentString.length) { return 100.0; }
 
             var str = percentString;
@@ -124,35 +131,37 @@ Ext.define('PO.view.field.POObjectMembers', {
         },
 
         /**
-         * Format assignments to a String
+         * Format membership list to a String
          */
-        formatMembers: function(assig) {
-            if (Ext.isString(assig)) { return assig; }
-	    alert('Looking for project member store');
-            var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
-	    alert('Looking for group store');
-            var groupStore = Ext.StoreManager.get('groupStore');
+        formatMembers: function(me, memberExpr) {
+            console.log('POObjectMembers.formatMembers: Starting: memberExpr='+memberExpr);
+	    console.log(me);
+	    console.log(memberExpr);
+            if (Ext.isString(memberExpr)) { return memberExpr; }
+
+            var projectMemberStore = me.memberStore;
+            var groupStore = me.groupStore;
 
             var result = "";
-            if (null != assig) {
-                assig.forEach(function(assignee) {
+            if (null != memberExpr) {
+                memberExpr.forEach(function(member) {
                     if ("" != result) { result = result + ";"; }
-                    var userId = ""+assignee.user_id;
+                    var userId = ""+member.user_id;
                     var userModel = projectMemberStore.getById(userId);
-		    var groupModel = groupStore.getById(userId);
-		    if (null == userModel && null == groupModel) { 
-			// This can happen when moving sub-projects around, even though it shouldn't...
-			result = result + '#'+userId;
-		    } else {
-			if (null != userModel) {
-			    result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
-			}
-			if (null != groupModel) {
-			    result = result + groupModel.get('group_name');
-			}
-		    }
-                    if (100 != assignee.percent) {
-                        result = result + '['+assignee.percent+'%]';
+                    var groupModel = groupStore.getById(userId);
+                    if (null == userModel && null == groupModel) { 
+                        // This can happen when moving sub-projects around, even though it shouldn't...
+                        result = result + '#'+userId;
+                    } else {
+                        if (null != userModel) {
+                            result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
+                        }
+                        if (null != groupModel) {
+                            result = result + groupModel.get('group_name');
+                        }
+                    }
+                    if (100 != member.percent) {
+                        result = result + '['+member.percent+'%]';
                     }
                 });
             }
@@ -162,6 +171,7 @@ Ext.define('PO.view.field.POObjectMembers', {
     
     initValue: function() {
         var me = this;
+        console.log('POObjectMembers.initValue: Starting');
         var value = me.value;
         if (Ext.isString(value)) {
             me.value = me.rawToValue(value);					// If a String value was supplied, try to convert it to a proper Date
@@ -171,28 +181,35 @@ Ext.define('PO.view.field.POObjectMembers', {
 
     getErrors: function(value) {
         var me = this;
+        console.log('POObjectMembers.getErrors: Starting');
         return [];								// Empty list of errors at the moment
     },
 
     rawToValue: function(rawValue) {
-	var me = this;
-	var val = this.statics().parseMembers(me, rawValue) || rawValue || null;
+        var me = this;
+        console.log('POObjectMembers.rawToValue: Starting');
+        var val = this.statics().parseMembers(me, rawValue) || rawValue || null;
 
-	// if (val.constructor === Array) { if (val.length == 0) { val = ""; } }
+        // if (val.constructor === Array) { if (val.length == 0) { val = ""; } }
 
-	console.log('POObjectMembers.rawToValue: '+rawValue+' -> '+val);
-	console.log(val);
+        console.log('POObjectMembers.rawToValue: '+rawValue+' -> '+val);
+        console.log(val);
 
         return val;
     },
 
     valueToRaw: function(value) {
-        var raw = this.statics().formatMembers(value);
-	console.log('POObjectMembers.valueToRaw: '+value+' -> '+raw);
+        var me = this;
+        console.log('POObjectMembers.valueToRaw: Starting, value='+value);
+	if (!value) return "";
+        var raw = this.statics().formatMembers(me, value);
+        console.log('POObjectMembers.valueToRaw: '+value+' -> '+raw);
         return raw;
     },
 
     getSubmitValue: function() {
+        var me = this;
+        console.log('POObjectMembers.getSubmitValue: Starting');
         var value = this.getValue();
         return value;
     },
@@ -200,13 +217,14 @@ Ext.define('PO.view.field.POObjectMembers', {
 
     /**
      * Open the TaskProperty panel with the Members
-     * tab open in order to edit assignments.
+     * tab open in order to edit membership.
      */
     onTriggerClick: function(a, b, c, d) {
         var me = this;
+        console.log('POObjectMembers.onTriggerClick: Starting');
 
-	alert('ToDo');
-	
+        alert('ToDo');
+        
         var treePanel = Ext.getCmp('ganttTreePanel');
         var value = treePanel.getSelectionModel().getLastSelected();
         var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
