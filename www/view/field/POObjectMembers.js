@@ -23,7 +23,7 @@ Ext.define('PO.view.field.POObjectMembers', {
          * Covert a comma separated list of initials into an 
          * array of user assignments
          */
-        parseAssignments: function(me, value) {
+        parseMembers: function(me, value) {
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
@@ -70,7 +70,10 @@ Ext.define('PO.view.field.POObjectMembers', {
             // ToDo: Sort the user store alphabetically in order to create
             // deterministic results
             var result = null;
-            var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
+
+	    alert('Looking for project member store');
+
+	    var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
             var letters = value.toUpperCase().split("");
             projectMemberStore.each(function(user) {
                 if (null != result) { return; }
@@ -123,9 +126,11 @@ Ext.define('PO.view.field.POObjectMembers', {
         /**
          * Format assignments to a String
          */
-        formatAssignments: function(assig) {
+        formatMembers: function(assig) {
             if (Ext.isString(assig)) { return assig; }
+	    alert('Looking for project member store');
             var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
+	    alert('Looking for group store');
             var groupStore = Ext.StoreManager.get('groupStore');
 
             var result = "";
@@ -171,7 +176,7 @@ Ext.define('PO.view.field.POObjectMembers', {
 
     rawToValue: function(rawValue) {
 	var me = this;
-	var val = this.statics().parseAssignments(me, rawValue) || rawValue || null;
+	var val = this.statics().parseMembers(me, rawValue) || rawValue || null;
 
 	// if (val.constructor === Array) { if (val.length == 0) { val = ""; } }
 
@@ -182,7 +187,7 @@ Ext.define('PO.view.field.POObjectMembers', {
     },
 
     valueToRaw: function(value) {
-        var raw = this.statics().formatAssignments(value);
+        var raw = this.statics().formatMembers(value);
 	console.log('POObjectMembers.valueToRaw: '+value+' -> '+raw);
         return raw;
     },
@@ -194,16 +199,19 @@ Ext.define('PO.view.field.POObjectMembers', {
 
 
     /**
-     * Open the TaskProperty panel with the Assignments
+     * Open the TaskProperty panel with the Members
      * tab open in order to edit assignments.
      */
     onTriggerClick: function(a, b, c, d) {
         var me = this;
+
+	alert('ToDo');
+	
         var treePanel = Ext.getCmp('ganttTreePanel');
         var value = treePanel.getSelectionModel().getLastSelected();
         var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
         taskPropertyPanel.setValue(value);
-        taskPropertyPanel.setActiveTab('taskPropertyAssignments');
+        taskPropertyPanel.setActiveTab('taskPropertyMembers');
         taskPropertyPanel.show();						// Show handled by picker management
     }
 });
