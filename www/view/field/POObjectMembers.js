@@ -21,6 +21,7 @@ Ext.define('PO.view.field.POObjectMembers', {
     debug: false,
     memberStore: null,							// Config: Store with users as candidates for members
     groupStore: null,
+    gridPanelId: null,							// ID of underlying panel that has a selection model
     
     statics: {
         /**
@@ -174,6 +175,17 @@ Ext.define('PO.view.field.POObjectMembers', {
             return result;
         }
     },										// End statics
+
+
+    // Add specialkey listener
+    initComponent: function() {
+        var me = this;
+        if (me.debug) console.log('POObjectMembers.initComponent: Starting');
+        this.callParent();
+        me.gridPanelId = me.initialConfig.gridPanelId;
+        if (me.debug) console.log('POObjectMembers.initComponent: Finished');
+    },
+
     
     initValue: function() {
         var me = this;
@@ -229,14 +241,26 @@ Ext.define('PO.view.field.POObjectMembers', {
         var me = this;
         if (me.debug) console.log('POObjectMembers.onTriggerClick: Starting');
 
-        alert('ToDo');
-        
+        var panel = Ext.getCmp(me.gridPanelId);
+        var value = panel.getSelectionModel().getLastSelected();
+        var taskPropertyPanel = Ext.getCmp('objectMemberPanel');
+        taskPropertyPanel.setValue(value);
+        taskPropertyPanel.setActiveTab('taskPropertyMembers');
+        taskPropertyPanel.show();						// Show handled by picker management
+
+
+
+
         var treePanel = Ext.getCmp('ganttTreePanel');
         var value = treePanel.getSelectionModel().getLastSelected();
         var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
         taskPropertyPanel.setValue(value);
-        taskPropertyPanel.setActiveTab('taskPropertyMembers');
+        taskPropertyPanel.setActiveTab('taskPropertyAssignments');
         taskPropertyPanel.show();						// Show handled by picker management
+
+
+
+
     }
 });
 
