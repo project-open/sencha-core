@@ -3,7 +3,7 @@
 // Copyright (C) 2013 ]project-open[
 //
 // All rights reserved. Please see
-// http://www.project-open.com/license/ for details.
+// https://www.project-open.com/license/ for details.
 
 /**
  * Stores all tasks of a single project as a hierarchical tree.

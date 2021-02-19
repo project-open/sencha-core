@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2014 ]project-open[
  * All rights reserved. Please see
- * http://www.absence-open.com/license/sencha/ for details.
+ * https://www.absence-open.com/license/sencha/ for details.
  *
  * This is the default Sencha model for absences with all
  * important fields available from the ]po[ data-model.

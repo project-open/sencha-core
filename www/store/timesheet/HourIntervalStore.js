@@ -3,7 +3,7 @@
 // Copyright (C) 2013-2014 ]project-open[
 //
 // All rights reserved. Please see
-// http://www.project-open.com/license/ for details.
+// https://www.project-open.com/license/ for details.
 
 Ext.define('PO.store.timesheet.HourIntervalStore', {
     extend:         'Ext.data.Store',

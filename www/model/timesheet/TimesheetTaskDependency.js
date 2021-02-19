@@ -3,7 +3,7 @@
 // Copyright (C) 2015 ]project-open[
 //
 // All rights reserved. Please see
-// http://www.project-open.com/license/ for details.
+// https://www.project-open.com/license/ for details.
 
 /**
  * A TimesheetTaskDependency represents a dependency

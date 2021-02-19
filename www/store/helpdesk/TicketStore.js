@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2014 ]ticket-open[
  * All rights reserved. Please see
- * http://www.ticket-open.com/license/sencha/ for details.
+ * https://www.ticket-open.com/license/sencha/ for details.
  */
 
 Ext.define('PO.store.helpdesk.TicketStore', {

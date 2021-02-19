@@ -42,7 +42,7 @@ Ext.define('PO.Utilities', {
                 title: title,
                 msg: "Error saving data on the server side.<br>&nbsp;<br>"+
                     "Send error message to ]project-open[ for incident reporting?<br>"+
-                    "Please see our <a href='http://www.project-open.com/en/company/project-open-privacy.html' target='_'>privacy statementy</a> "+
+                    "Please see our <a href='https://www.project-open.com/en/company/project-open-privacy.html' target='_'>privacy statementy</a> "+
                     "for details.<br><pre>" + msgLimited+"</pre>",
                 minWidth: 600,
                 buttonText: { yes: "Report this Error" },
@@ -50,7 +50,7 @@ Ext.define('PO.Utilities', {
                 fn: function(text) {
                     if (text == 'yes') {
                         Ext.Ajax.request({
-                            url: "http://www.project-open.net/intranet-forum/new-system-incident",
+                            url: "https://www.project-open.net/intranet-forum/new-system-incident",
                             method: 'POST',
                             headers: { 
                                 'Content-Type': 'multipart/form-data',

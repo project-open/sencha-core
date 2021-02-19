@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2014 ]project-open[
  * All rights reserved. Please see
- * http://www.user-open.com/license/sencha/ for details.
+ * https://www.user-open.com/license/sencha/ for details.
  *
  * This is the default Sencha model for users with all
  * important fields available from the ]po[ data-model.

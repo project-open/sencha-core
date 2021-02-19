@@ -37,7 +37,7 @@ Ext.define('PO.view.menu.AlphaMenu', {
 	var ticket_status_id = me.ticketStatusId;
 	var conf_item_id = me.confItemId;
 	var ticketStore = Ext.create('PO.store.helpdesk.TicketStore');
-	var serverUrl = "http://www.project-open.net";
+	var serverUrl = "https://www.project-open.net";
 
 	var item = Ext.create('Ext.menu.Item', {
 	    text: "Register yourself at ]po[ Server",

@@ -3,7 +3,7 @@
 // Copyright (C) 2013-2020 ]project-open[
 //
 // All rights reserved. Please see
-// http://www.project-open.com/license/ for details.
+// https://www.project-open.com/license/ for details.
 
 /**
  * BudgetItem represents one line of a (project) budget.

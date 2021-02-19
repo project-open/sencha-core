@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2014 ]project-open[
  * All rights reserved. Please see
- * http://www.project-open.com/license/sencha/ for details.
+ * https://www.project-open.com/license/sencha/ for details.
  *
  * This is the default Sencha model for groups and sub-
  * types including "im_profile" and "im_ticket_queue" with 
