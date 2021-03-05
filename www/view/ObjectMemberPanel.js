@@ -18,9 +18,6 @@ Ext.define('PO.view.ObjectMemberPanel', {
 
     title: 				'Members',
     id:					'objectMemberPanel',
-    senchaPreferenceStore:		null,
-    userStore:				null,
-    
     debug:				false,
     width:				500,
     height:				420,
@@ -31,14 +28,16 @@ Ext.define('PO.view.ObjectMemberPanel', {
     modal:				false,
     layout:				'fit',
 
-    taskModel: 				null,				// Set by setValue() before show()
+    objectMemberField: 			null,				// Field to which this panel is attached
+    potentialMemberStore:		null,				// List of all potential members
+    actualMemberStore: 			null,				// List of actual members selected
     
     initComponent: function() {
         var me = this;
         if (me.debug) console.log('PO.view.ObjectMemberPanel.initialize: Starting');
         this.callParent(arguments);
 
-        // Define a model for members
+        // Members are an extension of the User model with role
         Ext.define("PO.model.ObjectMemberModel", {
             extend: "PO.model.user.User",
             fields: [
@@ -48,10 +47,11 @@ Ext.define('PO.view.ObjectMemberPanel', {
         });
 
         // New store for keeping member data, setValue() adds the data.
-        var objectMemberStore = Ext.create('Ext.data.Store', {
-            id: 'objectMemberStore',
+        var actualMemberStore = Ext.create('Ext.data.Store', {
+            id: 'actualMemberStore',
             model: 'PO.model.ObjectMemberModel'
         });
+	me.actualMemberStore = actualMemberStore;
 
         // Row editor for the TaskMembersPanel.
         var taskMemberRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
@@ -60,7 +60,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
             autoCancel: true,
             valueModels: null,                                                 // set by "select" event of combobox
             listeners: {
-                // The user_id or role_id have changed. Write the changes back into the objectMemberStore.
+                // The user_id or role_id have changed. Write the changes back into the actualMemberStore.
                 edit: function(rowEditing, context, eOpts) {
                     if ("name" != context.field && "id" != context.field) { return; }
                     var userModels = this.valueModels;
@@ -75,10 +75,10 @@ Ext.define('PO.view.ObjectMemberPanel', {
         });
         
         // Grid with assigned users
-        var objectMembers = Ext.create('Ext.grid.Panel', {
+        var objectMembersPanel = Ext.create('Ext.grid.Panel', {
             title: 'Members',
             id: 'objectMembers',
-            store: objectMemberStore,
+            store: actualMemberStore,
             width: 200,
             debug: me.debug,
             stateful: true,
@@ -91,7 +91,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
                 { text: 'Initials', width: 60, dataIndex: 'initials', hidden: false},
                 { text: 'Name', dataIndex: 'name', flex: 1, editor: {
                     xtype: 'combobox',
-                    store: Ext.StoreManager.get('objectMemberStore'),
+                    store: me.potentialMemberStore,
                     displayField: 'name',
                     valueField: 'name',
                     queryMode: 'local',
@@ -120,8 +120,8 @@ Ext.define('PO.view.ObjectMemberPanel', {
         // Small controller in order to handle the (+) / (-) buttons for
         // adding and removing users.
         var objectMembersController = Ext.create('Ext.app.Controller', {
-            objectMemberStore: objectMemberStore,
-            objectMembers: objectMembers,    
+            actualMemberStore: actualMemberStore,
+            objectMembersPanel: objectMembersPanel,    
             init: function() {
                 var me = this;
                 this.control({
@@ -133,10 +133,9 @@ Ext.define('PO.view.ObjectMemberPanel', {
             onAssigButtonAdd: function(button, event) {
                 var me = this;
                 if (me.debug) console.log('ObjectMemberPanel.objectMembersController.onAssigButtonAdd');
-                var newRecord = me.objectMemberStore.add({role_id:100})[0];
+                var newRecord = me.actualMemberStore.add({role_id:1300})[0];
 
-                // Cancel editing
-                var editing = me.objectMembers.editingPlugin;
+                var editing = me.objectMembersPanel.editingPlugin;
                 editing.cancelEdit();
                 editing.startEdit(newRecord, 0);                       		// Start editing the first row
             },
@@ -145,17 +144,17 @@ Ext.define('PO.view.ObjectMemberPanel', {
                 if (me.debug) console.log('ObjectMemberPanel.objectMembersController.onAssigButtonDel');
 
                 // Cancel editing
-                var editing = me.objectMembers.editingPlugin;
+                var editing = me.objectMembersPanel.editingPlugin;
                 editing.cancelEdit();
 
-                var lastSelected = me.objectMembers.getSelectionModel().getLastSelected();
+                var lastSelected = me.objectMembersPanel.getSelectionModel().getLastSelected();
                 if (lastSelected) {
-                    me.objectMemberStore.remove(lastSelected);
+                    me.actualMemberStore.remove(lastSelected);
                 } else {
                     // Apparently no row selected yet. Never mind, use the last one...
-                    var last = me.objectMemberStore.last();
+                    var last = me.actualMemberStore.last();
                     if (last)
-                        me.objectMemberStore.remove(last);
+                        me.actualMemberStore.remove(last);
                 }
             }
         }).init();
@@ -164,7 +163,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
             id: 'taskPropertyTabpanel',
             border: false,
             items: [
-                objectMembers
+                objectMembersPanel
             ],
             buttons: [{
                 text: 'OK',
@@ -179,8 +178,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
         me.add(taskPropertyTabpanel);
 
         // store panels in the main object
-        me.objectMemberStore = objectMemberStore;
-        me.objectMembers = objectMembers;
+        me.objectMembersPanel = objectMembersPanel;
         me.taskPropertyTabpanel = taskPropertyTabpanel;
 
         if (me.debug) console.log('PO.view.ObjectMemberPanel.initialize: Finished');
@@ -193,63 +191,16 @@ Ext.define('PO.view.ObjectMemberPanel', {
         var me = this;
         if (me.debug) console.log('PO.view.ObjectMemberPanel.onButtonOK');
 
-	// Finish the editor of the TaskASsigments list in case the user didn't press "Update" yet.
-	var editing = me.objectMembers.editingPlugin;
-	editing.completeEdit();
+        // Finish the editor of the TaskASsigments list in case the user didn't press "Update" yet.
+        var editing = me.objectMembersPanel.editingPlugin;
+        editing.completeEdit();
         
         // ---------------------------------------------------------------
-        // "General" form panel with start- and end date, %done, work etc.
-        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);	// get all fields into object
-
-        var oldStartDate = me.taskModel.get('start_date');
-        var oldEndDate = me.taskModel.get('end_date');
-        var newStartDate = fields['start_date'];
-        var newEndDate = fields['end_date'];
-        if (oldStartDate.substring(0,10) == newStartDate) { fields['start_date'] = oldStartDate; }	// start has no time
-        if (oldEndDate.substring(0,10) == newEndDate) { fields['end_date'] = oldEndDate; }	 	// start has no time
-
-        var plannedUnits = fields['planned_units'];
-        if (undefined == plannedUnits) { plannedUnits = 0; }
-
-        // fix boolean vs. 't'/'f' checkbox for milestone_p
-        switch (fields['milestone_p']) {
-        case true: 
-            fields['milestone_p'] = 't';						// use 't' and 'f', not true and false!
-            fields['iconCls'] = 'icon-milestone';					// special icon for milestones
-            fields['end_date'] = fields['start_date'];					// Milestones have end_date = start_date
-            fields['planned_units'] = "0";             			                // Milestones don't have planned_units
-            break;
-        default: 
-            fields['milestone_p'] = 'f'; 
-            fields['iconCls'] = 'icon-task';						// special icon for non-milestones
-            fields['planned_units'] = ""+plannedUnits;              			// Convert the numberfield integer to string used in model.
-            break;	      								// '' is database "null" value in ]po[
-        }
-
-        // fix boolean vs. 't'/'f' checkbox for effort_driven_p
-        switch (fields['effort_driven_p']) {
-        case true: 
-            fields['effort_driven_p'] = 't';						// use 't' and 'f', not true and false!
-            break;
-        default: 
-            fields['effort_driven_p'] = 'f'; 
-            break;
-        }
-
-        me.taskModel.set(fields); 							// write all fields into model
-        
-        // ---------------------------------------------------------------
-        // Notes form
-        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
-        me.taskModel.set(fields);
-
-        // ---------------------------------------------------------------
-        // Deal with Assignations
-        var oldAssignees = me.taskModel.get('assignees');
+        // Store Assignations
         var newAssignees = [];
-        me.objectMemberStore.each(function(assig) {
+        me.actualMemberStore.each(function(assig) {
             var user_id = assig.get('user_id');
-	    if ("" == user_id) return;
+            if ("" == user_id) return;
             if (me.debug) console.log('PO.view.ObjectMemberPanel.onButtonOK: user_id='+user_id);
             var rel_id = parseInt(assig.get('rel_id'));
             if (!rel_id) { rel_id = null; }
@@ -263,10 +214,11 @@ Ext.define('PO.view.ObjectMemberPanel', {
         // Compare old with new assignees
         var oldAssigneesNorm = {};
         var newAssigneesNorm = {};
-        oldAssignees.forEach(function(v) { oldAssigneesNorm[v.user_id] = v.role_id; });
+        me.oldValue.forEach(function(v) { oldAssigneesNorm[v.user_id] = v.role_id; });
         newAssignees.forEach(function(v) { newAssigneesNorm[v.user_id] = v.role_id; });
         if (JSON.stringify(oldAssigneesNorm) !== JSON.stringify(newAssigneesNorm)) {
-            me.taskModel.set('assignees', newAssignees);
+            // Write new value to field
+            me.objectMemberField.setValue(newAssignees);
         }
 
         me.hide();									// hide the TaskProperty panel
@@ -299,28 +251,41 @@ Ext.define('PO.view.ObjectMemberPanel', {
     },
 
     /**
+     * Where should we write the results when finished?
+     * Used by onButtonOk to save values.
+     */
+    setField: function(formField) {
+        var me = this;
+        me.objectMemberField = formField;
+    },
+    
+    setStore: function(store) {
+        var me = this;
+        me.potentialMemberStore = store;
+    },
+
+    /**
      * Show the properties of the specified task model.
      * Write changes back to the task immediately (at the moment).
      */
     setValue: function(memberArray) {
         var me = this;
         if (me.debug) console.log('PO.view.ObjectMemberPanel.setValue: Starting');
-        var objectMemberStore = Ext.StoreManager.get('objectMemberStore');
 
-        // Load the data into the various forms
-        // me.taskPropertyFormGeneral.getForm().loadRecord(task);
-        // me.taskPropertyFormNotes.getForm().loadRecord(task);
+        // Remember old value for comparison
+        me.oldValue = memberArray;
 
-        // Load member information into the memberStore
-        me.objectMemberStore.removeAll();
+        // Load member information into the potentialMemberStore
+        var actualMemberStore = Ext.StoreManager.get('actualMemberStore');
+        me.actualMemberStore.removeAll();
         if (memberArray.constructor !== Array) { memberArray = []; }         		// Newly created?
         memberArray.forEach(function(v) {
             var userId = ""+v.user_id;
-            var userModel = me.userStore.getById(userId);
+            var userModel = me.potentialMemberStore.getById(userId);
             if (!userModel) { return; }                                      		// User not set in member row
             var assigModel = new PO.model.ObjectMemberModel(userModel.data);
             assigModel.set('role_id', v.role_id);
-            me.objectMemberStore.add(assigModel);
+            me.actualMemberStore.add(assigModel);
         });
 
         if (me.debug) console.log('PO.view.ObjectMemberPanel.setValue: Finished');

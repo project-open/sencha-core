@@ -22,6 +22,8 @@ Ext.define('PO.view.field.POObjectMembers', {
     memberStore: null,							// Config: Store with users as candidates for members
     groupStore: null,
     gridPanelId: null,							// ID of underlying panel that has a selection model
+
+    objectMemberPanel: null,						// Singleton
     
     statics: {
         /**
@@ -33,8 +35,6 @@ Ext.define('PO.view.field.POObjectMembers', {
             if (!Ext.isString(value)) {return value; }
 
             var result = [];
-            // if ("" == value) return null;
-
             var names = value.split(";");
             for(var i = 0; i < names.length; i++) {
                 var name = names[i];						// BB[20%]
@@ -75,14 +75,10 @@ Ext.define('PO.view.field.POObjectMembers', {
             var role = this.parseMembersRole(me, roleString.trim());	        // FullMember = 1300
             if (Ext.isString(role)) { return role; }	     		// Return an error string
 
-            // ToDo: Sort the user store alphabetically in order to create
-            // deterministic results
+            // ToDo: Sort the user alphabetically in order to create deterministic results
             var result = null;
-
-            // var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
-            var projectMemberStore = me.memberStore;
             var letters = value.toUpperCase().split("");
-            projectMemberStore.each(function(user) {
+            me.memberStore.each(function(user) {
                 if (null != result) { return; }
                 var firstNames = user.get('first_names');
                 var lastName = user.get('last_name');
@@ -146,15 +142,12 @@ Ext.define('PO.view.field.POObjectMembers', {
             }
 
             if (me.debug) console.log('POObjectMembers.formatMembers: Starting: memberExpr='+memberExpr);
-            var projectMemberStore = me.memberStore;
-            var groupStore = me.groupStore;
-	    
             var result = "";
             memberExpr.forEach(function(member) {
                 if ("" != result) { result = result + ";"; }
                 var userId = ""+member.user_id;
-                var userModel = projectMemberStore.getById(userId);
-                var groupModel = groupStore.getById(userId);
+                var userModel = me.memberStore.getById(userId);
+                var groupModel = me.groupStore.getById(userId);
                 if (null == userModel && null == groupModel) { 
                     // This can happen when moving sub-projects around, even though it shouldn't...
                     result = result + '#'+userId;
@@ -167,18 +160,17 @@ Ext.define('PO.view.field.POObjectMembers', {
                     }
                 }
                 if (!!member.role && 1300 != member.role) {
-        	    var roleString = ""
-        	    switch (member.role) {
-        	    case 1310: roleString = "M"; break;
-        	    default: roleString = "#"+member.role;
-        	    }
+                    var roleString = ""
+                    switch (member.role) {
+                    case 1310: roleString = "M"; break;
+                    default: roleString = "#"+member.role;
+                    }
                     result = result + '['+roleString+']';
                 }
             });
             return result;
         }
     },									// End statics
-
 
     // Add specialkey listener
     initComponent: function() {
@@ -188,7 +180,6 @@ Ext.define('PO.view.field.POObjectMembers', {
         me.gridPanelId = me.initialConfig.gridPanelId;
         if (me.debug) console.log('POObjectMembers.initComponent: Finished');
     },
-
     
     initValue: function() {
         var me = this;
@@ -210,12 +201,8 @@ Ext.define('PO.view.field.POObjectMembers', {
         var me = this;
         if (me.debug) console.log('POObjectMembers.rawToValue: Starting');
         var val = this.statics().parseMembers(me, rawValue) || rawValue || null;
-
-        // if (val.constructor === Array) { if (val.length == 0) { val = ""; } }
-
         if (me.debug) console.log('POObjectMembers.rawToValue: '+rawValue+' -> '+val);
         if (me.debug) console.log(val);
-
         return val;
     },
 
@@ -248,20 +235,37 @@ Ext.define('PO.view.field.POObjectMembers', {
         var budgetItem = panel.getSelectionModel().getLastSelected();
 
         var fieldValue = this.getValue();
-        var objectMemberPanel = Ext.getCmp('objectMemberPanel');
-        objectMemberPanel.show();						// Show handled by picker management
-        objectMemberPanel.setValue(fieldValue);
-        objectMemberPanel.setActiveTab('objectMembers');
+
 
 	if (0) {
-	// Create the panel showing properties of a task, but don't show it yet.
-	var objectMemberPanel = Ext.create("PO.view.gantt.GanttTaskPropertyPanel", {
-            debug: getDebug('objectMemberPanel'),
-            senchaPreferenceStore: senchaPreferenceStore,
-            ganttTreePanelController: ganttTreePanelController
-	});
-	objectMemberPanel.hide();
+	    var objectMemberPanel = Ext.getCmp('objectMemberPanel');
+            objectMemberPanel.setField(me);
+            objectMemberPanel.setStore(me.memberStore);
+            objectMemberPanel.setValue(fieldValue);
+            objectMemberPanel.setActiveTab('objectMembers');
+            objectMemberPanel.show();						// Show handled by picker management
+	    
+	} else  {
+
+	    if (!me.objectMemberPanel) {
+		// Create the panel showing properties of a task, but don't show it yet.
+		me.objectMemberPanel = Ext.create("PO.view.ObjectMemberPanel", {
+		    debug: getDebug('objectMemberPanel'),
+		    senchaPreferenceStore: null,
+		    memberStore: me.memberStore,
+		    potentialMemberStore: me.memberStore
+		});
+	    }
+
+            me.objectMemberPanel.setField(me);
+            me.objectMemberPanel.setStore(me.memberStore);
+            me.objectMemberPanel.setValue(fieldValue);
+            me.objectMemberPanel.setActiveTab('objectMembers');
+            me.objectMemberPanel.show();						// Show handled by picker management
+
 	}
     }
 });
+
+
 
