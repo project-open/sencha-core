@@ -16,10 +16,11 @@ Ext.define('PO.view.ObjectMemberPanel', {
     id:                                 'objectMemberPanel',
     alias:                              'objectMemberPanel',
 
-    title: 				'Task Properties',
+    title: 				'Members',
     id:					'objectMemberPanel',
     senchaPreferenceStore:		null,
-
+    userStore:				null,
+    
     debug:				false,
     width:				500,
     height:				420,
@@ -74,14 +75,14 @@ Ext.define('PO.view.ObjectMemberPanel', {
         });
         
         // Grid with assigned users
-        var taskPropertyMembers = Ext.create('Ext.grid.Panel', {
+        var objectMembers = Ext.create('Ext.grid.Panel', {
             title: 'Members',
-            id: 'taskPropertyMembers',
+            id: 'objectMembers',
             store: objectMemberStore,
             width: 200,
             debug: me.debug,
             stateful: true,
-            stateId: 'taskPropertyMembers',
+            stateId: 'objectMembers',
             selType: 'rowmodel',
             plugins: taskMemberRowEditing,
             columns: [
@@ -90,7 +91,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
                 { text: 'Initials', width: 60, dataIndex: 'initials', hidden: false},
                 { text: 'Name', dataIndex: 'name', flex: 1, editor: {
                     xtype: 'combobox',
-                    store: Ext.StoreManager.get('projectMemberStore'),
+                    store: Ext.StoreManager.get('objectMemberStore'),
                     displayField: 'name',
                     valueField: 'name',
                     queryMode: 'local',
@@ -118,9 +119,9 @@ Ext.define('PO.view.ObjectMemberPanel', {
 
         // Small controller in order to handle the (+) / (-) buttons for
         // adding and removing users.
-        var taskPropertyMembersController = Ext.create('Ext.app.Controller', {
+        var objectMembersController = Ext.create('Ext.app.Controller', {
             objectMemberStore: objectMemberStore,
-            taskPropertyMembers: taskPropertyMembers,    
+            objectMembers: objectMembers,    
             init: function() {
                 var me = this;
                 this.control({
@@ -131,23 +132,23 @@ Ext.define('PO.view.ObjectMemberPanel', {
             },
             onAssigButtonAdd: function(button, event) {
                 var me = this;
-                if (me.debug) console.log('ObjectMemberPanel.taskPropertyMembersController.onAssigButtonAdd');
+                if (me.debug) console.log('ObjectMemberPanel.objectMembersController.onAssigButtonAdd');
                 var newRecord = me.objectMemberStore.add({role_id:100})[0];
 
                 // Cancel editing
-                var editing = me.taskPropertyMembers.editingPlugin;
+                var editing = me.objectMembers.editingPlugin;
                 editing.cancelEdit();
                 editing.startEdit(newRecord, 0);                       		// Start editing the first row
             },
             onAssigButtonDel: function(button, event) {
                 var me = this;
-                if (me.debug) console.log('ObjectMemberPanel.taskPropertyMembersController.onAssigButtonDel');
+                if (me.debug) console.log('ObjectMemberPanel.objectMembersController.onAssigButtonDel');
 
                 // Cancel editing
-                var editing = me.taskPropertyMembers.editingPlugin;
+                var editing = me.objectMembers.editingPlugin;
                 editing.cancelEdit();
 
-                var lastSelected = me.taskPropertyMembers.getSelectionModel().getLastSelected();
+                var lastSelected = me.objectMembers.getSelectionModel().getLastSelected();
                 if (lastSelected) {
                     me.objectMemberStore.remove(lastSelected);
                 } else {
@@ -163,7 +164,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
             id: 'taskPropertyTabpanel',
             border: false,
             items: [
-                taskPropertyMembers
+                objectMembers
             ],
             buttons: [{
                 text: 'OK',
@@ -179,7 +180,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
 
         // store panels in the main object
         me.objectMemberStore = objectMemberStore;
-        me.taskPropertyMembers = taskPropertyMembers;
+        me.objectMembers = objectMembers;
         me.taskPropertyTabpanel = taskPropertyTabpanel;
 
         if (me.debug) console.log('PO.view.ObjectMemberPanel.initialize: Finished');
@@ -193,16 +194,12 @@ Ext.define('PO.view.ObjectMemberPanel', {
         if (me.debug) console.log('PO.view.ObjectMemberPanel.onButtonOK');
 
 	// Finish the editor of the TaskASsigments list in case the user didn't press "Update" yet.
-	var editing = me.taskPropertyMembers.editingPlugin;
+	var editing = me.objectMembers.editingPlugin;
 	editing.completeEdit();
-
-
-        // Write timestamp to make sure that data are modified and redrawn.
-        me.taskModel.set('last_modified', Ext.Date.format(new Date(), 'Y-m-d H:i:s'));
         
         // ---------------------------------------------------------------
         // "General" form panel with start- and end date, %done, work etc.
-!!!        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);	// get all fields into object
+        var fields = me.taskPropertyFormGeneral.getValues(false, true, true, true);	// get all fields into object
 
         var oldStartDate = me.taskModel.get('start_date');
         var oldEndDate = me.taskModel.get('end_date');
@@ -243,7 +240,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
         
         // ---------------------------------------------------------------
         // Notes form
-!!!        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
+        fields = me.taskPropertyFormNotes.getValues(false, true, true, true);
         me.taskModel.set(fields);
 
         // ---------------------------------------------------------------
@@ -305,39 +302,27 @@ Ext.define('PO.view.ObjectMemberPanel', {
      * Show the properties of the specified task model.
      * Write changes back to the task immediately (at the moment).
      */
-    setValue: function(task) {
+    setValue: function(memberArray) {
         var me = this;
         if (me.debug) console.log('PO.view.ObjectMemberPanel.setValue: Starting');
-        var projectMemberStore = Ext.StoreManager.get('projectMemberStore');
-
-        // Default values for task if not defined yet by ]po[
-        // ToDo: Unify with default values in onButtonAdd
-        if ("" == task.get('planned_units')) { task.set('planned_units', '0'); }
-        if ("" == task.get('uom_id')) { task.set('uom_id', ""+default_uom_id); } 		// "Day" as UoM
-        if ("" == task.get('material_id')) { task.set('material_id', ""+default_material_id); }	// "Default" material
-        if ("" == task.get('priority')) { task.set('priority', '500'); }
-        if ("" == task.get('start_date')) { task.set('start_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
-        if ("" == task.get('end_date')) { task.set('end_date',  Ext.Date.format(new Date(), 'Y-m-d')); }
-        if ("" == task.get('role_id_completed')) { task.set('role_id_completed', '0'); }
+        var objectMemberStore = Ext.StoreManager.get('objectMemberStore');
 
         // Load the data into the various forms
-!!!        me.taskPropertyFormGeneral.getForm().loadRecord(task);
-!!!        me.taskPropertyFormNotes.getForm().loadRecord(task);
+        // me.taskPropertyFormGeneral.getForm().loadRecord(task);
+        // me.taskPropertyFormNotes.getForm().loadRecord(task);
 
         // Load member information into the memberStore
         me.objectMemberStore.removeAll();
-        var members = task.get('assignees');
-        if (members.constructor !== Array) { members = []; }         		// Newly created task...
-        members.forEach(function(v) {
+        if (memberArray.constructor !== Array) { memberArray = []; }         		// Newly created?
+        memberArray.forEach(function(v) {
             var userId = ""+v.user_id;
-            var userModel = projectMemberStore.getById(userId);
+            var userModel = me.userStore.getById(userId);
             if (!userModel) { return; }                                      		// User not set in member row
             var assigModel = new PO.model.ObjectMemberModel(userModel.data);
             assigModel.set('role_id', v.role_id);
             me.objectMemberStore.add(assigModel);
         });
 
-        me.taskModel = task;								// Save the model for reference
         if (me.debug) console.log('PO.view.ObjectMemberPanel.setValue: Finished');
     }
 }); 

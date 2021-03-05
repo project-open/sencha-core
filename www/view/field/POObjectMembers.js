@@ -110,7 +110,7 @@ Ext.define('PO.view.field.POObjectMembers', {
         /**
          * Parse a string like "[M]" into the number 1310 (=Budget Item Manager)
          * Returns 1300 (=Full Member) for an empty string or a string object 
-	 * with an error message in case of an error.
+         * with an error message in case of an error.
          */
         parseMembersRole: function(me, roleString) {
             if (me.debug) console.log('POObjectMembers.parseMembersRole: Starting: str='+roleString);
@@ -125,56 +125,59 @@ Ext.define('PO.view.field.POObjectMembers', {
                 return "Role specification '"+str+"' does not include in it's brackets a single letter.";
             }
 
-	    switch (str.toLowerCase()) {
-	    case "m": role = 1310; break;
-	    default: role = 1300; break
-	    }
+            switch (str.toLowerCase()) {
+            case "m": role = 1310; break;
+            default: role = 1300; break
+            }
 
             if (me.debug) console.log('POObjectMembers.parseMembersRole: Finished: str='+roleString+' -> '+role);
             return role;
         },
-	
+        
 
         /**
          * Format membership list to a String
          */
         formatMembers: function(me, memberExpr) {
-            if (me.debug) console.log('POObjectMembers.formatMembers: Starting: memberExpr='+memberExpr);
             if (Ext.isString(memberExpr)) { return memberExpr; }
+            if (!memberExpr) { return ""; }
+            if (memberExpr.constructor === Array) {
+                if (memberExpr.length == 0) { return ""; }
+            }
+
+            if (me.debug) console.log('POObjectMembers.formatMembers: Starting: memberExpr='+memberExpr);
             var projectMemberStore = me.memberStore;
             var groupStore = me.groupStore;
-
+	    
             var result = "";
-            if (null != memberExpr) {
-                memberExpr.forEach(function(member) {
-                    if ("" != result) { result = result + ";"; }
-                    var userId = ""+member.user_id;
-                    var userModel = projectMemberStore.getById(userId);
-                    var groupModel = groupStore.getById(userId);
-                    if (null == userModel && null == groupModel) { 
-                        // This can happen when moving sub-projects around, even though it shouldn't...
-                        result = result + '#'+userId;
-                    } else {
-                        if (null != userModel) {
-                            result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
-                        }
-                        if (null != groupModel) {
-                            result = result + groupModel.get('group_name');
-                        }
+            memberExpr.forEach(function(member) {
+                if ("" != result) { result = result + ";"; }
+                var userId = ""+member.user_id;
+                var userModel = projectMemberStore.getById(userId);
+                var groupModel = groupStore.getById(userId);
+                if (null == userModel && null == groupModel) { 
+                    // This can happen when moving sub-projects around, even though it shouldn't...
+                    result = result + '#'+userId;
+                } else {
+                    if (null != userModel) {
+                        result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
                     }
-                    if (!!member.role && 1300 != member.role) {
-			var roleString = ""
-			switch (member.role) {
-			case 1310: roleString = "M"; break;
-			default: roleString = "#"+member.role;
-			}
-                        result = result + '['+roleString+']';
+                    if (null != groupModel) {
+                        result = result + groupModel.get('group_name');
                     }
-                });
-            }
+                }
+                if (!!member.role && 1300 != member.role) {
+        	    var roleString = ""
+        	    switch (member.role) {
+        	    case 1310: roleString = "M"; break;
+        	    default: roleString = "#"+member.role;
+        	    }
+                    result = result + '['+roleString+']';
+                }
+            });
             return result;
         }
-    },										// End statics
+    },									// End statics
 
 
     // Add specialkey listener
@@ -219,7 +222,7 @@ Ext.define('PO.view.field.POObjectMembers', {
     valueToRaw: function(value) {
         var me = this;
         if (me.debug) console.log('POObjectMembers.valueToRaw: Starting, value='+value);
-	if (!value) return "";
+        if (!value) return "";
         var raw = this.statics().formatMembers(me, value);
         if (me.debug) console.log('POObjectMembers.valueToRaw: '+value+' -> '+raw);
         return raw;
@@ -237,30 +240,28 @@ Ext.define('PO.view.field.POObjectMembers', {
      * Open the TaskProperty panel with the Members
      * tab open in order to edit membership.
      */
-    onTriggerClick: function(a, b, c, d) {
+    onTriggerClick: function(event) {
         var me = this;
         if (me.debug) console.log('POObjectMembers.onTriggerClick: Starting');
 
         var panel = Ext.getCmp(me.gridPanelId);
-        var value = panel.getSelectionModel().getLastSelected();
-        var taskPropertyPanel = Ext.getCmp('objectMemberPanel');
-        taskPropertyPanel.setValue(value);
-        taskPropertyPanel.setActiveTab('taskPropertyMembers');
-        taskPropertyPanel.show();						// Show handled by picker management
+        var budgetItem = panel.getSelectionModel().getLastSelected();
 
+        var fieldValue = this.getValue();
+        var objectMemberPanel = Ext.getCmp('objectMemberPanel');
+        objectMemberPanel.show();						// Show handled by picker management
+        objectMemberPanel.setValue(fieldValue);
+        objectMemberPanel.setActiveTab('objectMembers');
 
-
-
-        var treePanel = Ext.getCmp('ganttTreePanel');
-        var value = treePanel.getSelectionModel().getLastSelected();
-        var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
-        taskPropertyPanel.setValue(value);
-        taskPropertyPanel.setActiveTab('taskPropertyAssignments');
-        taskPropertyPanel.show();						// Show handled by picker management
-
-
-
-
+	if (0) {
+	// Create the panel showing properties of a task, but don't show it yet.
+	var objectMemberPanel = Ext.create("PO.view.gantt.GanttTaskPropertyPanel", {
+            debug: getDebug('objectMemberPanel'),
+            senchaPreferenceStore: senchaPreferenceStore,
+            ganttTreePanelController: ganttTreePanelController
+	});
+	objectMemberPanel.hide();
+	}
     }
 });
 
