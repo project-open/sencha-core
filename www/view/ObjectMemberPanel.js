@@ -51,7 +51,7 @@ Ext.define('PO.view.ObjectMemberPanel', {
             id: 'actualMemberStore',
             model: 'PO.model.ObjectMemberModel'
         });
-	me.actualMemberStore = actualMemberStore;
+         me.actualMemberStore = actualMemberStore;
 
         // Row editor for the TaskMembersPanel.
         var taskMemberRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
@@ -217,10 +217,18 @@ Ext.define('PO.view.ObjectMemberPanel', {
         me.oldValue.forEach(function(v) { oldAssigneesNorm[v.user_id] = v.role_id; });
         newAssignees.forEach(function(v) { newAssigneesNorm[v.user_id] = v.role_id; });
         if (JSON.stringify(oldAssigneesNorm) !== JSON.stringify(newAssigneesNorm)) {
-            // Write new value to field
-            me.objectMemberField.setValue(newAssignees);
-        }
 
+            // Write new value to field
+            // 2021-03-05 fraber: We need to sync the store, because it might
+	    // have a different proxy than the model. In the case of a tree-
+	    // panel this is a custom implementation, so it needs to be the
+	    // store that saves, not the model!
+            var model = me.model;
+            if (!!model) {
+                model.set(me.modelField,newAssignees);
+		model.store.sync();
+            }
+        }
         me.hide();									// hide the TaskProperty panel
     },
 
@@ -264,6 +272,13 @@ Ext.define('PO.view.ObjectMemberPanel', {
         me.potentialMemberStore = store;
     },
 
+    setModelAndField: function(model, field) {
+        var me = this;
+         me.model = model;
+         me.modelField = field;
+    },
+
+    
     /**
      * Show the properties of the specified task model.
      * Write changes back to the task immediately (at the moment).

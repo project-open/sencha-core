@@ -257,6 +257,7 @@ Ext.define('PO.view.field.POObjectMembers', {
 		});
 	    }
 
+            me.objectMemberPanel.setModelAndField(budgetItem, "members");
             me.objectMemberPanel.setField(me);
             me.objectMemberPanel.setStore(me.memberStore);
             me.objectMemberPanel.setValue(fieldValue);
