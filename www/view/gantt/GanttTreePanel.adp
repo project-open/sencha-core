@@ -71,6 +71,11 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
                 var me = this;
                 if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit');
 
+		if (me.disabled) {
+                    if (me.debug) console.log('PO.view.gantt.GanttTreePanel.cellediting.beforeedit: CellEditing is disabled, skipping...');
+		    return false;
+		}
+		
                 // switch all columns to read-only mode if the user doesn't have to right to edit the project...
                 if (!write_project_p) return false;
 
@@ -417,6 +422,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var me = this;
             if (me.debug) console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick');
             var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
+	    if (!taskPropertyPanel) {
+		console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick: No ganttTaskPropertyPanel found - skipping');
+		return;
+	    }
             taskPropertyPanel.setValue(record);
             taskPropertyPanel.setActiveTab('taskPropertyFormGeneral');
             taskPropertyPanel.show();
