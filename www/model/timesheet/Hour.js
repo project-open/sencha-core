@@ -1,10 +1,12 @@
-Ext.define('PO.model.Hour', {
+Ext.define('PO.model.timesheet.Hour', {
     extend: 'Ext.data.Model',
     fields: [
 	'id',						// Same as hour_id
 	'hour_id',					// Unique ID taken from im_hours_seq
 	'user_id',					// Who logged the hours?
 	'project_id',					// On which project or task?
+	'project_id_deref',				// Name of task or project, if deref_p=1
+	'main_project_id',				// Cached/redundant: Main project_id from REST
 	'day',						// Which day (format: date, not timestamptz)
 	'hours',					// How many hours were logged?
 	'note',						// Comment for the logged hours
