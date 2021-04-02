@@ -27,3 +27,12 @@ set sencha_version [lindex $sencha_version_tuples 0]; # "v421" or similar
 set sencha_version_prod_dev [lindex $sencha_version_tuples 1]; # "dev" or "prod"
 set sencha_version_package [lindex $sencha_version_tuples 2]; # "sencha-extjs-v421-dev" or similar
 
+
+# Create a debug JSON object that controls logging verbosity
+set debug_default "default 0"
+set debug_list [parameter::get_from_package_key -package_key "intranet-gantt-editor" -parameter DebugHash -default $debug_default]
+array set debug_hash $debug_list
+set debug_json_list {}
+foreach id [array names debug_hash] { lappend debug_json_list "'$id': $debug_hash($id)" }
+set debug_json "{\n\t[join $debug_json_list ",\n\t"]\n}"
+

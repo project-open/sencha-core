@@ -82,9 +82,6 @@ Ext.define('PO.Utilities', {
             msgBox.setOverflowXY('auto', 'auto');
         },
 
-
-
-
         /**
          * Write out a message
          */
@@ -147,6 +144,26 @@ Ext.define('PO.Utilities', {
         },
 
         /**
+         * Determine if debug is switched on for certain IDs.
+         * Check Admin -> Parameters -> intranet-timesheet2-weekly -> DebugHash
+         */
+        getDebug: function(id) {
+            // Extract debugHash from ]po[ parameters
+            var debugHash = @debug_json;noquote@;
+
+            // Check for a debug setting for the specific Id
+            var debug = parseInt(debugHash[id]);
+            if (!isNaN(debug)) return debug;
+            
+            // Use the default debug
+            debug = parseInt(debugHash['default']);
+            if (!isNaN(debug)) return debug;
+            
+            // invalid configuration - enable debug
+            return 1;
+        },
+
+        /**
          * Extract the current userId from the OpenACS session cookie
          */
         userId : function() { return parseInt('@user_id@'); },
@@ -185,7 +202,7 @@ Ext.define('PO.Utilities', {
             mm = (m = d.getMinutes()) < 10 ? ('0'+m) : m;
             ss = (s = d.getSeconds()) < 10 ? ('0'+s) : s;
 
-	    // Handle time zone. Time zones with fractions of an hour need to be added with ':30'
+            // Handle time zone. Time zones with fractions of an hour need to be added with ':30'
             tzSign = (tzo = d.getTimezoneOffset()/-60) < 0 ? '-' : '+';
             tzAbs = Math.abs(tzo);
             if (Math.floor(tzAbs) != tzAbs) {
