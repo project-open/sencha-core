@@ -151,25 +151,40 @@ DECLARE
 
 	v_preference_id	integer;
 BEGIN
-	v_preference_id := acs_object__new (
-		p_preference_id,				-- object_id - NULL to create a new id
-		p_object_type,					-- object_type - "im_sencha_preference"
-		p_creation_date,				-- creation_date - now()
-		p_creation_user,				-- creation_user - Current user or "0" for guest
-		p_creation_ip,					-- creation_ip - IP from ns_conn, or "0.0.0.0"
-		p_context_id,					-- context_id - NULL, not used in ]po[
-		't'						-- security_inherit_p - not used in ]po[
-	);
-	
-	insert into im_sencha_preferences (
-		preference_id, preference_object_id,
-		preference_type_id, preference_status_id,
-		preference_url, preference_key, preference_value
-	) values (
-		v_preference_id, p_preference_object_id,
-		p_preference_type_id, p_preference_status_id,
-		p_preference_url, p_preference_key, p_preference_value
-	);
+	-- Check for duplicate. This is a workaround for very
+	-- strange cases where this check in TCL does not work.
+	select	preference_id
+	into	v_preference_id
+	from	im_sencha_preferences
+	where	preference_object_id = p_preference_object_id and
+		preference_url = p_preference_url and
+		preference_key = p_preference_key;
+
+	IF v_preference_id is null THEN
+		v_preference_id := acs_object__new (
+			p_preference_id,				-- object_id - NULL to create a new id
+			p_object_type,					-- object_type - "im_sencha_preference"
+			p_creation_date,				-- creation_date - now()
+			p_creation_user,				-- creation_user - Current user or "0" for guest
+			p_creation_ip,					-- creation_ip - IP from ns_conn, or "0.0.0.0"
+			p_context_id,					-- context_id - NULL, not used in ]po[
+			't'						-- security_inherit_p - not used in ]po[
+		);
+		
+		insert into im_sencha_preferences (
+			preference_id, preference_object_id,
+			preference_type_id, preference_status_id,
+			preference_url, preference_key, preference_value
+		) values (
+			v_preference_id, p_preference_object_id,
+			p_preference_type_id, p_preference_status_id,
+			p_preference_url, p_preference_key, p_preference_value
+		);
+	ELSE
+		update	im_sencha_preferences
+		set	preference_value = p_preference_value
+		where	preference_id = v_preference_id;
+	END IF;
 
 	return v_preference_id;
 END;$body$ language 'plpgsql';
