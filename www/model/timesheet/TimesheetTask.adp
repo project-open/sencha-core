@@ -124,6 +124,7 @@ Ext.define('PO.model.timesheet.TimesheetTask', {
         'successors',				// List of tasks that depend on the current tasks
         'predecessors',				// List of tasks on which this task depends
         'assignees',				// List of users assigned to the task with {id,user_id,percent}
+        'baselines',				// Baseline information
         'invoices',				// List of financial documents related to task with {id,cost_id,cost_type_id, ...}
 
 	'logged_hours',				// Sum of hours logged on task, sub-project or project (from cache)

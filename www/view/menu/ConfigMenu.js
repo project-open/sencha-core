@@ -31,7 +31,7 @@ Ext.define('PO.view.menu.ConfigMenu', {
         if (me.debug) console.log('PO.view.menu.ConfigMenu.initComponent: Starting')
         this.callParent(arguments);
 
-	this.initPreferenceStore();
+        this.initPreferenceStore();
 
         // Create a "Reset Configuration" entry
         var item = Ext.create('Ext.menu.Item', {
@@ -39,13 +39,13 @@ Ext.define('PO.view.menu.ConfigMenu', {
             text: 'Reset Configuration',
             handler: function() {
                 if (me.debug) console.log('configMenu.OnResetConfiguration');
-		me.items.each(function(item) {
-		    if ('checkedDefault' in item) {
-			me.senchaPreferenceStore.setPreference(item.key, item.checkedDefault);
-			item.setChecked(item.checkedDefault);
-			item.fireEvent('click', this);
-		    }
-		});
+                me.items.each(function(item) {
+                    if ('checkedDefault' in item) {
+                	me.senchaPreferenceStore.setPreference(item.key, item.checkedDefault);
+                	item.setChecked(item.checkedDefault);
+                	item.fireEvent('click', this);
+                    }
+                });
             }
         });
         me.insert(0,item);
@@ -56,7 +56,7 @@ Ext.define('PO.view.menu.ConfigMenu', {
 
 
     initPreferenceStore: function() {
-	var me = this;
+        var me = this;
         if (me.debug) console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Starting')
 
         // Check if SenchaPreference entries exist for the menu items and create if needed
@@ -69,25 +69,45 @@ Ext.define('PO.view.menu.ConfigMenu', {
                 return;
             };
 
-	    // Save the original (default) checked property
-	    item.checkedDefault = item.checked;
+            // Save the original (default) checked property
+            item.checkedDefault = item.checked;
 
             // Initialize the DB state if not already set from using the page the last time
             var exists = me.senchaPreferenceStore.existsPreference(item.key);
             if (exists) {
-		// Pull the value from preference store and write into default state
-		item.checked = me.senchaPreferenceStore.getPreferenceBoolean(item.key, item.checked);
-	    } else {
-		me.senchaPreferenceStore.setPreference(item.key, item.checked);
-	    }
+                // Pull the value from preference store and write into default state
+                item.checked = me.senchaPreferenceStore.getPreferenceBoolean(item.key, item.checked);
+            } else {
+                me.senchaPreferenceStore.setPreference(item.key, item.checked);
+            }
 
             // Handle a click: Update the DB status via REST interface
-            item.setHandler(
-                function(item){
-                    if (me.debug) console.log('configMenuOnItemCheck: item.key='+item.key+', checked='+item.checked);
-                    me.senchaPreferenceStore.setPreference(item.key, item.checked);
-                }
-            );
+            // Only works for Ext.menu.CheckItem, ignore for others (handle it yourself!)
+            var senchaClassName = item['$className'];
+            switch (senchaClassName) {
+            case "Ext.menu.CheckItem":
+                item.setHandler(
+                    function(item){
+                        if (me.debug) console.log('configMenuOnItemCheck (CheckItem): item.key='+item.key+', checked='+item.checked);
+                        me.senchaPreferenceStore.setPreference(item.key, item.checked);
+                    }
+                );
+                break;
+/*
+            case "Ext.form.field.ComboBox":
+                item.on('select', function(combo, records) {
+                    console.log('configMenuOnItemCheck (ComboBox): item.key='+item.key+', value='+records);
+                    if (!records) return;
+                    var record = records[0];
+                    if (!record) return;
+                    var id = record.get('id');
+                    me.senchaPreferenceStore.setPreference(item.key, id);
+                });
+                break;
+*/
+            default:
+                console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Unknown config item with class='+senchaClassName);
+            }
         });
         if (me.debug) console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Finished')
 

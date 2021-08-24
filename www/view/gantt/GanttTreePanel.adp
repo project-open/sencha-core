@@ -387,7 +387,26 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
          hidden: true, sortable: false
 //         ,editor: { xtype: 'checkbox', uncheckedValue: 'f', inputValue: 't'}
         },
-        {text: 'Scheduling Type', stateId: 'treegrid-effort-driven-type', flex: 1, hidden: true, dataIndex: 'effort_driven_type_id', sortable: false,
+
+
+        {text: 'Baseline Start', stateId: 'treegrid-baseline-start', width: 80, hidden: true,
+         renderer: function(value, context, model) {
+	     var baseline = model.get('baseline');
+	     if (!baseline) return "";
+	     var startDate = baseline.start_date;
+             return startDate.substring(0,10);
+         }},
+
+        {text: 'Baseline End', stateId: 'treegrid-baseline-end', width: 80, hidden: true,
+         renderer: function(value, context, model) {
+	     var baseline = model.get('baseline');
+	     if (!baseline) return "";
+	     var endDate = baseline.end_date;
+             return endDate.substring(0,10);
+         }},
+
+
+	{text: 'Scheduling Type', stateId: 'treegrid-effort-driven-type', flex: 1, hidden: true, dataIndex: 'effort_driven_type_id', sortable: false,
          editor: {
              xtype: 'combobox',
              forceSelection: true,
