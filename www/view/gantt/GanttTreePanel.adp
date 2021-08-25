@@ -391,22 +391,31 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
 
         {text: 'Baseline Start', stateId: 'treegrid-baseline-start', width: 80, hidden: true,
          renderer: function(value, context, model) {
-	     var baseline = model.get('baseline');
-	     if (!baseline) return "";
-	     var startDate = baseline.start_date;
+             var baselines = model.get('baselines');
+             if (!baselines) return "";
+             var preferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
+             var baselineId = preferenceStore.getPreference('show_project_baseline', "");
+             var baseline = baselines[baselineId];
+             if (!baseline) return "";
+             var startDate = baseline.start_date;
+	     if (!startDate) return "";
              return startDate.substring(0,10);
          }},
 
         {text: 'Baseline End', stateId: 'treegrid-baseline-end', width: 80, hidden: true,
          renderer: function(value, context, model) {
-	     var baseline = model.get('baseline');
-	     if (!baseline) return "";
-	     var endDate = baseline.end_date;
+             var baselines = model.get('baselines');
+             if (!baselines) return "";
+             var preferenceStore = Ext.StoreManager.get('senchaPreferenceStore');
+             var baselineId = preferenceStore.getPreference('show_project_baseline', "");
+             var baseline = baselines[baselineId];
+             if (!baseline) return "";
+             var endDate = baseline.end_date;
+	     if (!endDate) return "";
              return endDate.substring(0,10);
          }},
 
-
-	{text: 'Scheduling Type', stateId: 'treegrid-effort-driven-type', flex: 1, hidden: true, dataIndex: 'effort_driven_type_id', sortable: false,
+        {text: 'Scheduling Type', stateId: 'treegrid-effort-driven-type', flex: 1, hidden: true, dataIndex: 'effort_driven_type_id', sortable: false,
          editor: {
              xtype: 'combobox',
              forceSelection: true,
@@ -441,10 +450,10 @@ Ext.define('PO.view.gantt.GanttTreePanel', {
             var me = this;
             if (me.debug) console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick');
             var taskPropertyPanel = Ext.getCmp('ganttTaskPropertyPanel');
-	    if (!taskPropertyPanel) {
-		console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick: No ganttTaskPropertyPanel found - skipping');
-		return;
-	    }
+            if (!taskPropertyPanel) {
+                console.log('PO.view.gantt.GanttTreePanel.beforeItemDblClick: No ganttTaskPropertyPanel found - skipping');
+                return;
+            }
             taskPropertyPanel.setValue(record);
             taskPropertyPanel.setActiveTab('taskPropertyFormGeneral');
             taskPropertyPanel.show();
