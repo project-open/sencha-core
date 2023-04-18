@@ -83,9 +83,10 @@ Ext.define('PO.view.menu.ConfigMenu', {
 
             // Handle a click: Update the DB status via REST interface
             // Only works for Ext.menu.CheckItem, ignore for others (handle it yourself!)
-            var senchaClassName = item['$className'];
-            switch (senchaClassName) {
-            case "Ext.menu.CheckItem":
+            var xtype = 'invalid';
+            if ('xtype' in item) xtype = item['xtype'];
+            switch (xtype) {
+            case "menucheckitem":
                 item.setHandler(
                     function(item){
                         if (me.debug) console.log('configMenuOnItemCheck (CheckItem): item.key='+item.key+', checked='+item.checked);
@@ -93,20 +94,9 @@ Ext.define('PO.view.menu.ConfigMenu', {
                     }
                 );
                 break;
-/*
-            case "Ext.form.field.ComboBox":
-                item.on('select', function(combo, records) {
-                    console.log('configMenuOnItemCheck (ComboBox): item.key='+item.key+', value='+records);
-                    if (!records) return;
-                    var record = records[0];
-                    if (!record) return;
-                    var id = record.get('id');
-                    me.senchaPreferenceStore.setPreference(item.key, id);
-                });
-                break;
-*/
+            case "combobox": break; // ComboBox handles click itself
             default:
-                console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Unknown config item with class='+senchaClassName);
+                console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Unknown config item with xtype='+xtype);
             }
         });
         if (me.debug) console.log('PO.view.menu.ConfigMenu.initPreferenceStore: Finished')
