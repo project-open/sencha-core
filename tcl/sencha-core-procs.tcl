@@ -129,7 +129,7 @@ ad_proc -public im_sencha_sql_to_store {
 		    lappend json_entry "'$var': $val"
 		} else {
 		    set val_quoted [im_quotejson $val]
-		    lappend json_entry "'$var': '$val_quoted'"
+		    lappend json_entry "\"$var\": \"$val_quoted\""
 		}
 	    }
 	    lappend json_list [join $json_entry ", "]
@@ -155,8 +155,6 @@ ad_proc -public im_sencha_sql_to_store {
 	# Return two values: 1. the store JSON, 2. the list of columns used
 	return [list $store_json $col_names]
     }
-
-
 }
 
 
