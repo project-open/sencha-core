@@ -14,7 +14,8 @@ Ext.define('PO.store.timesheet.TaskCostCenterStore', {
 	url:        '/intranet-rest/im_cost_center',
 	appendId:   true,
 	extraParams: {
-	    format: 'json'
+	    format: 'json',
+	    limit: 1000000
 	},
 	reader: { type: 'json', root: 'data' }
     }
