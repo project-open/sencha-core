@@ -14,6 +14,7 @@ foreach col $default_columns {
 
 set default_columns_json "{\n\t\t[join $default_columns_list ",\n\t\t"]\n\t}"
 
+set current_user_id [auth::require_login]
 
 # Extract all task attributes, except for a few ones that are
 # already handled hard-coded by the GanttTreePanel.
@@ -30,6 +31,7 @@ set attributes_sql "
 		da.widget_name = dw.widget_name and
 		aa.object_type = 'im_timesheet_task' and
 		da.also_hard_coded_p = 'f' and
+		't' = im_object_permission_p(da.attribute_id, :current_user_id, 'read') and
 		aa.attribute_name not in ( -- handled by GanttEditor JS
 			  'creation_date', 'creation_ip', 'creation_user',
 			  'lock_date', 'lock_ip', 'lock_user',
