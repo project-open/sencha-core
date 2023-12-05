@@ -42,7 +42,9 @@ Ext.define('PO.store.CategoryStore', {
         if (rec == null || typeof rec == "undefined") { return result; }
         return rec.get('category_translated'); 
     },
+
     cat: function(category_id) { return this.category_from_id(category_id); },
+
     fill_tree_category_translated: function(store) {	// Concat the tree category names. It is useful to order by name and level
         store.each(function(record){
             var tree_sortkey = record.get('tree_sortkey');
@@ -55,6 +57,7 @@ Ext.define('PO.store.CategoryStore', {
             record.set('tree_category_translated', tree_category);                                        
         });
     },
+
     validateLevel: function(value,nullvalid) {		//Validate the combo value. No level with sublevel is permitted. 
         if (nullvalid && Ext.isEmpty(value)) {
             return true;
@@ -82,11 +85,13 @@ Ext.define('PO.store.CategoryStore', {
             return 'Obligatorio'; 
         }
     },
+
     addBlank:  function() {				// Add blank value to the store. It is used to white selecction in comboboxes
         var categoryVars = {category_id: '', category_translated: null, sort_order: '0'};
         var category = Ext.ModelManager.create(categoryVars, 'TicketBrowser.Category');
         this.add(category);        
     },
+
     getParent: function(value) {			// Get category parent ID
         if (!Ext.isEmpty(value)) {
             var record = this.getById(value);
@@ -100,5 +105,6 @@ Ext.define('PO.store.CategoryStore', {
         }
         return '';
     }
+
 });
 
