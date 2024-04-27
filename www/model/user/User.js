@@ -27,6 +27,7 @@ Ext.define('PO.model.user.User', {
 	'screen_name',				// 
 	'first_names',				// 
 	'last_name',				// 
+	'initials',
 	'note',					// 
 
 	// System Information
@@ -85,12 +86,6 @@ Ext.define('PO.model.user.User', {
 	  convert: function(value, record) {
 	      var fullName = record.get('first_names') + ' ' + record.get('last_name');
 	      return fullName;
-	  }
-	},
-	{ name: 'initials',			// 
-	  convert: function(value, record) {
-	      var initials = "" + record.get('first_names').substr(0,1) + record.get('last_name').substr(0,1);
-	      return initials;
 	  }
 	}
     ],

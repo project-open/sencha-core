@@ -56,52 +56,59 @@ Ext.define('PO.view.field.POObjectMembers', {
             if (me.debug) console.log('POObjectMember.parseMembers: Starting: value='+value);
 
             if (!Ext.isString(value)) { 
-                return "Value='"+value+"' is not a string but a "+typeof value; 
+                me.markInvalid("Value='"+value+"' is not a string but a "+typeof value);
+                return;
             }
 
             value = value.replace(/ /,"");					// Eliminate white spaces, better than trim()
-            if (value.length < 2) {
-                return "Value='"+value+"' should contain of at least two characters"; 
+            if (value.length == 0) { 
+                console.log('parseAssignment('+value+'): value.length == 0');
+                return; 
             }
-            var initials = "";
-            var roleString = value;
+            if (value.length < 2) {
+                console.log('parseAssignment('+value+'): value.length < 2');
+                me.markInvalid("Value='"+value+"' should contain of at least two characters");
+                return;
+            }
 
-            // Split the value into the "initials" part possibly including
+            // Split the value into the "initialsString" part possibly including
             // numbers and the remaining part hopefully containing "[80%]"
+            var initialsString = "";
+            var roleString = value;
+            while (/^[a-zA-Z0-9]/.test(roleString.substr(0,1))) {
+                initialsString = initialsString + roleString.substr(0,1).toUpperCase();
+                roleString = roleString.substring(1,value.length);
+            }
+
+            var roleString = value;
             while (/^[a-zA-Z0-9]/.test(roleString.substr(0,1))) {
                 initials = initials + value.substr(0,1);
                 roleString = roleString.substring(1,value.length);
             }
             var role = this.parseMembersRole(me, roleString.trim());	        // FullMember = 1300
-            if (Ext.isString(role)) { return role; }	     		// Return an error string
+            if (Ext.isString(role)) { 	     		// Return an error string
+                console.log('parseMember('+value+'): '+roleString);
+                me.markInvalid(roleString);
+                return;
+	    }
 
-            // ToDo: Sort the user alphabetically in order to create deterministic results
             var result = null;
-            var letters = value.toUpperCase().split("");
             me.memberStore.each(function(user) {
-                if (null != result) { return; }
-                var firstNames = user.get('first_names');
-                var lastName = user.get('last_name');
-                var firstNamesInitial = firstNames.toUpperCase().substr(0,1);
-                var lastNameInitial = lastName.toUpperCase().substr(0,1);
-                var found = false;
-                if (letters[0] == firstNamesInitial && letters[1] == lastNameInitial) { found = true; }
-                
-                if (found) {
-                    // {id:123456, user_id:8864, role:1300}
+                if (null != result) { return; }        // Already found with previous user, skipping loop
+		var initialsUser = user.get('initials').toUpperCase();
+                if (initialsUser == initialsString) {
                     var user_id = parseInt(user.get('user_id'));
                     var rel_id = Math.floor((Math.random() * 10000000000000.0));
                     result = {id:rel_id, user_id:user_id, role_id:role};
+                    console.log(result);
                 }
             });
 
             if (null == result) {
-                me.markInvalid('Unable to parse member expression "'+value+'"');
+                me.markInvalid('<nobr>Unable to parse "'+value+'"</nobr>');
             }
-
             return result;
         },
-
 
         /**
          * Parse a string like "[M]" into the number 1310 (=Budget Item Manager)
@@ -153,7 +160,7 @@ Ext.define('PO.view.field.POObjectMembers', {
                     result = result + '#'+userId;
                 } else {
                     if (null != userModel) {
-                        result = result + userModel.get('first_names').substr(0,1) + userModel.get('last_name').substr(0,1);
+                        result = result + userModel.get('initials');
                     }
                     if (null != groupModel) {
                         result = result + groupModel.get('group_name');
