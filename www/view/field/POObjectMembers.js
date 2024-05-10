@@ -91,12 +91,12 @@ Ext.define('PO.view.field.POObjectMembers', {
                 console.log('parseMember('+value+'): '+roleString);
                 me.markInvalid(roleString);
                 return;
-	    }
+            }
 
             var result = null;
             me.memberStore.each(function(user) {
                 if (null != result) { return; }        // Already found with previous user, skipping loop
-		var initialsUser = user.get('initials').toUpperCase();
+                var initialsUser = user.get('initials').toUpperCase();
                 if (initialsUser == initialsString) {
                     var user_id = parseInt(user.get('user_id'));
                     var rel_id = Math.floor((Math.random() * 10000000000000.0));
@@ -245,25 +245,25 @@ Ext.define('PO.view.field.POObjectMembers', {
         var fieldValue = this.getValue();
 
 
-	if (0) {
-	    var objectMemberPanel = Ext.getCmp('objectMemberPanel');
+        if (0) {
+            var objectMemberPanel = Ext.getCmp('objectMemberPanel');
             objectMemberPanel.setField(me);
             objectMemberPanel.setStore(me.memberStore);
             objectMemberPanel.setValue(fieldValue);
             objectMemberPanel.setActiveTab('objectMembers');
             objectMemberPanel.show();						// Show handled by picker management
-	    
-	} else  {
+            
+        } else  {
 
-	    if (!me.objectMemberPanel) {
-		// Create the panel showing properties of a task, but don't show it yet.
-		me.objectMemberPanel = Ext.create("PO.view.ObjectMemberPanel", {
-		    debug: getDebug('objectMemberPanel'),
-		    senchaPreferenceStore: null,
-		    memberStore: me.memberStore,
-		    potentialMemberStore: me.memberStore
-		});
-	    }
+            if (!me.objectMemberPanel) {
+                // Create the panel showing properties of a task, but don't show it yet.
+                me.objectMemberPanel = Ext.create("PO.view.ObjectMemberPanel", {
+                    debug: getDebug('objectMemberPanel'),
+                    senchaPreferenceStore: null,
+                    memberStore: me.memberStore,
+                    potentialMemberStore: me.memberStore
+                });
+            }
 
             me.objectMemberPanel.setModelAndField(budgetItem, "members");
             me.objectMemberPanel.setField(me);
@@ -272,7 +272,7 @@ Ext.define('PO.view.field.POObjectMembers', {
             me.objectMemberPanel.setActiveTab('objectMembers');
             me.objectMemberPanel.show();						// Show handled by picker management
 
-	}
+        }
     }
 });
 
