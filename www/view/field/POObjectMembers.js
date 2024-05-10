@@ -81,6 +81,7 @@ Ext.define('PO.view.field.POObjectMembers', {
             }
 
             var roleString = value;
+            var initials = "";
             while (/^[a-zA-Z0-9]/.test(roleString.substr(0,1))) {
                 initials = initials + value.substr(0,1);
                 roleString = roleString.substring(1,value.length);
