@@ -156,9 +156,10 @@ Ext.define('PO.controller.ResizeController', {
             'left': '0',
             'top': '0'
         });
-          
+
         // Disable the "resizable" properties of the outer panel
-        me.outerContainer.resizer.resizeTracker.disable();
+        var resizer = me.outerContainer.resizer;
+        if (resizer) resizer.resizeTracker.disable();
 
         // Disable scrolling in the browser and set vertical scroll to zero
         document.documentElement.style.overflow = 'hidden';			// firefox, chrome
@@ -170,7 +171,7 @@ Ext.define('PO.controller.ResizeController', {
 
         // Check if the surface is smaller than the ganttPanel
         // and resize and redraw the surface if necessary
-	if (me.ganttZoomController)
+        if (me.ganttZoomController)
             me.ganttZoomController.onSwitchToFullScreen();
 
         if (me.debug) console.log('PO.controller.gantt_editor.GanttResizeController.onSwitchToFullScreen: Finished');
