@@ -91,6 +91,9 @@ Ext.define('PO.view.menu.ConfigMenu', {
                     function(item){
                         if (me.debug) console.log('configMenuOnItemCheck (CheckItem): item.key='+item.key+', checked='+item.checked);
                         me.senchaPreferenceStore.setPreference(item.key, item.checked);
+
+                        // Fire a custom event
+                        me.fireEvent('itemChanged', item, item.checked)
                     }
                 );
                 break;
