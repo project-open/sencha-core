@@ -22,6 +22,8 @@ Ext.define('PO.Utilities', {
         reportError : function(title, msg) {
             var me = this;
 
+            if (!msg) msg = "error message not available (returned from server side)";
+
             // Split lines with length > maxLen into multiple lines
             var maxLen = 75;
             var msgLimited = "";
